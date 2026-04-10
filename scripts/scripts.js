@@ -229,7 +229,7 @@ async function renderStreamedSection(data, content) {
         }
       }
     });
-    sectionMeta.parentNode.remove();
+    sectionMeta.remove();
   }
 
   // Wrap block in wrapper div (EDS pattern)
