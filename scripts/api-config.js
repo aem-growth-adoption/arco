@@ -11,7 +11,7 @@
 
 // Main recommender service (Cloudflare Worker)
 export const ARCO_RECOMMENDER_URL = window.ARCO_CONFIG?.RECOMMENDER_URL
-  || 'https://arco-recommender.franklin-prod.workers.dev';
+  || 'https://arco-recommender-foryou-speculative-prefetch.franklin-prod.workers.dev';
 
 // ============================================
 // Environment Detection
