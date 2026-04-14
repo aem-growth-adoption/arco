@@ -21,6 +21,10 @@ workers/*/node_modules/
 workers/*/.wrangler/
 .dev.vars
 
+# Generated hero images (stored in DA, not git)
+assets/images/heroes/
+drafts/media/
+
 # Demo video build intermediates
 build-demo/audio/
 build-demo/images/
