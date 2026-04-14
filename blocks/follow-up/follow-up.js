@@ -92,6 +92,30 @@ function renderKeepExploring(block, suggestions) {
     chipsList.appendChild(chip);
   });
 
+  // Free-text input chip
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'follow-up-chip follow-up-chip-input';
+  input.placeholder = 'Or type your own question\u2026';
+  input.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    const query = input.value.trim();
+    if (!query) return;
+
+    const parentContainer = block.closest('.follow-up-container');
+    if (parentContainer) parentContainer.classList.add('used');
+
+    window.dispatchEvent(new CustomEvent('arco-keep-exploring', {
+      detail: {
+        query,
+        followUp: { type: 'explore', label: query },
+      },
+    }));
+
+    input.value = '';
+  });
+  chipsList.appendChild(input);
+
   container.appendChild(chipsList);
   block.textContent = '';
   block.appendChild(container);

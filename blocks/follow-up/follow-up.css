@@ -112,6 +112,25 @@
 
 /* Explore: default copper (inherits base styles) */
 
+/* === Free-text input chip === */
+
+.follow-up .follow-up-chip-input {
+  min-width: 200px;
+  text-transform: none;
+  letter-spacing: normal;
+  appearance: none;
+  outline: none;
+}
+
+.follow-up .follow-up-chip-input::placeholder {
+  color: var(--accent-color, #b5651d);
+  opacity: 0.5;
+}
+
+.follow-up .follow-up-chip-input:focus {
+  box-shadow: 0 0 0 2px rgb(181 101 29 / 25%);
+}
+
 /* === Speculative prefetch states === */
 
 /* Loading: shimmer animation */
