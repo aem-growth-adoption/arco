@@ -117,6 +117,7 @@
 .follow-up .follow-up-chip-input {
   text-transform: none;
   letter-spacing: normal;
+  padding: 6px 12px;
 }
 
 .follow-up .follow-up-chip-input:hover,
@@ -125,7 +126,7 @@
   color: var(--accent-color, #b5651d);
   transform: none;
   border-width: 2px;
-  padding: 9.5px 19.5px;
+  padding: 5.5px 11.5px;
 }
 
 .follow-up .follow-up-chip-input-field {
@@ -138,9 +139,7 @@
   font-weight: inherit;
   padding: 0;
   margin: 0;
-  width: 16ch;
-  height: 1em;
-  line-height: 1;
+  width: 22ch;
 }
 
 .follow-up .follow-up-chip-input-field::placeholder {
