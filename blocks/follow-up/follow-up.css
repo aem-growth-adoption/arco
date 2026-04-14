@@ -115,20 +115,22 @@
 /* === Free-text input chip === */
 
 .follow-up .follow-up-chip-input {
-  min-width: 200px;
+  min-width: 180px;
+  padding: 8px 16px;
+  font-size: 13px;
   text-transform: none;
   letter-spacing: normal;
   appearance: none;
   outline: none;
 }
 
-.follow-up .follow-up-chip-input::placeholder {
-  color: var(--accent-color, #b5651d);
-  opacity: 0.5;
-}
-
+.follow-up .follow-up-chip-input:hover,
 .follow-up .follow-up-chip-input:focus {
-  box-shadow: 0 0 0 2px rgb(181 101 29 / 25%);
+  background: transparent;
+  color: var(--accent-color, #b5651d);
+  transform: none;
+  border-width: 2px;
+  padding: 7.5px 15.5px;
 }
 
 /* === Speculative prefetch states === */
