@@ -186,6 +186,7 @@ export async function searchContent(query, env, config = {}) {
     return {
       guides: keywordMatchGuides(query).slice(0, maxGuides),
       experiences: [],
+      heroImages: [],
       timings,
     };
   }
@@ -201,6 +202,7 @@ export async function searchContent(query, env, config = {}) {
       return {
         guides: keywordMatchGuides(query).slice(0, maxGuides),
         experiences: [],
+        heroImages: [],
         timings: { ...timings, fallback: true },
       };
     }
@@ -209,13 +211,14 @@ export async function searchContent(query, env, config = {}) {
 
     const vectorizeStart = Date.now();
     const allResults = await env.CONTENT_INDEX.query(embedding, {
-      topK: 30,
+      topK: 40,
       returnMetadata: 'all',
     });
     timings.vectorize = Date.now() - vectorizeStart;
 
     const guideMatches = (allResults.matches || []).filter((m) => m.metadata?.type === 'guide');
     const experienceMatches = (allResults.matches || []).filter((m) => m.metadata?.type === 'experience');
+    const heroImageMatches = (allResults.matches || []).filter((m) => m.metadata?.type === 'hero-image');
 
     // Deduplicate by slug
     const seenGuides = new Set();
@@ -250,14 +253,25 @@ export async function searchContent(query, env, config = {}) {
       return acc;
     }, []);
 
+    const heroImages = heroImageMatches.slice(0, 5).map((m) => ({
+      id: m.metadata?.id,
+      url: m.metadata?.url,
+      alt: m.metadata?.alt,
+      category: m.metadata?.category,
+      score: m.score,
+    }));
+
     timings.guidesMs = timings.embedding + timings.vectorize;
     timings.experiencesMs = timings.embedding + timings.vectorize;
 
-    return { guides, experiences, timings };
+    return {
+      guides, experiences, heroImages, timings,
+    };
   } catch {
     return {
       guides: keywordMatchGuides(query).slice(0, maxGuides),
       experiences: [],
+      heroImages: [],
       timings: { ...timings, fallback: true },
     };
   }
