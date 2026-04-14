@@ -138,6 +138,11 @@
   width: 16ch;
 }
 
+.follow-up .follow-up-chip-input-field::placeholder {
+  color: var(--accent-color, #b5651d);
+  opacity: 0.7;
+}
+
 /* === Speculative prefetch states === */
 
 /* Loading: shimmer animation */
