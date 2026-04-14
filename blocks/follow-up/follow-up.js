@@ -93,10 +93,18 @@ function renderKeepExploring(block, suggestions) {
   });
 
   // Free-text input chip
+  const inputChip = document.createElement('label');
+  inputChip.className = 'follow-up-chip follow-up-chip-input';
+
+  const inputIcon = document.createElement('span');
+  inputIcon.className = 'follow-up-chip-icon';
+  inputIcon.innerHTML = SUGGESTION_ICONS.explore;
+  inputChip.appendChild(inputIcon);
+
   const input = document.createElement('input');
   input.type = 'text';
-  input.className = 'follow-up-chip follow-up-chip-input';
-  input.placeholder = 'Or type your own question\u2026';
+  input.className = 'follow-up-chip-input-field';
+  input.placeholder = 'Type your own question\u2026';
   input.addEventListener('keydown', (e) => {
     if (e.key !== 'Enter') return;
     const query = input.value.trim();
@@ -114,7 +122,8 @@ function renderKeepExploring(block, suggestions) {
 
     input.value = '';
   });
-  chipsList.appendChild(input);
+  inputChip.appendChild(input);
+  chipsList.appendChild(inputChip);
 
   container.appendChild(chipsList);
   block.textContent = '';
