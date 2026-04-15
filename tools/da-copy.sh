@@ -38,13 +38,21 @@ RESET='\033[0m'
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+ENV_FILE="$(cd "$SCRIPT_DIR/.." && pwd)/.env"
+
 if [ -z "${DA_TOKEN:-}" ]; then
   DA_TOKEN=$(gcloud secrets versions access latest --secret=DA_TOKEN 2>/dev/null || true)
 fi
 
+# Fall back to DA_BEARER_TOKEN from env var or .env file
+if [ -z "${DA_TOKEN:-}" ]; then
+  DA_TOKEN="${DA_BEARER_TOKEN:-$(grep "^DA_BEARER_TOKEN=" "$ENV_FILE" 2>/dev/null | sed 's/DA_BEARER_TOKEN=//' | tr -d '"' || true)}"
+fi
+
 if [ -z "$DA_TOKEN" ]; then
   echo -e "${RED}DA_TOKEN not set and could not be retrieved from gcloud secrets.${RESET}"
-  echo "Set DA_TOKEN env var or configure gcloud secrets."
+  echo "Set DA_TOKEN or DA_BEARER_TOKEN in .env, or configure gcloud secrets."
   exit 1
 fi
 
