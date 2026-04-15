@@ -1,19 +1,21 @@
-#!/bin/bash
+#!/opt/homebrew/bin/bash
 # Copy files between DA (Document Authoring) orgs/repos.
 #
 # Usage:
-#   ./tools/da-copy.sh <src> <dst> [path]
+#   ./tools/da-copy.sh <src> <dst> [path] [--force]
 #
 # Arguments:
-#   src   Source org/repo (e.g. paolomoz/arco)
-#   dst   Destination org/repo (e.g. carlossg/arco)
-#   path  Optional path prefix to copy (e.g. products). Copies everything under it.
-#         If omitted, lists top-level directories for you to choose.
+#   src     Source org/repo (e.g. paolomoz/arco)
+#   dst     Destination org/repo (e.g. froesef/arco)
+#   path    Optional path prefix to copy (e.g. products). Copies everything under it.
+#           If omitted, lists top-level directories for you to choose.
+#   --force Re-copy files that already exist in destination (fixes content-type issues)
 #
 # Examples:
-#   ./tools/da-copy.sh paolomoz/arco carlossg/arco products/comparison
-#   ./tools/da-copy.sh paolomoz/arco carlossg/arco blog
-#   ./tools/da-copy.sh paolomoz/arco carlossg/arco          # interactive
+#   ./tools/da-copy.sh paolomoz/arco froesef/arco products/comparison
+#   ./tools/da-copy.sh paolomoz/arco froesef/arco blog
+#   ./tools/da-copy.sh paolomoz/arco froesef/arco media --force
+#   ./tools/da-copy.sh paolomoz/arco froesef/arco          # interactive
 #
 # Requires:
 #   - gcloud CLI with access to DA_TOKEN secret, OR
@@ -23,6 +25,8 @@
 # in the source org and copies any that are missing in the destination.
 
 set -uo pipefail
+
+FORCE=false
 
 CYAN='\033[0;36m'
 GREEN='\033[0;32m'
@@ -49,6 +53,7 @@ fi
 SRC="${1:-}"
 DST="${2:-}"
 PREFIX="${3:-}"
+if [ "${4:-}" = "--force" ] || [ "${3:-}" = "--force" ]; then FORCE=true; fi
 
 if [ -z "$SRC" ] || [ -z "$DST" ]; then
   echo "Usage: $0 <src-org/repo> <dst-org/repo> [path]"
@@ -175,11 +180,11 @@ echo -e "${DIM}Found ${src_count} files in source${RESET}"
 echo -e "${DIM}Checking destination...${RESET}"
 dst_files=$(da_list_recursive "$DST" "/${PREFIX}" 2>/dev/null || true)
 
-# Find missing files
+# Find files to copy (missing, or all if --force)
 missing=()
 while IFS= read -r f; do
   [ -z "$f" ] && continue
-  if ! echo "$dst_files" | grep -qF "$f"; then
+  if [ "$FORCE" = true ] || ! echo "$dst_files" | grep -qF "$f"; then
     missing+=("$f")
   fi
 done <<< "$src_files"
