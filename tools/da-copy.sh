@@ -99,6 +99,21 @@ da_list_recursive() {
   done <<< "$items"
 }
 
+# Detect MIME type from file extension
+mime_type() {
+  case "${1##*.}" in
+    jpg|jpeg) echo "image/jpeg" ;;
+    png)      echo "image/png" ;;
+    gif)      echo "image/gif" ;;
+    webp)     echo "image/webp" ;;
+    svg)      echo "image/svg+xml" ;;
+    mp4)      echo "video/mp4" ;;
+    pdf)      echo "application/pdf" ;;
+    html)     echo "text/html" ;;
+    *)        echo "application/octet-stream" ;;
+  esac
+}
+
 # Copy a single file from src to dst
 copy_file() {
   local rel_path="$1"
@@ -114,10 +129,13 @@ copy_file() {
     return 1
   fi
 
+  local content_type
+  content_type=$(mime_type "$rel_path")
+
   local put_code=$(/usr/bin/curl -s -o /dev/null -w "%{http_code}" \
     -X PUT \
     -H "Authorization: Bearer $DA_TOKEN" \
-    -F "data=@${tmp};type=text/html" \
+    -F "data=@${tmp};type=${content_type}" \
     "https://admin.da.live/source/${DST}${rel_path}")
 
   if [ "$put_code" = "200" ] || [ "$put_code" = "201" ]; then
