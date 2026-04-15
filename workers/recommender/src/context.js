@@ -12,7 +12,33 @@ import useCasesData from '../../../content/metadata/use-cases.json';
 import productProfilesData from '../../../content/metadata/product-profiles.json';
 import recipesData from '../../../content/recipes/recipes.json';
 import accessoriesData from '../../../content/accessories/accessories.json';
+
+// Pre-authored comparisons (bundled for direct lookup)
+import compPrimoVsDoppio from '../../../content/products/comparison/arco-primo-vs-arco-doppio.json';
+import compNanoVsPrimo from '../../../content/products/comparison/arco-nano-vs-arco-primo.json';
+import compDoppioVsStudio from '../../../content/products/comparison/arco-doppio-vs-arco-studio.json';
+import compStudioVsStudioPro from '../../../content/products/comparison/arco-studio-vs-arco-studio-pro.json';
+import compAutomaticoVsStudio from '../../../content/products/comparison/arco-automatico-vs-arco-studio.json';
+import compUfficioVsStudioPro from '../../../content/products/comparison/arco-ufficio-vs-arco-studio-pro.json';
+import compViaggioVsNano from '../../../content/products/comparison/arco-viaggio-vs-arco-nano.json';
+import compPrecisoVsZero from '../../../content/products/comparison/arco-preciso-vs-arco-zero.json';
+import compMacinoVsPreciso from '../../../content/products/comparison/arco-macinino-vs-arco-preciso.json';
+import compFiltroVsPreciso from '../../../content/products/comparison/arco-filtro-vs-arco-preciso.json';
 /* eslint-enable import/extensions, import/no-relative-packages */
+
+// Build comparison lookup map: sorted product pair → comparison data
+const COMPARISON_MAP = new Map();
+[
+  compPrimoVsDoppio, compNanoVsPrimo, compDoppioVsStudio,
+  compStudioVsStudioPro, compAutomaticoVsStudio, compUfficioVsStudioPro,
+  compViaggioVsNano, compPrecisoVsZero, compMacinoVsPreciso,
+  compFiltroVsPreciso,
+].forEach((comp) => {
+  if (comp.products && comp.products.length === 2) {
+    const key = [...comp.products].sort().join('-vs-');
+    COMPARISON_MAP.set(key, comp);
+  }
+});
 
 /**
  * Match query against persona trigger phrases.
@@ -161,6 +187,45 @@ export function getRelevantReviews(query, products) {
 }
 
 /**
+ * Find a pre-authored comparison by product pair.
+ * Returns the comparison data or null.
+ */
+export function findComparison(productA, productB) {
+  const key = [productA, productB].sort().join('-vs-');
+  return COMPARISON_MAP.get(key) || null;
+}
+
+/**
+ * Extract product IDs mentioned in a query string.
+ */
+const PRODUCT_NAMES = {
+  primo: 'arco-primo',
+  doppio: 'arco-doppio',
+  studio: 'arco-studio',
+  'studio pro': 'arco-studio-pro',
+  'studio-pro': 'arco-studio-pro',
+  nano: 'arco-nano',
+  viaggio: 'arco-viaggio',
+  automatico: 'arco-automatico',
+  ufficio: 'arco-ufficio',
+  preciso: 'arco-preciso',
+  macinino: 'arco-macinino',
+  filtro: 'arco-filtro',
+  zero: 'arco-zero',
+};
+
+export function extractProductIds(query) {
+  const lower = query.toLowerCase();
+  // Check longer names first to avoid partial matches
+  return Object.entries(PRODUCT_NAMES)
+    .sort((a, b) => b[0].length - a[0].length)
+    .reduce((found, [name, id]) => {
+      if (lower.includes(name) && !found.includes(id)) found.push(id);
+      return found;
+    }, []);
+}
+
+/**
  * Keyword-based guide matching fallback.
  * Guides are in separate JSON files — this is a stub.
  * Real matches come from Vectorize.
@@ -170,39 +235,86 @@ function keywordMatchGuides() {
 }
 
 /**
+ * Deduplicate Vectorize matches by slug, returning up to maxCount items.
+ */
+function dedupeMatches(matches, maxCount) {
+  const seen = new Set();
+  return matches.reduce((acc, m) => {
+    if (acc.length >= maxCount) return acc;
+    const slug = m.metadata?.slug;
+    if (seen.has(slug)) return acc;
+    seen.add(slug);
+    acc.push({
+      slug,
+      title: m.metadata?.title,
+      category: m.metadata?.category,
+      difficulty: m.metadata?.difficulty,
+      type: m.metadata?.type,
+      _score: m.score,
+      _matchedSection: m.metadata?.sectionHeading,
+    });
+    return acc;
+  }, []);
+}
+
+/**
  * Search content via Vectorize + KV fallback.
  * Uses a single embedding, queries CONTENT_INDEX, splits by metadata type.
- * Falls back to keyword matching on bundled guide/experience JSON if unavailable.
+ * Returns guides, experiences, comparisons, recipes, and tool content.
  */
+/**
+ * Race a promise against a timeout. Rejects with a named error on timeout.
+ */
+function withTimeout(promise, ms, label) {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
+const EMBEDDING_TIMEOUT_MS = 10_000;
+const VECTORIZE_TIMEOUT_MS = 10_000;
+
 export async function searchContent(query, env, config = {}) {
   const timings = {
     embedding: 0, vectorize: 0, guidesMs: 0, experiencesMs: 0, fallback: false,
   };
   const maxGuides = config.maxGuides || 5;
   const maxExperiences = config.maxExperiences || 3;
+  const maxComparisons = config.maxComparisons || 2;
+  const maxRecipes = config.maxRecipes || 3;
+  const maxTools = config.maxTools || 3;
+
+  const emptyResult = {
+    guides: [],
+    experiences: [],
+    comparisons: [],
+    recipes: [],
+    tools: [],
+    heroImages: [],
+    timings,
+  };
 
   if (!env.CONTENT_INDEX) {
     timings.fallback = true;
-    return {
-      guides: keywordMatchGuides(query).slice(0, maxGuides),
-      experiences: [],
-      heroImages: [],
-      timings,
-    };
+    emptyResult.guides = keywordMatchGuides(query).slice(0, maxGuides);
+    return emptyResult;
   }
 
   try {
     const embeddingStart = Date.now();
-    const embeddingResponse = await env.AI?.run('@cf/baai/bge-small-en-v1.5', {
-      text: [query],
-    });
+    const embeddingResponse = await withTimeout(
+      env.AI?.run('@cf/baai/bge-small-en-v1.5', { text: [query] }),
+      EMBEDDING_TIMEOUT_MS,
+      'AI embedding',
+    );
     timings.embedding = Date.now() - embeddingStart;
 
     if (!embeddingResponse?.data?.[0]) {
       return {
+        ...emptyResult,
         guides: keywordMatchGuides(query).slice(0, maxGuides),
-        experiences: [],
-        heroImages: [],
         timings: { ...timings, fallback: true },
       };
     }
@@ -210,48 +322,31 @@ export async function searchContent(query, env, config = {}) {
     const embedding = embeddingResponse.data[0];
 
     const vectorizeStart = Date.now();
-    const allResults = await env.CONTENT_INDEX.query(embedding, {
-      topK: 40,
-      returnMetadata: 'all',
-    });
+    const allResults = await withTimeout(
+      env.CONTENT_INDEX.query(embedding, { topK: 50, returnMetadata: 'all' }),
+      VECTORIZE_TIMEOUT_MS,
+      'Vectorize query',
+    );
     timings.vectorize = Date.now() - vectorizeStart;
 
-    const guideMatches = (allResults.matches || []).filter((m) => m.metadata?.type === 'guide');
-    const experienceMatches = (allResults.matches || []).filter((m) => m.metadata?.type === 'experience');
-    const heroImageMatches = (allResults.matches || []).filter((m) => m.metadata?.type === 'hero-image');
+    const matches = allResults.matches || [];
 
-    // Deduplicate by slug
-    const seenGuides = new Set();
-    const guides = guideMatches.reduce((acc, m) => {
-      if (acc.length >= maxGuides) return acc;
-      const slug = m.metadata?.slug;
-      if (seenGuides.has(slug)) return acc;
-      seenGuides.add(slug);
-      acc.push({
-        slug,
-        title: m.metadata?.title,
-        category: m.metadata?.category,
-        difficulty: m.metadata?.difficulty,
-        _score: m.score,
-        _matchedSection: m.metadata?.sectionHeading,
-      });
-      return acc;
-    }, []);
+    // Split by content type
+    const guideMatches = matches.filter((m) => m.metadata?.type === 'guide');
+    const experienceMatches = matches.filter((m) => m.metadata?.type === 'experience');
+    const heroImageMatches = matches.filter((m) => m.metadata?.type === 'hero-image');
+    const comparisonMatches = matches.filter((m) => m.metadata?.type === 'comparison');
+    const recipeMatches = matches.filter((m) => m.metadata?.type === 'recipe');
+    const toolTypes = new Set(['maintenance', 'diagnostic', 'pairing', 'calculator']);
+    const toolMatches = matches.filter((m) => toolTypes.has(m.metadata?.type));
+    const productMatches = matches.filter((m) => m.metadata?.type === 'product');
 
-    const seenExp = new Set();
-    const experiences = experienceMatches.reduce((acc, m) => {
-      if (acc.length >= maxExperiences) return acc;
-      const slug = m.metadata?.slug;
-      if (seenExp.has(slug)) return acc;
-      seenExp.add(slug);
-      acc.push({
-        slug,
-        title: m.metadata?.title,
-        category: m.metadata?.category,
-        _score: m.score,
-      });
-      return acc;
-    }, []);
+    // Deduplicate each type by slug
+    const guides = dedupeMatches(guideMatches, maxGuides);
+    const experiences = dedupeMatches(experienceMatches, maxExperiences);
+    const comparisons = dedupeMatches(comparisonMatches, maxComparisons);
+    const recipes = dedupeMatches(recipeMatches, maxRecipes);
+    const tools = dedupeMatches([...toolMatches, ...productMatches], maxTools);
 
     const heroImages = heroImageMatches.slice(0, 5).map((m) => ({
       id: m.metadata?.id,
@@ -265,13 +360,14 @@ export async function searchContent(query, env, config = {}) {
     timings.experiencesMs = timings.embedding + timings.vectorize;
 
     return {
-      guides, experiences, heroImages, timings,
+      guides, experiences, comparisons, recipes, tools, heroImages, timings,
     };
-  } catch {
+  } catch (err) {
+    // Propagate timeout errors so they surface as real failures
+    if (err.message?.includes('timed out')) throw err;
     return {
+      ...emptyResult,
       guides: keywordMatchGuides(query).slice(0, maxGuides),
-      experiences: [],
-      heroImages: [],
       timings: { ...timings, fallback: true },
     };
   }
