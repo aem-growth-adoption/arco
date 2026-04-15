@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/opt/homebrew/bin/bash
 # Preview all uploaded pages on AEM Edge Delivery
 # Triggers the preview CDN to pick up content from DA
 # Usage: ./tools/preview-all.sh [path-prefix]

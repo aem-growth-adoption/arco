@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/opt/homebrew/bin/bash
 # Publish (go live) all previewed pages on AEM Edge Delivery
 # Promotes content from preview (.aem.page) to live (.aem.live)
 # Usage: ./tools/publish-all.sh [path-prefix]

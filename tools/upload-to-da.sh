@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/opt/homebrew/bin/bash
 # Upload draft HTML files and media to DA (Document Authoring)
 # Usage: ./tools/upload-to-da.sh [specific-file]
 #        ./tools/upload-to-da.sh --media          # upload media files only
