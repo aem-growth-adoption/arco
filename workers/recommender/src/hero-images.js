@@ -114,35 +114,51 @@ function scoreImage(image, queryTokens, productIds) {
  * @param {Array} [vectorMatches=[]] - Pre-computed vector matches from ctx.rag.heroImages
  * @returns {{ url: string, alt: string }} Image URL and alt text
  */
+// Minimum vector similarity to trust Vectorize directly (skip hybrid scoring)
+const VECTOR_CONFIDENCE_THRESHOLD = 0.7;
+
 export function selectHeroImage({
   query, useCases, intentType, productIds = [],
 } = {}, vectorMatches = []) {
   const queryTokens = tokenize(query, useCases);
-
-  // Also add intent type as a query token for topic matching
   if (intentType) queryTokens.add(intentType);
 
-  // Build vector score lookup: id → similarity score
+  // ── 1. Product match: explicit product query always wins ───────────────────
+  // Check keyword scores for product images only — +10 per matched product ID
+  // dominates everything else, so we can short-circuit here.
+  if (productIds.length > 0) {
+    const productScored = HERO_IMAGE_CATALOG
+      .map((image) => ({ image, score: scoreImage(image, queryTokens, productIds) }))
+      .filter((s) => s.score >= 10);
+    if (productScored.length > 0) {
+      productScored.sort((a, b) => b.score - a.score || Math.random() - 0.5);
+      return { url: productScored[0].image.url, alt: productScored[0].image.alt };
+    }
+  }
+
+  // ── 2. High-confidence vector match: trust Vectorize when it's sure ────────
+  // vectorMatches are already ranked by similarity (highest first).
+  // If the top match clears the threshold, use it — no keyword inflation risk.
+  const topVector = vectorMatches[0];
+  if (topVector?.score >= VECTOR_CONFIDENCE_THRESHOLD && topVector.url) {
+    return { url: topVector.url, alt: topVector.alt };
+  }
+
+  // ── 3. Hybrid scoring: keyword + vector boost ──────────────────────────────
   const vectorScoreMap = new Map();
   vectorMatches.forEach((vm) => {
-    if (vm.id && vm.score != null) {
-      vectorScoreMap.set(vm.id, vm.score);
-    }
+    if (vm.id && vm.score != null) vectorScoreMap.set(vm.id, vm.score);
   });
 
-  // Score every image: keyword + vector boost
   let scored = HERO_IMAGE_CATALOG.map((image) => {
     const keywordScore = scoreImage(image, queryTokens, productIds);
     const vectorScore = vectorScoreMap.get(image.id) || 0;
     return {
-      image,
-      keywordScore,
-      vectorScore,
-      score: keywordScore + (vectorScore * 8),
+      image, keywordScore, vectorScore, score: keywordScore + (vectorScore * 8),
     };
   });
 
-  // If no strong match (best score <= 1), inject intent fallback topics
+  // If no signal at all, inject intent fallback topics
   const bestScore = Math.max(...scored.map((s) => s.score));
   if (bestScore <= 1 && intentType) {
     const fallbackTopics = INTENT_FALLBACK_TOPICS[intentType] || ['general', 'espresso'];
@@ -151,29 +167,14 @@ export function selectHeroImage({
       const keywordScore = scoreImage(image, queryTokens, productIds);
       const vectorScore = vectorScoreMap.get(image.id) || 0;
       return {
-        image,
-        keywordScore,
-        vectorScore,
-        score: keywordScore + (vectorScore * 8),
+        image, keywordScore, vectorScore, score: keywordScore + (vectorScore * 8),
       };
     });
   }
 
-  // Sort descending by score, random jitter to break ties
-  scored.sort((a, b) => {
-    const diff = b.score - a.score;
-    if (diff !== 0) return diff;
-    return Math.random() - 0.5;
-  });
-
-  // Pick from the top tier (all images sharing the highest score)
-  const topScore = scored[0].score;
-  const topTier = scored.filter((s) => s.score === topScore);
+  scored.sort((a, b) => b.score - a.score || Math.random() - 0.5);
+  const topTier = scored.filter((s) => s.score === scored[0].score);
   const selected = topTier[Math.floor(Math.random() * topTier.length)].image;
 
-  // URL is pre-resolved in the catalog — no more DEFAULT_HERO fallback
-  return {
-    url: selected.url,
-    alt: selected.alt,
-  };
+  return { url: selected.url, alt: selected.alt };
 }
