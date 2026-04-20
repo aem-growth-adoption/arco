@@ -1,7 +1,13 @@
 /**
  * Admin Interface — session browser for the Arco recommender demo.
  *
- * Routes (all require HTTP Basic Auth — username: admin, password: ADMIN_TOKEN):
+ * Auth flow:
+ *   1. GET /admin with no cookie → 401 WWW-Authenticate: Basic (browser shows dialog)
+ *   2. Browser retries with Authorization: Basic header → server validates, sets
+ *      HttpOnly session cookie, serves HTML
+ *   3. SPA fetch() calls to /api/admin/* carry the cookie automatically (same-origin)
+ *
+ * Routes:
  *   GET /admin                           → self-contained HTML SPA
  *   GET /api/admin/sessions              → paginated session list
  *   GET /api/admin/sessions/:id          → session detail + all pages
@@ -12,45 +18,73 @@ import { CORS_HEADERS } from './pipeline/context.js';
 
 // ─── Auth ────────────────────────────────────────────────────────────────────
 
-function checkAuth(request, env) {
-  if (!env.ADMIN_TOKEN) return true; // No token configured → open (dev)
+const COOKIE_NAME = 'arco-admin-session';
+const COOKIE_MAX_AGE = 60 * 60 * 24; // 24 hours
+
+/**
+ * Derive a session token from ADMIN_TOKEN using HMAC-SHA256.
+ * Stateless — recomputed on every check, no storage needed.
+ */
+async function deriveSessionToken(adminToken) {
+  const key = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(adminToken),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  );
+  const msg = new TextEncoder().encode('arco-admin-session-v1');
+  const sig = await crypto.subtle.sign('HMAC', key, msg);
+  return Array.from(new Uint8Array(sig))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+function parseCookies(request) {
+  const header = request.headers.get('cookie') || '';
+  return Object.fromEntries(
+    header.split(';').map((c) => c.trim().split('=')).filter((p) => p.length === 2),
+  );
+}
+
+function checkBasicAuth(request, env) {
+  if (!env.ADMIN_TOKEN) return true;
   const auth = request.headers.get('authorization') || '';
   if (!auth.startsWith('Basic ')) return false;
   let decoded;
-  try {
-    decoded = atob(auth.slice(6));
-  } catch {
-    return false;
-  }
+  try { decoded = atob(auth.slice(6)); } catch { return false; }
   const colon = decoded.indexOf(':');
   if (colon === -1) return false;
-  const username = decoded.slice(0, colon);
-  const password = decoded.slice(colon + 1);
-  return username === 'admin' && password === env.ADMIN_TOKEN;
+  return decoded.slice(0, colon) === 'admin' && decoded.slice(colon + 1) === env.ADMIN_TOKEN;
 }
 
-function unauthorized(forHtml) {
-  const realm = 'Arco Admin';
-  if (forHtml) {
-    return new Response('Unauthorized', {
-      status: 401,
-      headers: { 'WWW-Authenticate': `Basic realm="${realm}"`, 'Content-Type': 'text/plain' },
-    });
-  }
+async function checkCookieAuth(request, env) {
+  if (!env.ADMIN_TOKEN) return true;
+  const cookies = parseCookies(request);
+  const sessionToken = cookies[COOKIE_NAME];
+  if (!sessionToken) return false;
+  const expected = await deriveSessionToken(env.ADMIN_TOKEN);
+  return sessionToken === expected;
+}
+
+function wwwAuthenticate() {
+  return new Response('Unauthorized', {
+    status: 401,
+    headers: { 'WWW-Authenticate': 'Basic realm="Arco Admin"', 'Content-Type': 'text/plain' },
+  });
+}
+
+function unauthorized() {
   return new Response(JSON.stringify({ error: 'Unauthorized' }), {
     status: 401,
-    headers: {
-      ...CORS_HEADERS,
-      'Content-Type': 'application/json',
-      'WWW-Authenticate': `Basic realm="${realm}"`,
-    },
+    headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
   });
 }
 
 // ─── API Handlers ─────────────────────────────────────────────────────────────
 
 export async function handleAdminSessions(request, env) {
-  if (!checkAuth(request, env)) return unauthorized(false);
+  if (!await checkCookieAuth(request, env) && !checkBasicAuth(request, env)) return unauthorized();
   const url = new URL(request.url);
   const limit = Math.min(parseInt(url.searchParams.get('limit') || '50', 10), 200);
   const offset = parseInt(url.searchParams.get('offset') || '0', 10);
@@ -75,7 +109,7 @@ export async function handleAdminSessions(request, env) {
 }
 
 export async function handleAdminSession(request, env, sessionId) {
-  if (!checkAuth(request, env)) return unauthorized(false);
+  if (!await checkCookieAuth(request, env) && !checkBasicAuth(request, env)) return unauthorized();
 
   const { results: [session] } = await env.SESSIONS_DB.prepare(
     'SELECT * FROM sessions WHERE id = ?1',
@@ -102,7 +136,7 @@ export async function handleAdminSession(request, env, sessionId) {
 }
 
 export async function handleAdminPage(request, env, pageId) {
-  if (!checkAuth(request, env)) return unauthorized(false);
+  if (!await checkCookieAuth(request, env) && !checkBasicAuth(request, env)) return unauthorized();
 
   const { results: [page] } = await env.SESSIONS_DB.prepare(
     'SELECT * FROM generated_pages WHERE id = ?1',
@@ -123,8 +157,12 @@ export async function handleAdminPage(request, env, pageId) {
 
 // ─── Admin SPA HTML ───────────────────────────────────────────────────────────
 
-export function handleAdminUI(request, env) {
-  if (!checkAuth(request, env)) return unauthorized(true);
+export async function handleAdminUI(request, env) {
+  // Check cookie first (subsequent visits), then Basic Auth (first login)
+  const hasCookie = await checkCookieAuth(request, env);
+  if (!hasCookie) {
+    if (!checkBasicAuth(request, env)) return wwwAuthenticate();
+  }
   const url = new URL(request.url);
   const baseUrl = `${url.origin}`;
 
@@ -480,7 +518,7 @@ async function renderPage(el, pageId) {
       item.className = 'block-item';
       const headerId = 'block-body-' + block.index;
       // eslint-disable-next-line no-useless-escape
-      item.innerHTML = '<div class="block-header" onclick="toggleBlock(\'' + headerId + '\')">'
+      item.innerHTML = '<div class="block-header" onclick="toggleBlock(\\'' + headerId + '\\')">'
         + '<span class="block-num">#' + block.index + '</span>'
         + '<span class="block-type">' + badge(block.blockType, 'blue') + '</span>'
         + '<span class="toggle" id="' + headerId + '-arrow">▼</span>'
@@ -494,9 +532,9 @@ async function renderPage(el, pageId) {
       // eslint-disable-next-line no-useless-escape
       body.innerHTML = '<div style="padding:8px 12px;border-bottom:1px solid var(--border);display:flex;gap:8px">'
         // eslint-disable-next-line no-useless-escape
-        + '<button onclick="showTab(\'' + headerId + '\',\'render\')" id="' + headerId + '-tab-render" class="tab-btn active-tab">Rendered</button>'
+        + '<button onclick="showTab(\\'' + headerId + '\\',\\'render\\')" id="' + headerId + '-tab-render" class="tab-btn active-tab">Rendered</button>'
         // eslint-disable-next-line no-useless-escape
-        + '<button onclick="showTab(\'' + headerId + '\',\'source\')" id="' + headerId + '-tab-source" class="tab-btn">HTML Source</button>'
+        + '<button onclick="showTab(\\'' + headerId + '\\',\\'source\\')" id="' + headerId + '-tab-source" class="tab-btn">HTML Source</button>'
         + '</div>'
         + '<div id="' + headerId + '-render" class="block-render">' + block.html + '</div>'
         + '<div id="' + headerId + '-source" style="display:none" class="block-preview"><pre>' + esc(block.html) + '</pre></div>';
@@ -622,13 +660,31 @@ document.head.insertAdjacentHTML('beforeend', '<style>.tab-btn{background:none;b
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 
-route();
+try {
+  route();
+} catch(e) {
+  const v = document.getElementById('view');
+  if (v) v.innerHTML = '<div class="loading" style="color:var(--red)">Init error: ' + String(e) + '</div>';
+  console.error('Admin init error:', e);
+}
 </script>
 </body>
 </html>`;
   /* eslint-enable no-useless-escape */
 
-  return new Response(html, {
-    headers: { 'Content-Type': 'text/html;charset=utf-8', 'Cache-Control': 'no-store' },
+  const headers = new Headers({
+    'Content-Type': 'text/html;charset=utf-8',
+    'Cache-Control': 'no-store',
   });
+
+  // Set session cookie when logging in via Basic Auth (not already cookie-authed)
+  if (!hasCookie && env.ADMIN_TOKEN) {
+    const token = await deriveSessionToken(env.ADMIN_TOKEN);
+    headers.set(
+      'Set-Cookie',
+      `${COOKIE_NAME}=${token}; HttpOnly; Secure; SameSite=Strict; Max-Age=${COOKIE_MAX_AGE}; Path=/`,
+    );
+  }
+
+  return new Response(html, { headers });
 }

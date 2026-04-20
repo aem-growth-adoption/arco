@@ -195,6 +195,73 @@ On `GET /generate`, the server checks `DAClient.exists(path)` before starting th
 
 Key files for caching: `scripts/scripts.js` (deterministic `generateSlug`, `cache-hit` handler), `workers/recommender/src/index.js` (cache check in `/api/generate`).
 
+### Session Storage & Admin Interface
+
+Every completed recommender generation is persisted to two Cloudflare-managed stores:
+
+**D1 (SQLite) — `arco-sessions` database** — fast, queryable metadata:
+
+```sql
+sessions(id, ip_hash, user_agent, first_seen, last_seen, page_count)
+generated_pages(id, session_id, query, previous_queries, title, intent_type,
+                journey_stage, flow_id, follow_up_type, block_count, created_at,
+                duration_ms, input_tokens, output_tokens, da_path, preview_url, live_url)
+```
+
+**KV — `SESSION_STORE` namespace** — full page payloads (90-day TTL):
+
+```
+page:{pageId}  →  { blocks: [{index, blockType, html}], debug: {...}, request: {...} }
+```
+
+The `debug` snapshot captures intent classification, RAG results (products, features, FAQs, recipes, hero images), behavior analysis, full system/user prompts, timings, LLM model + token counts, and raw LLM output.
+
+**Session ID** is a UUID generated client-side by `getOrCreateSessionId()` in `scripts/scripts.js`, stored in `localStorage` with a 24-hour expiry. It is sent as `sessionId` in every `/api/generate` request body, including speculative prefetch requests from the `speculative-engine.js`.
+
+**Key storage files:**
+
+| File | Role |
+|------|------|
+| `workers/recommender/src/storage.js` | `saveGeneration(ctx, env, sessionId)` — called after `executeFlow` completes; writes D1 metadata + KV payload |
+| `workers/recommender/src/admin.js` | Admin route handlers + self-contained HTML SPA |
+| `workers/recommender/migrations/0001_sessions.sql` | D1 schema (run once via `wrangler d1 execute`) |
+
+**Admin interface** — `https://arco-recommender.franklin-prod.workers.dev/admin`
+
+Login: HTTP Basic Auth — username `admin`, password = `ADMIN_TOKEN` secret (set via `wrangler secret put ADMIN_TOKEN`).
+
+| View | URL | What it shows |
+|------|-----|---------------|
+| Sessions list | `/admin#/` | All sessions ordered by last-active; session ID, timestamps, page count, user agent |
+| Session detail | `/admin#/sessions/:id` | All generated pages for a session with query, intent, duration, token counts |
+| Page detail | `/admin#/pages/:id` | Full metadata + rendered HTML blocks (tabbed render/source view) + collapsible debug panels: RAG context, behavior analysis, prompt text, timings, raw LLM output |
+
+**Direct API access** (useful for scripting or curl):
+
+```bash
+# All sessions (paginated)
+curl -u admin:TOKEN https://arco-recommender.franklin-prod.workers.dev/api/admin/sessions?limit=50&offset=0
+
+# Single session + its pages
+curl -u admin:TOKEN https://arco-recommender.franklin-prod.workers.dev/api/admin/sessions/{sessionId}
+
+# Page metadata + full KV payload (blocks + debug)
+curl -u admin:TOKEN https://arco-recommender.franklin-prod.workers.dev/api/admin/pages/{pageId}
+```
+
+**Query D1 directly** (for ad-hoc analysis):
+
+```bash
+# Most active sessions
+wrangler d1 execute arco-sessions --command "SELECT id, page_count, first_seen, last_seen FROM sessions ORDER BY page_count DESC LIMIT 10"
+
+# Recent generations with intent and timing
+wrangler d1 execute arco-sessions --command "SELECT query, intent_type, journey_stage, duration_ms, input_tokens, output_tokens FROM generated_pages ORDER BY created_at DESC LIMIT 20"
+
+# Token usage summary
+wrangler d1 execute arco-sessions --command "SELECT SUM(input_tokens) as total_in, SUM(output_tokens) as total_out, COUNT(*) as pages FROM generated_pages"
+```
+
 ## Testing & Quality Assurance
 
 ### Performance
