@@ -567,3 +567,236 @@
 .admin .admin-error {
   color: #b00020;
 }
+
+/* ── URL cell ────────────────────────────────────────────────── */
+
+.admin .admin-url {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted-color);
+  font-size: 0.7rem;
+}
+
+/* ── Reconstruction: run divider ──────────────────────────── */
+
+.admin .admin-run-divider {
+  margin: 2rem 0;
+  padding: 0;
+  position: relative;
+  text-align: center;
+}
+
+.admin .admin-run-divider-line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--border-color) 20%, var(--border-color) 80%, transparent 100%);
+  z-index: 0;
+}
+
+.admin .admin-run-divider-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--background-color);
+  padding: 0.35rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  position: relative;
+  z-index: 1;
+  color: var(--muted-color);
+}
+
+.admin .admin-run-divider-type {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  color: #7c3aed;
+  font-size: 0.68rem;
+}
+
+.admin .admin-run-divider-arrow {
+  color: var(--muted-color);
+}
+
+.admin .admin-run-divider-query {
+  color: var(--text-color);
+  font-weight: 500;
+}
+
+/* ── Follow-up chip markers (inline in reconstruction) ───── */
+
+.admin .admin-followup-marker {
+  margin: 1rem 0;
+  padding: 1rem 1.25rem;
+  background: var(--light-color);
+  border: 1px dashed var(--border-color);
+  border-radius: 8px;
+}
+
+.admin .admin-followup-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted-color);
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.admin .admin-followup-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.admin .admin-followup-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.8rem;
+  background: var(--background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  font-size: 0.78rem;
+  color: var(--text-color);
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.admin .admin-followup-chip.is-clicked {
+  background: rgb(181 101 29 / 12%);
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+  font-weight: 600;
+}
+
+.admin .admin-followup-type {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.62rem;
+  color: var(--muted-color);
+  font-weight: 600;
+}
+
+.admin .admin-followup-chip.is-clicked .admin-followup-type {
+  color: var(--accent-color);
+}
+
+.admin .admin-followup-text {
+  color: inherit;
+}
+
+.admin .admin-followup-arrow {
+  font-size: 0.65rem;
+  padding: 0.1rem 0.5rem;
+  background: var(--accent-color);
+  color: var(--light-color);
+  border-radius: 999px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ── Run timeline ────────────────────────────────────────── */
+
+.admin .admin-timeline {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.admin .admin-timeline-item {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-top: 1px solid var(--border-color);
+}
+
+.admin .admin-timeline-item:first-child {
+  border-top: none;
+  padding-top: 0.5rem;
+}
+
+.admin .admin-timeline-marker {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--accent-color);
+  color: var(--light-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.admin .admin-timeline-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+  font-size: 0.78rem;
+}
+
+.admin .admin-timeline-query {
+  margin: 0 0 0.25rem;
+  font-size: 0.9rem;
+  color: var(--text-color);
+  font-weight: 500;
+}
+
+.admin .admin-timeline-title {
+  margin: 0 0 0.5rem;
+  font-style: italic;
+}
+
+.admin .admin-timeline-options {
+  margin-top: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--background-color);
+  border-radius: 8px;
+}
+
+.admin .admin-timeline-options-label {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.68rem;
+  margin-bottom: 0.5rem;
+}
+
+.admin .admin-timeline-details {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.admin .admin-timeline-details summary {
+  cursor: pointer;
+  color: var(--muted-color);
+  list-style: none;
+  font-size: 0.75rem;
+}
+
+.admin .admin-timeline-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.admin .admin-timeline-details[open] summary {
+  margin-bottom: 0.5rem;
+}
+
+.admin .admin-run-debug h3 {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.9rem;
+  color: var(--text-color);
+  font-weight: 600;
+}

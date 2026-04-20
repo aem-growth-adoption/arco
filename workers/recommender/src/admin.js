@@ -108,6 +108,10 @@ export async function handleAdminSessions(request, env) {
   }), { headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' } });
 }
 
+/**
+ * Session detail → returns session metadata plus logical pages (grouped by page_id).
+ * Each page is a URL visit and aggregates its runs (initial + follow-up clicks).
+ */
 export async function handleAdminSession(request, env, sessionId) {
   if (!await checkCookieAuth(request, env) && !checkBasicAuth(request, env)) return unauthorized();
 
@@ -121,36 +125,122 @@ export async function handleAdminSession(request, env, sessionId) {
     });
   }
 
-  const { results: pages } = await env.SESSIONS_DB.prepare(`
-    SELECT id, query, title, intent_type, journey_stage, flow_id, follow_up_type,
-           block_count, created_at, duration_ms, input_tokens, output_tokens,
-           da_path, preview_url, live_url
+  // Aggregate runs into pages. Rows without page_id (pre-migration) are each
+  // their own single-run page.
+  const { results: rows } = await env.SESSIONS_DB.prepare(`
+    SELECT id, page_id, page_url, run_index, query, title, intent_type,
+           follow_up_type, follow_up_label, block_count, created_at,
+           duration_ms, input_tokens, output_tokens
     FROM generated_pages
     WHERE session_id = ?1
     ORDER BY created_at ASC
   `).bind(sessionId).all();
+
+  const pageMap = new Map();
+  rows.forEach((r) => {
+    const pid = r.page_id || r.id;
+    if (!pageMap.has(pid)) {
+      pageMap.set(pid, {
+        pageId: pid,
+        pageUrl: r.page_url,
+        initialQuery: r.query,
+        initialIntent: r.intent_type,
+        initialTitle: r.title,
+        firstRunAt: r.created_at,
+        lastRunAt: r.created_at,
+        runCount: 0,
+        totalDurationMs: 0,
+        totalInputTokens: 0,
+        totalOutputTokens: 0,
+        runs: [],
+      });
+    }
+    const p = pageMap.get(pid);
+    p.runCount += 1;
+    p.lastRunAt = Math.max(p.lastRunAt, r.created_at);
+    p.totalDurationMs += r.duration_ms || 0;
+    p.totalInputTokens += r.input_tokens || 0;
+    p.totalOutputTokens += r.output_tokens || 0;
+    p.runs.push({
+      runId: r.id,
+      runIndex: r.run_index,
+      query: r.query,
+      title: r.title,
+      intent: r.intent_type,
+      followUpType: r.follow_up_type,
+      followUpLabel: r.follow_up_label,
+      blockCount: r.block_count,
+      durationMs: r.duration_ms,
+      inputTokens: r.input_tokens,
+      outputTokens: r.output_tokens,
+      createdAt: r.created_at,
+    });
+  });
+
+  const pages = [...pageMap.values()].sort((a, b) => b.lastRunAt - a.lastRunAt);
 
   return new Response(JSON.stringify({ session, pages }), {
     headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
   });
 }
 
-export async function handleAdminPage(request, env, pageId) {
+/**
+ * Page detail — returns a logical page (grouped by page_id) with all its runs
+ * and the full KV payloads needed to reconstruct the page as the user saw it.
+ */
+export async function handleAdminPageGroup(request, env, pageId) {
   if (!await checkCookieAuth(request, env) && !checkBasicAuth(request, env)) return unauthorized();
 
-  const { results: [page] } = await env.SESSIONS_DB.prepare(
-    'SELECT * FROM generated_pages WHERE id = ?1',
-  ).bind(pageId).all();
+  // Fetch all runs grouped by page_id. Fall back to runId = pageId for rows
+  // without page_id (legacy data before 0002 migration).
+  const { results: runs } = await env.SESSIONS_DB.prepare(`
+    SELECT *
+    FROM generated_pages
+    WHERE page_id = ?1 OR (page_id IS NULL AND id = ?1)
+    ORDER BY run_index ASC, created_at ASC
+  `).bind(pageId).all();
 
-  if (!page) {
+  if (!runs.length) {
     return new Response(JSON.stringify({ error: 'Page not found' }), {
       status: 404, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
     });
   }
 
-  const kvPayload = await env.SESSION_STORE.get(`page:${pageId}`, 'json');
+  // Fetch each run's KV payload in parallel.
+  const payloads = await Promise.all(
+    runs.map((r) => env.SESSION_STORE.get(`page:${r.id}`, 'json')),
+  );
 
-  return new Response(JSON.stringify({ page, payload: kvPayload }), {
+  const runsWithPayloads = runs.map((r, i) => ({ run: r, payload: payloads[i] }));
+
+  return new Response(JSON.stringify({
+    pageId,
+    sessionId: runs[0].session_id,
+    pageUrl: runs[0].page_url,
+    runs: runsWithPayloads,
+  }), { headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' } });
+}
+
+/**
+ * Run detail — individual generation. Equivalent to the legacy
+ * `/api/admin/pages/:id` endpoint.
+ */
+export async function handleAdminRun(request, env, runId) {
+  if (!await checkCookieAuth(request, env) && !checkBasicAuth(request, env)) return unauthorized();
+
+  const { results: [run] } = await env.SESSIONS_DB.prepare(
+    'SELECT * FROM generated_pages WHERE id = ?1',
+  ).bind(runId).all();
+
+  if (!run) {
+    return new Response(JSON.stringify({ error: 'Run not found' }), {
+      status: 404, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+    });
+  }
+
+  const payload = await env.SESSION_STORE.get(`page:${runId}`, 'json');
+
+  return new Response(JSON.stringify({ run, payload }), {
     headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
   });
 }
@@ -453,10 +543,10 @@ async function renderSession(el, sessionId) {
 async function renderPage(el, pageId) {
   el.innerHTML = '<div class="loading">Loading page…</div>';
   let data;
-  try { data = await api('/api/admin/pages/' + pageId); }
+  try { data = await api('/api/admin/runs/' + pageId); }
   catch(e) { el.innerHTML = '<div class="loading" style="color:var(--red)">Error: ' + esc(e.message) + '</div>'; return; }
 
-  const p = data.page;
+  const p = data.run || data.page;  // /api/admin/runs/:id returns { run, payload }
   const payload = data.payload;
   el.innerHTML = '';
 

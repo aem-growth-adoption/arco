@@ -199,24 +199,41 @@ Key files for caching: `scripts/scripts.js` (deterministic `generateSlug`, `cach
 
 Every completed recommender generation is persisted to two Cloudflare-managed stores:
 
-**D1 (SQLite) — `arco-sessions` database** — fast, queryable metadata:
+**Hierarchy** — three levels:
+
+```
+session (one browser tab — sessionStorage)
+  └─ page (one ?q= URL visit — shared across initial + follow-up runs)
+      └─ run (one /api/generate call — initial or a follow-up click)
+```
+
+**D1 (SQLite) — `arco-sessions` database** — fast, queryable metadata. The `generated_pages` table is the **runs** table:
 
 ```sql
 sessions(id, ip_hash, user_agent, first_seen, last_seen, page_count)
-generated_pages(id, session_id, query, previous_queries, title, intent_type,
-                journey_stage, flow_id, follow_up_type, block_count, created_at,
-                duration_ms, input_tokens, output_tokens, da_path, preview_url, live_url)
+generated_pages(id=runId, session_id, page_id, page_url, run_index, parent_run_id,
+                query, previous_queries, title, intent_type, journey_stage, flow_id,
+                follow_up_type, follow_up_label, follow_up_options, block_count,
+                created_at, duration_ms, input_tokens, output_tokens,
+                da_path, preview_url, live_url)
 ```
 
-**KV — `SESSION_STORE` namespace** — full page payloads (90-day TTL):
+`page_id` groups all runs belonging to a single URL visit. `run_index` is 0 for the initial run and 1..N for each follow-up click. `follow_up_options` is a JSON array of the chips that were shown to the user on that run.
+
+**KV — `SESSION_STORE` namespace** — full payloads keyed by runId (legacy `page:{id}` prefix kept):
 
 ```
-page:{pageId}  →  { blocks: [{index, blockType, html}], debug: {...}, request: {...} }
+page:{runId}  →  { blocks: [{index, blockType, html}], followUpOptions, followUpClicked, debug, request }
 ```
 
 The `debug` snapshot captures intent classification, RAG results (products, features, FAQs, recipes, hero images), behavior analysis, full system/user prompts, timings, LLM model + token counts, and raw LLM output.
 
-**Session ID** is a UUID generated client-side by `getOrCreateSessionId()` in `scripts/scripts.js`, stored in `localStorage` with a 24-hour expiry. It is sent as `sessionId` in every `/api/generate` request body, including speculative prefetch requests from the `speculative-engine.js`.
+**Identifier lifecycle** (all generated client-side in `scripts/scripts.js`):
+- `sessionId` — UUID per browser tab (`sessionStorage`). A new tab/window = a new session.
+- `pageId` — UUID per `?q=` URL visit. Shared by the initial generation and every follow-up click on that page.
+- `runId` — UUID per `/api/generate` call.
+
+All three are sent in every request body along with `pageUrl` and optional `parentRunId` (the run whose follow-up chip was clicked).
 
 **Key storage files:**
 
@@ -232,9 +249,11 @@ Login: HTTP Basic Auth — username `admin`, password = `ADMIN_TOKEN` secret (se
 
 | View | URL | What it shows |
 |------|-----|---------------|
-| Sessions list | `/admin#/` | All sessions ordered by last-active; session ID, timestamps, page count, user agent |
-| Session detail | `/admin#/sessions/:id` | All generated pages for a session with query, intent, duration, token counts |
-| Page detail | `/admin#/pages/:id` | Full metadata + rendered HTML blocks (tabbed render/source view) + collapsible debug panels: RAG context, behavior analysis, prompt text, timings, raw LLM output |
+| Sessions list | `#/` | All sessions ordered by last-active; session ID, timestamps, run count, user agent |
+| Session detail | `#/sessions/:id` | Pages (grouped by page_id) with initial query, URL, run count, total duration, tokens |
+| Page detail | `#/pages/:id` | Four tabs: **Overview** (metadata + totals), **Full page** (reconstructs every run plus inline follow-up chip markers showing what was presented and which chip was clicked), **Run timeline** (per-run breakdown with options shown + selected), **Debug** (per-run RAG/prompt/LLM output) |
+
+The admin EDS block lives at `blocks/admin/` and is also hosted at `drafts/admin.html` for local testing. The prior `/admin` HTML SPA endpoint on the worker still exists but is superseded by the block.
 
 **Direct API access** (useful for scripting or curl):
 
@@ -242,11 +261,14 @@ Login: HTTP Basic Auth — username `admin`, password = `ADMIN_TOKEN` secret (se
 # All sessions (paginated)
 curl -u admin:TOKEN https://arco-recommender.franklin-prod.workers.dev/api/admin/sessions?limit=50&offset=0
 
-# Single session + its pages
+# Single session + its pages (grouped runs)
 curl -u admin:TOKEN https://arco-recommender.franklin-prod.workers.dev/api/admin/sessions/{sessionId}
 
-# Page metadata + full KV payload (blocks + debug)
+# Page (group of runs) with all KV payloads for reconstruction
 curl -u admin:TOKEN https://arco-recommender.franklin-prod.workers.dev/api/admin/pages/{pageId}
+
+# Single run detail (KV payload for one generation)
+curl -u admin:TOKEN https://arco-recommender.franklin-prod.workers.dev/api/admin/runs/{runId}
 ```
 
 **Query D1 directly** (for ad-hoc analysis):
