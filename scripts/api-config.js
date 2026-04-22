@@ -20,7 +20,7 @@ function resolveBranchWorkerURL() {
   if (window.ARCO_CONFIG?.RECOMMENDER_URL) return window.ARCO_CONFIG.RECOMMENDER_URL;
 
   const { hostname } = window.location;
-  const match = hostname.match(/^(.+)--[^.]+--[^.]+\.aem\.(page|live)$/);
+  const match = hostname.match(/^(.+)--[^.]+--[^.]+\.aem\.page$/);
   if (!match || match[1] === 'main') return PRODUCTION_WORKER;
 
   const alias = match[1]
