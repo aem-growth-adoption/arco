@@ -123,7 +123,7 @@ async function renderOverview(root) {
   root.innerHTML = '<p class="vec-loading">Loading index stats…</p>';
   let data;
   try {
-    data = await api('/api/admin/vectorize/stats?sampleTopK=100');
+    data = await api('/api/admin/vectorize/stats?sampleTopK=50');
   } catch (err) {
     root.innerHTML = `<p class="vec-error">${esc(err.message)}</p>`;
     return;
@@ -131,6 +131,7 @@ async function renderOverview(root) {
 
   const d = data.describe || {};
   const s = data.sample || {};
+  const totalVectors = data.totalVectors ?? d.vectorCount ?? d.vectorsCount ?? null;
   const scoreStats = s.scoreStats || null;
   const lastMutation = d.processedUpToDatetime
     ? new Date(d.processedUpToDatetime).toLocaleString('en-US', {
@@ -138,11 +139,13 @@ async function renderOverview(root) {
     })
     : '—';
 
+  const metric = d.metric ? String(d.metric) : '—';
+
   root.innerHTML = `
     <div class="vec-stats-strip">
-      <span class="vec-stat"><span class="vec-stat-value">${fmtInt(d.vectorsCount)}</span><span class="vec-stat-label">vectors (describe)</span></span>
+      <span class="vec-stat"><span class="vec-stat-value">${fmtInt(totalVectors)}</span><span class="vec-stat-label">vectors (describe)</span></span>
       <span class="vec-stat"><span class="vec-stat-value">${fmtInt(d.dimensions)}</span><span class="vec-stat-label">dimensions</span></span>
-      <span class="vec-stat"><span class="vec-stat-value" style="font-size:0.95rem">${esc(data.index?.name || '—')}</span><span class="vec-stat-label">index</span></span>
+      <span class="vec-stat"><span class="vec-stat-value" style="font-size:0.95rem">${esc(metric)}</span><span class="vec-stat-label">metric</span></span>
       <span class="vec-stat"><span class="vec-stat-value" style="font-size:0.95rem">${esc((data.index?.embeddingModel || '').replace(/^@cf\//, ''))}</span><span class="vec-stat-label">model</span></span>
     </div>
 
@@ -153,14 +156,16 @@ async function renderOverview(root) {
         <div class="vec-kv"><dt>Binding</dt><dd><code>${esc(data.index?.binding)}</code></dd></div>
         <div class="vec-kv"><dt>Embedding model</dt><dd><code>${esc(data.index?.embeddingModel)}</code></dd></div>
         <div class="vec-kv"><dt>Dimensions</dt><dd>${fmtInt(d.dimensions)}</dd></div>
-        <div class="vec-kv"><dt>Total vectors</dt><dd>${fmtInt(d.vectorsCount)}</dd></div>
+        <div class="vec-kv"><dt>Metric</dt><dd>${esc(metric)}</dd></div>
+        <div class="vec-kv"><dt>Total vectors</dt><dd>${fmtInt(totalVectors)}</dd></div>
         <div class="vec-kv"><dt>Processed up to</dt><dd>${esc(lastMutation)}</dd></div>
         <div class="vec-kv"><dt>Last mutation id</dt><dd class="vec-mono">${esc(d.processedUpToMutation || '—')}</dd></div>
       </dl>
       <p class="vec-muted vec-hint">
         Vectorize V2 has no list-all-vectors API, so the breakdown below is sampled from the top
-        ${esc(s.topK || 100)} similarity results for a broad seed query
+        ${esc(s.topK || 50)} similarity results for a broad seed query
         (<em>${esc(s.seed || '')}</em>). It is a snapshot of the neighbourhood, not a census.
+        Max topK is 50 when <code>returnMetadata=all</code> (Vectorize V2 limit).
       </p>
     </section>
 
@@ -227,8 +232,8 @@ function renderSearchForm(params) {
           <input type="text" name="q" value="${esc(params.q)}" placeholder="e.g. quiet espresso machine for a small kitchen" autocomplete="off">
         </label>
         <label class="vec-field">
-          <span>top K (1–100)</span>
-          <input type="number" name="topK" min="1" max="100" value="${esc(params.topK)}">
+          <span>top K (1–50)</span>
+          <input type="number" name="topK" min="1" max="50" value="${esc(params.topK)}">
         </label>
         <label class="vec-field">
           <span>type filter</span>

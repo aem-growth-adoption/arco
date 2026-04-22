@@ -19,8 +19,10 @@ import { requireAdminAuth } from './admin.js';
 
 const EMBEDDING_MODEL = '@cf/baai/bge-small-en-v1.5';
 const SAMPLE_SEED_QUERY = 'coffee espresso machine grinder recipe maintenance guide travel beginner';
-const SAMPLE_TOPK = 100;
-const MAX_SEARCH_TOPK = 100;
+// Vectorize V2 caps topK at 50 when returnMetadata='all' or returnValues=true
+// (error code 40025). Use 100 only with returnMetadata='indexed'.
+const SAMPLE_TOPK = 50;
+const MAX_SEARCH_TOPK = 50;
 
 function json(body, init = {}) {
   return new Response(JSON.stringify(body), {
@@ -80,6 +82,10 @@ export async function handleVectorizeStats(request, env) {
     return json({ error: `describe() failed: ${err.message}` }, { status: 500 });
   }
 
+  // Vectorize binding historically returned `vectorsCount`; current runtime
+  // returns `vectorCount`. Surface both plus a canonical `totalVectors` key.
+  const totalVectors = (describe && (describe.vectorCount ?? describe.vectorsCount)) ?? null;
+
   const sample = { matches: [], error: null };
   try {
     const vec = await embed(SAMPLE_SEED_QUERY, env);
@@ -109,6 +115,7 @@ export async function handleVectorizeStats(request, env) {
       embeddingModel: EMBEDDING_MODEL,
     },
     describe,
+    totalVectors,
     sample: {
       seed: SAMPLE_SEED_QUERY,
       topK: sampleTopK,
