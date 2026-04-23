@@ -117,7 +117,7 @@ function renderStory(data) {
     .filter(Boolean)
     .join('\n  ');
 
-  return `<div>\n  ${parts}\n</div>\n`;
+  return wrapPage(`<div>\n  ${parts}\n</div>`);
 }
 
 function renderExperience(data) {
@@ -133,7 +133,11 @@ function renderExperience(data) {
     .filter(Boolean)
     .join('\n  ');
 
-  return `<div>\n  ${parts}\n</div>\n`;
+  return wrapPage(`<div>\n  ${parts}\n</div>`);
+}
+
+function wrapPage(inner) {
+  return `<body>\n  <header></header>\n  <main>\n    ${inner}\n  </main>\n  <footer></footer>\n</body>\n`;
 }
 
 // ── Main ───────────────────────────────────────────────────────────────────

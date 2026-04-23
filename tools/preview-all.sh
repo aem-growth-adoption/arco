@@ -22,7 +22,10 @@ DA_REPO=$(grep "^DA_REPO" "$PROJECT_DIR/.env" 2>/dev/null | sed 's/DA_REPO=//' |
 
 DA_ORG="${DA_ORG:?DA_ORG must be set in .env}"
 DA_REPO="${DA_REPO:?DA_REPO must be set in .env}"
-ADMIN_API="https://admin.hlx.page/preview/$DA_ORG/$DA_REPO/main"
+BRANCH="${BRANCH:-$(git -C "$PROJECT_DIR" rev-parse --abbrev-ref HEAD 2>/dev/null || echo main)}"
+BRANCH_SLUG="${BRANCH//\//-}"
+ADMIN_API="https://admin.hlx.page/preview/$DA_ORG/$DA_REPO/$BRANCH_SLUG"
+echo "Previewing branch: $BRANCH (as $BRANCH_SLUG)"
 
 # 1. DA_BEARER_TOKEN takes precedence (env var or .env, JWT starting with ey...)
 DA_BEARER_TOKEN="${DA_BEARER_TOKEN:-$(grep "DA_BEARER_TOKEN" "$PROJECT_DIR/.env" 2>/dev/null | sed 's/DA_BEARER_TOKEN=//' | tr -d '"' || true)}"
