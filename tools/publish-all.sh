@@ -10,6 +10,8 @@ set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 DRAFTS_DIR="$PROJECT_DIR/drafts"
+FRAGMENTS_DIR="$PROJECT_DIR/fragments"
+MODALS_DIR="$PROJECT_DIR/modals"
 
 # Read env vars from .env file (|| true to avoid set -e failures on missing keys)
 DA_CLIENT_ID=$(grep "DA_CLIENT_ID" "$PROJECT_DIR/.env" 2>/dev/null | sed 's/DA_CLIENT_ID=//' | tr -d '"' || true)
@@ -50,7 +52,17 @@ MAX_PARALLEL="${MAX_PARALLEL:-10}"
 publish_page() {
   local file="$1"
   local progress="$2"
-  local rel_path="${file#$DRAFTS_DIR/}"
+  local rel_path=""
+  if [[ "$file" == "$DRAFTS_DIR/"* ]]; then
+    rel_path="${file#$DRAFTS_DIR/}"
+  elif [[ "$file" == "$FRAGMENTS_DIR/"* ]]; then
+    rel_path="${file#$PROJECT_DIR/}"
+  elif [[ "$file" == "$MODALS_DIR/"* ]]; then
+    rel_path="${file#$PROJECT_DIR/}"
+  else
+    echo "[$progress] SKIP: $file (unsupported HTML root)"
+    return 1
+  fi
   local page_path="${rel_path%.plain.html}"
 
   local status
@@ -71,9 +83,21 @@ publish_page() {
 # Collect files — optionally filtered by prefix argument
 PREFIX="${1:-}"
 if [ -n "$PREFIX" ]; then
-  mapfile -t files < <(find "$DRAFTS_DIR" -name "*.plain.html" -path "*${PREFIX}*" | sort)
+  mapfile -t files < <(
+    {
+      find "$DRAFTS_DIR" -name "*.plain.html" -path "*${PREFIX}*" 2>/dev/null
+      find "$FRAGMENTS_DIR" -name "*.plain.html" -path "*${PREFIX}*" 2>/dev/null
+      find "$MODALS_DIR" -name "*.plain.html" -path "*${PREFIX}*" 2>/dev/null
+    } | sort
+  )
 else
-  mapfile -t files < <(find "$DRAFTS_DIR" -name "*.plain.html" | sort)
+  mapfile -t files < <(
+    {
+      find "$DRAFTS_DIR" -name "*.plain.html" 2>/dev/null
+      find "$FRAGMENTS_DIR" -name "*.plain.html" 2>/dev/null
+      find "$MODALS_DIR" -name "*.plain.html" 2>/dev/null
+    } | sort
+  )
 fi
 
 TOTAL=${#files[@]}
