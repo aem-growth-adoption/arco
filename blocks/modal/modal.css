@@ -95,3 +95,21 @@ body.modal-open {
 .modal dialog .section {
   padding: 0;
 }
+
+.modal dialog .modal-content .modal-open-full {
+  margin: 32px 0 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  text-align: right;
+  font-size: var(--body-font-size-s, 0.875rem);
+}
+
+.modal dialog .modal-content .modal-open-full a {
+  color: var(--text-color);
+  text-decoration: none;
+  border-bottom: 1px solid currentcolor;
+}
+
+.modal dialog .modal-content .modal-open-full a:hover {
+  opacity: 0.7;
+}
