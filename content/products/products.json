@@ -496,7 +496,7 @@
         "Adjustable drink strength and volume",
         "Auto-rinse and descale programs",
         "Removable brew group for easy cleaning",
-        "Color display with intuitive interface",
+        "Color touchscreen display with intuitive interface",
         "Bypass doser for pre-ground coffee"
       ],
       "bestFor": ["beginner", "office", "milk-drinks", "espresso"],
@@ -517,7 +517,7 @@
         "plumbedIn": false,
         "builtInGrinder": true,
         "autoMilk": true,
-        "touchscreen": false,
+        "touchscreen": true,
         "programmableDrinks": 8
       },
       "images": [
@@ -770,7 +770,7 @@
         "singleDose": true
       },
       "images": [
-        "/products/espresso-machines/media_1f17bba668fe467f67ae08dd99eb40c79369a4a95.jpg"
+        "/products/grinders/media_19c236f641f7072fce950228b96bc7321ef5ec983.jpg"
       ],
       "variants": [
         {

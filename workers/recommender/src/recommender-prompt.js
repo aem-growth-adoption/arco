@@ -55,8 +55,13 @@ function buildProductCatalog(priceFilter) {
       const pump = p.specs?.pumpType || '?';
       const pid = p.specs?.pidControl ? 'PID' : '';
       const flow = p.specs?.flowControl ? 'Flow Control' : '';
+      const pressure = p.specs?.pressureProfiling ? 'Pressure Profiling' : '';
       const plumbed = p.specs?.plumbedIn ? 'Plumb-in' : '';
-      const specials = [pid, flow, plumbed].filter(Boolean).join(', ');
+      const grinder = p.specs?.builtInGrinder ? 'Built-in Grinder' : '';
+      const touchscreen = p.specs?.touchscreen ? 'Touchscreen' : '';
+      const autoMilk = p.specs?.autoMilk ? 'Auto Milk' : '';
+      const drinks = p.specs?.programmableDrinks ? `${p.specs.programmableDrinks} programmable drinks` : '';
+      const specials = [pid, flow, pressure, plumbed, grinder, touchscreen, autoMilk, drinks].filter(Boolean).join(', ');
       return `- **${p.name}** (ID: ${p.id}) | $${p.price} | Series: ${p.series} | Category: ${p.category}
   Specs: ${boiler} boiler, ${group}, ${pump}, ${power}${specials ? ` | ${specials}` : ''}
   Best for: ${p.bestFor?.join(', ') || 'general'} | Warranty: ${p.warranty || 'N/A'}
