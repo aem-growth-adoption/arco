@@ -156,10 +156,10 @@
         "culture",
         "market-it"
       ],
-      "url": "/experiences/italian-espresso-culture",
+      "url": "/fragments/recommender/experiences/italian-espresso-culture",
       "excerpt": "Arco was born in this tradition.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-cu-004",
@@ -185,10 +185,10 @@
         "culture",
         "market-de"
       ],
-      "url": "/experiences/precision-coffee-germany",
+      "url": "/fragments/recommender/experiences/precision-coffee-germany",
       "excerpt": "In Germany, the engineering mindset meets the brewing process — and the results are extraordinary.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-cu-002",
@@ -213,10 +213,10 @@
         "culture",
         "market-en-de"
       ],
-      "url": "/experiences/scandinavian-filter-tradition",
+      "url": "/fragments/recommender/experiences/scandinavian-filter-tradition",
       "excerpt": "In Scandinavia, coffee is brewed lighter, cleaner, and more intentionally than anywhere else in the world.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-cu-003",
@@ -241,10 +241,10 @@
         "culture",
         "market-en"
       ],
-      "url": "/experiences/third-wave-uk",
+      "url": "/fragments/recommender/experiences/third-wave-uk",
       "excerpt": "From flat whites to single-origin espressos, British coffee culture has transformed in a decade — and the home setup has kept pace.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-hs-002",
@@ -268,10 +268,10 @@
         "full-build",
         "aesthetics"
       ],
-      "url": "/experiences/dedicated-coffee-corner",
+      "url": "/fragments/recommender/experiences/dedicated-coffee-corner",
       "excerpt": "When the coffee setup stops sharing counter space and gets its own dedicated station.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-hs-005",
@@ -295,10 +295,10 @@
         "routine",
         "dual-boiler"
       ],
-      "url": "/experiences/home-office-setup",
+      "url": "/fragments/recommender/experiences/home-office-setup",
       "excerpt": "When home became the office, the commute became the walk to the coffee machine.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-hs-003",
@@ -322,10 +322,10 @@
         "aesthetics",
         "rotary-pump"
       ],
-      "url": "/experiences/open-plan-kitchen",
+      "url": "/fragments/recommender/experiences/open-plan-kitchen",
       "excerpt": "Aesthetics and acoustics matter when there are no walls to hide behind.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-hs-004",
@@ -349,10 +349,10 @@
         "self-contained",
         "compact"
       ],
-      "url": "/experiences/rented-apartment",
+      "url": "/fragments/recommender/experiences/rented-apartment",
       "excerpt": "A proper espresso setup that moves when you do.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-hs-001",
@@ -376,10 +376,10 @@
         "apartment",
         "nano"
       ],
-      "url": "/experiences/small-kitchen-setup",
+      "url": "/fragments/recommender/experiences/small-kitchen-setup",
       "excerpt": "Great coffee in small spaces is an engineering problem.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-lm-005",
@@ -403,10 +403,10 @@
         "traditional",
         "post-travel"
       ],
-      "url": "/experiences/back-from-naples",
+      "url": "/fragments/recommender/experiences/back-from-naples",
       "excerpt": "The holiday ended.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-lm-001",
@@ -430,10 +430,10 @@
         "learning",
         "entry-level"
       ],
-      "url": "/experiences/first-apartment",
+      "url": "/fragments/recommender/experiences/first-apartment",
       "excerpt": "The machine that makes a new place feel like home before the furniture arrives.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-lm-006",
@@ -457,10 +457,10 @@
         "subscription",
         "holiday"
       ],
-      "url": "/experiences/gifting-for-a-coffee-lover",
+      "url": "/fragments/recommender/experiences/gifting-for-a-coffee-lover",
       "excerpt": "A guide to gifting for the person who already has opinions about water temperature.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-lm-002",
@@ -484,10 +484,10 @@
         "automatic",
         "one-handed"
       ],
-      "url": "/experiences/new-parent-upgrade",
+      "url": "/fragments/recommender/experiences/new-parent-upgrade",
       "excerpt": "Parenthood changed everything.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-lm-004",
@@ -511,10 +511,10 @@
         "savings",
         "routine"
       ],
-      "url": "/experiences/remote-work-upgrade",
+      "url": "/fragments/recommender/experiences/remote-work-upgrade",
       "excerpt": "When 'working from home temporarily' became 'this is just how it works now.'",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-lm-003",
@@ -538,10 +538,10 @@
         "methodical",
         "advanced-setup"
       ],
-      "url": "/experiences/retirement-time-to-learn",
+      "url": "/fragments/recommender/experiences/retirement-time-to-learn",
       "excerpt": "Retirement is not slowing down.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-mr-005",
@@ -565,10 +565,10 @@
         "single-espresso",
         "morning"
       ],
-      "url": "/experiences/commuter-one-cup",
+      "url": "/fragments/recommender/experiences/commuter-one-cup",
       "excerpt": "The train will not wait.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-mr-004",
@@ -592,10 +592,10 @@
         "filter-and-espresso",
         "morning-rush"
       ],
-      "url": "/experiences/family-kitchen-morning",
+      "url": "/fragments/recommender/experiences/family-kitchen-morning",
       "excerpt": "When the morning coffee run serves an espresso, a latte, a hot chocolate, and a long filter — all before 8am.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-mr-001",
@@ -619,10 +619,10 @@
         "morning",
         "espresso"
       ],
-      "url": "/experiences/pre-gym-espresso",
+      "url": "/fragments/recommender/experiences/pre-gym-espresso",
       "excerpt": "The fastest good espresso you can make, for the morning that starts before the morning.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-mr-002",
@@ -646,10 +646,10 @@
         "exploration",
         "light-roast"
       ],
-      "url": "/experiences/slow-weekend-morning",
+      "url": "/fragments/recommender/experiences/slow-weekend-morning",
       "excerpt": "The coffee you make when time is the only luxury that matters.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-mr-003",
@@ -673,10 +673,10 @@
         "milk-drinks",
         "routine"
       ],
-      "url": "/experiences/work-from-home-morning",
+      "url": "/fragments/recommender/experiences/work-from-home-morning",
       "excerpt": "Between meetings, between tasks, between the first coffee and lunch — this is the one that counts.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-seasonal-005",
@@ -703,10 +703,10 @@
         "comfort",
         "blends"
       ],
-      "url": "/experiences/autumn-comfort-drinks",
+      "url": "/fragments/recommender/experiences/autumn-comfort-drinks",
       "excerpt": "Autumn espresso is bolder, warmer, and more generous.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-se-005",
@@ -730,10 +730,10 @@
         "slow-brew",
         "ritual"
       ],
-      "url": "/experiences/autumn-slow-brew",
+      "url": "/fragments/recommender/experiences/autumn-slow-brew",
       "excerpt": "Autumn is the season that reminds you why you fell in love with coffee in the first place.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-se-007",
@@ -758,10 +758,10 @@
         "dorm",
         "seasonal"
       ],
-      "url": "/experiences/back-to-school-dorm-coffee",
+      "url": "/fragments/recommender/experiences/back-to-school-dorm-coffee",
       "excerpt": "The setup that fits on a dorm desk and outlasts your degree.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-se-009",
@@ -786,10 +786,10 @@
         "holiday",
         "crowd-serving"
       ],
-      "url": "/experiences/christmas-morning-coffee",
+      "url": "/fragments/recommender/experiences/christmas-morning-coffee",
       "excerpt": "Christmas morning starts at the machine, and the whole family gathers around it.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-se-006",
@@ -813,10 +813,10 @@
         "entry-level",
         "seasonal"
       ],
-      "url": "/experiences/fathers-day-first-machine",
+      "url": "/fragments/recommender/experiences/fathers-day-first-machine",
       "excerpt": "The Father's Day gift that changes his mornings for good.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-seasonal-003",
@@ -842,10 +842,10 @@
         "bundles",
         "subscription"
       ],
-      "url": "/experiences/holiday-gift-guide-experience",
+      "url": "/fragments/recommender/experiences/holiday-gift-guide-experience",
       "excerpt": "Whether you are giving or receiving, Arco makes the holidays taste better.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-se-003",
@@ -869,10 +869,10 @@
         "all-products",
         "persona-matched"
       ],
-      "url": "/experiences/holiday-gift-guide",
+      "url": "/fragments/recommender/experiences/holiday-gift-guide",
       "excerpt": "Persona-matched Christmas gifts for every kind of coffee drinker in your life.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-se-004",
@@ -896,10 +896,10 @@
         "resolution",
         "january"
       ],
-      "url": "/experiences/new-year-upgrade",
+      "url": "/fragments/recommender/experiences/new-year-upgrade",
       "excerpt": "January is for upgrading the things that matter most — starting with the first thing you do every morning.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-seasonal-004",
@@ -925,10 +925,10 @@
         "craft",
         "exploration"
       ],
-      "url": "/experiences/spring-single-origins",
+      "url": "/fragments/recommender/experiences/spring-single-origins",
       "excerpt": "Spring means fresh crop arrivals, and the best single origins of the year are landing now.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-se-008",
@@ -954,10 +954,10 @@
         "espresso-tonic",
         "seasonal"
       ],
-      "url": "/experiences/summer-garden-party-drinks",
+      "url": "/fragments/recommender/experiences/summer-garden-party-drinks",
       "excerpt": "Shakerato, Espresso Tonic, Iced Americano — summer entertaining, powered by espresso.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-se-001",
@@ -981,10 +981,10 @@
         "seasonal",
         "refreshing"
       ],
-      "url": "/experiences/summer-iced-espresso",
+      "url": "/fragments/recommender/experiences/summer-iced-espresso",
       "excerpt": "Cold brew, iced espresso, espresso tonic — summer has its own coffee vocabulary.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-se-005",
@@ -1008,10 +1008,10 @@
         "latte-art",
         "seasonal"
       ],
-      "url": "/experiences/valentines-espresso-for-two",
+      "url": "/fragments/recommender/experiences/valentines-espresso-for-two",
       "excerpt": "The most romantic gesture is not a reservation.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-se-002",
@@ -1035,10 +1035,10 @@
         "seasonal",
         "volume"
       ],
-      "url": "/experiences/winter-long-brews",
+      "url": "/fragments/recommender/experiences/winter-long-brews",
       "excerpt": "When the mornings are dark and cold, the slow pour-over becomes a meditation.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-seasonal-002",
@@ -1063,10 +1063,10 @@
         "dark-roast",
         "comfort"
       ],
-      "url": "/experiences/winter-warmers",
+      "url": "/fragments/recommender/experiences/winter-warmers",
       "excerpt": "Winter coffee is slower, richer, and more deliberate.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-sc-003",
@@ -1090,10 +1090,10 @@
         "hospitality",
         "impression"
       ],
-      "url": "/experiences/clients-coming-to-home-office",
+      "url": "/fragments/recommender/experiences/clients-coming-to-home-office",
       "excerpt": "A professional impression, made one cup at a time.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-sc-008",
@@ -1119,10 +1119,10 @@
         "welcoming",
         "guests"
       ],
-      "url": "/experiences/coffee-and-conversation",
+      "url": "/fragments/recommender/experiences/coffee-and-conversation",
       "excerpt": "The art of making coffee the reason people sit down and stay.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-sc-001",
@@ -1146,10 +1146,10 @@
         "dinner-party",
         "social"
       ],
-      "url": "/experiences/coffee-for-a-dinner-party",
+      "url": "/fragments/recommender/experiences/coffee-for-a-dinner-party",
       "excerpt": "The course nobody lists on the menu but everyone remembers.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-sc-009",
@@ -1175,10 +1175,10 @@
         "two-preferences",
         "routine"
       ],
-      "url": "/experiences/couples-morning-ritual",
+      "url": "/fragments/recommender/experiences/couples-morning-ritual",
       "excerpt": "The morning ritual that works for both of you, without compromise.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-sc-006",
@@ -1204,10 +1204,10 @@
         "volume",
         "hosting"
       ],
-      "url": "/experiences/dinner-party-espresso",
+      "url": "/fragments/recommender/experiences/dinner-party-espresso",
       "excerpt": "When the meal ends and the espresso begins, you own the room.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-sc-004",
@@ -1231,10 +1231,10 @@
         "shared-kitchen",
         "parallel"
       ],
-      "url": "/experiences/espresso-and-filter-couple",
+      "url": "/fragments/recommender/experiences/espresso-and-filter-couple",
       "excerpt": "The setup that keeps the peace and satisfies both palates.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-sc-002",
@@ -1258,10 +1258,10 @@
         "profiles",
         "budget"
       ],
-      "url": "/experiences/flatmates-shared-machine",
+      "url": "/fragments/recommender/experiences/flatmates-shared-machine",
       "excerpt": "The shared coffee setup that actually works, because someone finally chose the right equipment.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-sc-005",
@@ -1285,10 +1285,10 @@
         "education",
         "single-origin"
       ],
-      "url": "/experiences/home-coffee-tasting",
+      "url": "/fragments/recommender/experiences/home-coffee-tasting",
       "excerpt": "You do not need to be a professional to host a cupping.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-sc-010",
@@ -1315,10 +1315,10 @@
         "hosting",
         "in-laws"
       ],
-      "url": "/experiences/impressing-the-in-laws",
+      "url": "/fragments/recommender/experiences/impressing-the-in-laws",
       "excerpt": "They are judging the coffee.",
       "image": "",
-      "published": false
+      "published": true
     },
     {
       "id": "exp-sc-007",
@@ -1344,10 +1344,10 @@
         "home-setup",
         "milk-drinks"
       ],
-      "url": "/experiences/the-home-cafe",
+      "url": "/fragments/recommender/experiences/the-home-cafe",
       "excerpt": "When friends stop suggesting going out for coffee and start suggesting coming to yours.",
       "image": "",
-      "published": false
+      "published": true
     }
   ]
 }
