@@ -20,6 +20,10 @@
  *   #/sessions/:id             Session detail + pages list
  *   #/pages/:id[/:tab]         Page detail — overview / reconstruction / timeline / debug
  *   #/llm-config               Model settings
+ *   #/experiments              Experiments list (multi-model A/B)
+ *   #/experiments/new          New experiment form + live run
+ *   #/experiments/:id          Experiment detail (flip-through variants)
+ *   #/experiments/:id/variants/:variantId  Deep link to a specific variant
  *   #/vectorize                Vectorize overview (index stats + sampled histogram)
  *   #/vectorize/search[?...]   Vectorize similarity search
  *   #/vectorize/items/:id      Vectorize item detail
@@ -142,6 +146,17 @@ function parseRoute() {
 
   const pageMatch = hash.match(/^\/pages\/([^/]+)(?:\/(\w+))?$/);
   if (pageMatch) return { view: 'page', id: pageMatch[1], tab: pageMatch[2] || 'overview' };
+
+  if (hash === '/experiments') return { view: 'experiments' };
+  if (hash === '/experiments/new' || hash.startsWith('/experiments/new?')) {
+    return { view: 'experiment-new' };
+  }
+  const expVariantMatch = hash.match(/^\/experiments\/([^/]+)\/variants\/([^/]+)$/);
+  if (expVariantMatch) {
+    return { view: 'experiment', id: expVariantMatch[1], variantId: expVariantMatch[2] };
+  }
+  const expMatch = hash.match(/^\/experiments\/([^/]+)$/);
+  if (expMatch) return { view: 'experiment', id: expMatch[1] };
 
   if (hash === '/vectorize' || hash === '/vectorize/overview') return { view: 'vec-overview' };
   if (hash === '/vectorize/search' || hash.startsWith('/vectorize/search?')) return { view: 'vec-search' };
@@ -1308,6 +1323,547 @@ async function renderVectorizeItem(root, id) {
   `;
 }
 
+// ── Experiments ─────────────────────────────────────────────────────────────
+
+const EXPERIMENT_DEFAULTS = { temperature: 0.6, maxTokens: 5120 };
+const EXPERIMENT_STATUS_TONE = { complete: 'ok', running: 'warn', error: 'muted' };
+
+async function streamExperimentRun(body, onEvent, signal) {
+  const token = getAdminToken();
+  if (!token) throw new Error('Admin token required');
+  const res = await fetch(`${ARCO_RECOMMENDER_URL}/api/admin/experiments`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Basic ${btoa(`admin:${token}`)}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+    signal,
+  });
+  if (res.status === 401) {
+    clearAdminToken();
+    throw new Error('Unauthorized — token cleared. Reload to retry.');
+  }
+  if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    // eslint-disable-next-line no-await-in-loop
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+    // eslint-disable-next-line no-restricted-syntax
+    for (const line of lines) {
+      if (!line.trim()) continue; // eslint-disable-line no-continue
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        await onEvent(JSON.parse(line));
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.warn('Failed to parse experiment event:', err, line);
+      }
+    }
+  }
+  if (buffer.trim()) {
+    try { await onEvent(JSON.parse(buffer)); } catch { /* ignore */ }
+  }
+}
+
+function shortModel(provider, model) {
+  return `${provider} · ${model}`;
+}
+
+function tokensPerSec(outputTokens, durationMs) {
+  if (!outputTokens || !durationMs) return null;
+  const sec = durationMs / 1000;
+  if (sec <= 0) return null;
+  return Math.round(outputTokens / sec);
+}
+
+async function renderExperimentsList(root) {
+  root.innerHTML = '<p class="admin-loading">Loading experiments…</p>';
+  let data;
+  try {
+    data = await api('/api/admin/experiments?limit=100&offset=0');
+  } catch (err) {
+    root.innerHTML = `<p class="admin-error">${esc(err.message)}</p>`;
+    return;
+  }
+
+  const experiments = data.experiments || [];
+  const total = data.total || 0;
+
+  root.innerHTML = `
+    <div class="admin-toolbar">
+      <h2>Experiments</h2>
+      <div class="admin-header-actions">
+        <a class="admin-btn admin-btn-primary" href="#/experiments/new">+ New experiment</a>
+      </div>
+    </div>
+    <p class="admin-muted admin-experiments-hint">
+      Run the same query against multiple LLMs in parallel — the upstream
+      pipeline (intent + RAG + prompt) executes once, then each variant
+      fans out on the final LLM call. Compare tokens, duration, and
+      generated output side-by-side.
+    </p>
+    <div class="admin-stats">
+      <span class="admin-stat"><span class="admin-stat-value">${total}</span><span class="admin-stat-label">total</span></span>
+    </div>
+    ${experiments.length === 0
+    ? '<p class="admin-empty">No experiments yet. Click <strong>New experiment</strong> to run one.</p>'
+    : `<div class="admin-table-wrap"><table class="admin-table admin-experiments-table">
+        <thead><tr>
+          <th>Query</th><th>Variants</th><th>Status</th>
+          <th>Intent</th><th>Upstream</th><th>Created</th>
+        </tr></thead>
+        <tbody>${experiments.map((e) => {
+    const status = e.status || 'running';
+    const tone = EXPERIMENT_STATUS_TONE[status] || 'muted';
+    const completeCount = e.complete_count ?? 0;
+    return `<tr data-href="#/experiments/${esc(e.id)}">
+      <td class="admin-query">${esc(e.query || '')}</td>
+      <td>${badge(`${completeCount} / ${e.variant_count}`, completeCount === e.variant_count ? 'accent' : 'warn')}</td>
+      <td>${badge(status, tone)}</td>
+      <td>${badge(e.shared_intent_type || '—', intentTone(e.shared_intent_type))}</td>
+      <td class="admin-muted">${dur(e.shared_duration_ms)}</td>
+      <td class="admin-muted">${ts(e.created_at)}</td>
+    </tr>`;
+  }).join('')}
+        </tbody>
+      </table></div>`}
+  `;
+
+  root.querySelectorAll('tr[data-href]').forEach((tr) => {
+    tr.addEventListener('click', () => { navigate(tr.dataset.href); });
+  });
+}
+
+function prefillQueryFromUrl() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('q') || params.get('query') || '';
+  } catch {
+    return '';
+  }
+}
+
+function renderCatalogPicker(catalog) {
+  const byProvider = catalog.reduce((acc, entry) => {
+    const key = entry.provider;
+    (acc[key] = acc[key] || []).push(entry);
+    return acc;
+  }, {});
+
+  return Object.entries(byProvider).map(([provider, entries]) => `
+    <fieldset class="admin-experiment-group">
+      <legend>${esc(provider)}</legend>
+      <ul class="admin-experiment-models">
+        ${entries.map((e, i) => {
+    const key = `${e.provider}::${e.model}`;
+    const id = `exp-var-${provider}-${i}`;
+    const disabled = e.available === false;
+    const missing = (e.missing || []).join(', ');
+    return `<li class="admin-experiment-model${disabled ? ' is-disabled' : ''}">
+      <label class="admin-experiment-check">
+        <input type="checkbox" name="variant"
+          data-provider="${esc(e.provider)}"
+          data-model="${esc(e.model)}"
+          data-label="${esc(e.label)}"
+          value="${esc(key)}"
+          id="${id}"${disabled ? ' disabled' : ''}>
+        <span class="admin-experiment-label">${esc(e.label)}</span>
+        ${disabled ? `<span class="admin-experiment-missing">needs ${esc(missing)}</span>` : ''}
+      </label>
+      <div class="admin-experiment-settings" data-for="${id}">
+        <label class="admin-experiment-field">
+          <span>temp</span>
+          <input type="number" name="temperature" step="0.05" min="0" max="2" value="${EXPERIMENT_DEFAULTS.temperature}" disabled>
+        </label>
+        <label class="admin-experiment-field">
+          <span>max tok</span>
+          <input type="number" name="maxTokens" step="64" min="256" max="16384" value="${EXPERIMENT_DEFAULTS.maxTokens}" disabled>
+        </label>
+      </div>
+    </li>`;
+  }).join('')}
+      </ul>
+    </fieldset>
+  `).join('');
+}
+
+function collectVariantsFromForm(form) {
+  const variants = [];
+  form.querySelectorAll('input[name="variant"]:checked').forEach((cb) => {
+    const settings = form.querySelector(`.admin-experiment-settings[data-for="${cb.id}"]`);
+    const temperature = parseFloat(settings.querySelector('input[name="temperature"]').value);
+    const maxTokens = parseInt(settings.querySelector('input[name="maxTokens"]').value, 10);
+    variants.push({
+      provider: cb.dataset.provider,
+      model: cb.dataset.model,
+      label: cb.dataset.label,
+      temperature: Number.isNaN(temperature) ? null : temperature,
+      maxTokens: Number.isNaN(maxTokens) ? null : maxTokens,
+    });
+  });
+  return variants;
+}
+
+function variantProgressCard(variant) {
+  return `
+    <article class="admin-experiment-card" data-variant-id="${esc(variant.variantId)}">
+      <header class="admin-experiment-card-head">
+        <span class="admin-experiment-card-label">${esc(variant.label || shortModel(variant.provider, variant.model))}</span>
+        <span class="admin-experiment-card-status" data-role="status">queued</span>
+      </header>
+      <div class="admin-experiment-card-body">
+        <dl class="admin-kvs">
+          <div class="admin-kv"><dt>temp</dt><dd>${variant.temperature ?? '—'}</dd></div>
+          <div class="admin-kv"><dt>max tok</dt><dd>${variant.maxTokens ?? '—'}</dd></div>
+          <div class="admin-kv"><dt>sections</dt><dd data-role="sections">0</dd></div>
+          <div class="admin-kv"><dt>duration</dt><dd data-role="duration">—</dd></div>
+          <div class="admin-kv"><dt>tokens in / out</dt><dd data-role="tokens">—</dd></div>
+        </dl>
+        <p class="admin-experiment-card-note" data-role="note"></p>
+      </div>
+    </article>
+  `;
+}
+
+async function renderExperimentCreateForm(root) {
+  root.innerHTML = '<p class="admin-loading">Loading model catalog…</p>';
+  let catRes;
+  try {
+    catRes = await api('/api/admin/catalog');
+  } catch (err) {
+    root.innerHTML = `<p class="admin-error">${esc(err.message)}</p>`;
+    return;
+  }
+  const catalog = catRes.catalog || [];
+  const prefill = prefillQueryFromUrl();
+
+  root.innerHTML = `
+    <nav class="admin-crumbs"><a href="#/experiments">← Experiments</a></nav>
+    <div class="admin-toolbar">
+      <h2>New experiment</h2>
+    </div>
+
+    <section class="admin-card">
+      <h3>1. Query</h3>
+      <p class="admin-muted">Same format as the <code>?q=</code> parameter on the site.</p>
+      <form id="admin-experiment-form" class="admin-experiment-form">
+        <label class="admin-field admin-field-wide">
+          <span>Query</span>
+          <input type="text" name="query" value="${esc(prefill)}"
+            placeholder="e.g. best espresso machine under 1000"
+            autocomplete="off" required maxlength="500">
+        </label>
+
+        <h3>2. Variants</h3>
+        <p class="admin-muted">Pick 1–6 provider/model combos. Each runs with independent temperature and max_tokens.</p>
+        <div class="admin-experiment-groups">
+          ${renderCatalogPicker(catalog)}
+        </div>
+
+        <div class="admin-experiment-actions">
+          <button type="submit" class="admin-btn admin-btn-primary" data-role="run">Run experiment</button>
+          <button type="button" class="admin-btn admin-btn-ghost" data-role="cancel" hidden>Cancel</button>
+          <span class="admin-experiment-summary admin-muted" data-role="summary">0 variants selected</span>
+        </div>
+      </form>
+    </section>
+
+    <section class="admin-card admin-experiment-progress" hidden data-role="progress-card">
+      <h3>Progress</h3>
+      <div class="admin-experiment-progress-meta">
+        <span data-role="progress-phase">Waiting…</span>
+        <span class="admin-muted" data-role="progress-ids"></span>
+      </div>
+      <div class="admin-experiment-cards" data-role="cards"></div>
+    </section>
+  `;
+
+  const form = root.querySelector('#admin-experiment-form');
+  const summaryEl = form.querySelector('[data-role="summary"]');
+  const runBtn = form.querySelector('[data-role="run"]');
+  const cancelBtn = form.querySelector('[data-role="cancel"]');
+  const progressCard = root.querySelector('[data-role="progress-card"]');
+  const progressPhase = root.querySelector('[data-role="progress-phase"]');
+  const progressIds = root.querySelector('[data-role="progress-ids"]');
+  const cardsContainer = root.querySelector('[data-role="cards"]');
+
+  const refreshSummary = () => {
+    const variants = collectVariantsFromForm(form);
+    summaryEl.textContent = variants.length === 0
+      ? '0 variants selected'
+      : `${variants.length} variant${variants.length === 1 ? '' : 's'} · will run in parallel`;
+  };
+
+  // Enable/disable per-variant settings when the checkbox toggles.
+  form.querySelectorAll('input[name="variant"]').forEach((cb) => {
+    cb.addEventListener('change', () => {
+      const settings = form.querySelector(`.admin-experiment-settings[data-for="${cb.id}"]`);
+      settings.querySelectorAll('input').forEach((i) => { i.disabled = !cb.checked; });
+      refreshSummary();
+    });
+  });
+
+  let abortController = null;
+
+  cancelBtn.addEventListener('click', () => {
+    if (abortController) abortController.abort();
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const query = form.querySelector('input[name="query"]').value.trim();
+    const variants = collectVariantsFromForm(form);
+    if (!query) { summaryEl.textContent = 'Query is required.'; return; }
+    if (variants.length === 0) { summaryEl.textContent = 'Select at least one variant.'; return; }
+    if (variants.length > 6) { summaryEl.textContent = 'Max 6 variants.'; return; }
+
+    runBtn.disabled = true;
+    cancelBtn.hidden = false;
+    progressCard.hidden = false;
+    cardsContainer.innerHTML = '';
+    progressPhase.textContent = 'Starting…';
+    progressIds.textContent = '';
+
+    abortController = new AbortController();
+    let experimentId = null;
+    try {
+      await streamExperimentRun({ query, variants }, (evt) => {
+        if (evt.type === 'experiment-start') {
+          experimentId = evt.experimentId;
+          progressIds.textContent = `experiment ${experimentId.substring(0, 8)}… · ${evt.variantCount} variants`;
+          cardsContainer.innerHTML = (evt.variants || []).map(variantProgressCard).join('');
+        } else if (evt.type === 'upstream-done') {
+          progressPhase.textContent = `Upstream complete (${dur(evt.sharedDurationMs)}) · intent ${evt.intentType || '—'} · fanning out to LLMs…`;
+        } else if (evt.type === 'variant-start') {
+          const card = cardsContainer.querySelector(`[data-variant-id="${CSS.escape(evt.variantId)}"]`);
+          if (card) {
+            card.dataset.status = 'running';
+            card.querySelector('[data-role="status"]').textContent = 'streaming…';
+          }
+        } else if (evt.type === 'section' && evt.variantId) {
+          const card = cardsContainer.querySelector(`[data-variant-id="${CSS.escape(evt.variantId)}"]`);
+          if (card) {
+            const sectionsEl = card.querySelector('[data-role="sections"]');
+            sectionsEl.textContent = String(Number(sectionsEl.textContent || '0') + 1);
+          }
+        } else if (evt.type === 'variant-done') {
+          const card = cardsContainer.querySelector(`[data-variant-id="${CSS.escape(evt.variantId)}"]`);
+          if (card) {
+            card.dataset.status = 'complete';
+            card.querySelector('[data-role="status"]').textContent = 'complete';
+            card.querySelector('[data-role="duration"]').textContent = dur(evt.durationMs);
+            card.querySelector('[data-role="tokens"]').textContent = evt.inputTokens != null
+              ? `${evt.inputTokens}↑ ${evt.outputTokens}↓`
+              : '—';
+            if (evt.title) card.querySelector('[data-role="note"]').textContent = evt.title;
+          }
+        } else if (evt.type === 'variant-error') {
+          const card = cardsContainer.querySelector(`[data-variant-id="${CSS.escape(evt.variantId)}"]`);
+          if (card) {
+            card.dataset.status = 'error';
+            card.querySelector('[data-role="status"]').textContent = 'error';
+            card.querySelector('[data-role="note"]').textContent = evt.message || 'variant failed';
+          }
+        } else if (evt.type === 'experiment-done') {
+          progressPhase.textContent = `Done (${evt.completedCount} / ${evt.variantCount} complete)`;
+          setTimeout(() => {
+            if (experimentId) navigate(`#/experiments/${experimentId}`);
+          }, 800);
+        } else if (evt.type === 'error') {
+          progressPhase.textContent = `Error: ${evt.message || 'unknown'}`;
+        }
+      }, abortController.signal);
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        progressPhase.textContent = 'Cancelled.';
+      } else {
+        progressPhase.textContent = `Error: ${err.message}`;
+      }
+    } finally {
+      runBtn.disabled = false;
+      cancelBtn.hidden = true;
+      abortController = null;
+    }
+  });
+
+  refreshSummary();
+}
+
+function renderExperimentOverviewTable(experiment, variants) {
+  const rows = variants.map((v, i) => {
+    const tps = tokensPerSec(v.output_tokens, v.duration_ms);
+    const statusTone = EXPERIMENT_STATUS_TONE[v.status] || 'muted';
+    return `<tr data-variant-id="${esc(v.id)}" data-variant-index="${i}">
+      <td class="admin-muted">${i}</td>
+      <td>${esc(v.provider)}</td>
+      <td class="admin-mono">${esc(v.model)}</td>
+      <td>${v.temperature ?? '—'}</td>
+      <td>${v.max_tokens ?? '—'}</td>
+      <td>${badge(v.status || '—', statusTone)}</td>
+      <td>${dur(v.duration_ms)}</td>
+      <td>${v.input_tokens != null ? v.input_tokens : '—'}</td>
+      <td>${v.output_tokens != null ? v.output_tokens : '—'}</td>
+      <td class="admin-muted">${tps ? `${tps}/s` : '—'}</td>
+      <td class="admin-muted">${esc((v.title || '').substring(0, 60))}</td>
+    </tr>`;
+  }).join('');
+
+  return `<div class="admin-table-wrap"><table class="admin-table admin-experiment-variants-table">
+    <thead><tr>
+      <th>#</th><th>Provider</th><th>Model</th>
+      <th>Temp</th><th>Max tok</th>
+      <th>Status</th><th>Duration</th>
+      <th>In tok</th><th>Out tok</th><th>Throughput</th>
+      <th>Title</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table></div>`;
+}
+
+function renderExperimentPills(variants, activeId) {
+  if (!variants.length) return '';
+  return `<nav class="admin-experiment-pills">
+    ${variants.map((v, i) => `
+      <button type="button" class="admin-experiment-pill${v.id === activeId ? ' is-active' : ''}"
+        data-variant-id="${esc(v.id)}" data-variant-index="${i}">
+        <span class="admin-experiment-pill-index">#${i}</span>
+        <span class="admin-experiment-pill-model">${esc(v.provider)} · ${esc(v.model)}</span>
+        <span class="admin-experiment-pill-meta">${v.status === 'complete' ? dur(v.duration_ms) : esc(v.status || '—')}</span>
+      </button>`).join('')}
+  </nav>`;
+}
+
+async function renderExperimentVariantPreview(container, experimentId, variantId, cache) {
+  container.innerHTML = '<p class="admin-loading">Loading variant…</p>';
+  let entry = cache.get(variantId);
+  if (!entry) {
+    try {
+      const data = await api(`/api/admin/experiments/${experimentId}/variants/${variantId}`);
+      entry = data;
+      cache.set(variantId, entry);
+    } catch (err) {
+      container.innerHTML = `<p class="admin-error">${esc(err.message)}</p>`;
+      return;
+    }
+  }
+  const { payload } = entry;
+  const { variant } = entry;
+  container.innerHTML = '';
+
+  if (variant?.status === 'error') {
+    container.innerHTML = `<p class="admin-error">This variant failed: ${esc(variant.error || 'unknown error')}</p>`;
+    return;
+  }
+
+  if (!payload?.blocks?.length) {
+    container.innerHTML = '<p class="admin-empty">No blocks stored for this variant.</p>';
+    return;
+  }
+
+  const stage = document.createElement('div');
+  stage.className = 'admin-preview-stage admin-experiment-preview';
+  const main = document.createElement('main');
+  main.className = 'admin-preview-main';
+  stage.appendChild(main);
+  container.appendChild(stage);
+
+  // eslint-disable-next-line no-restricted-syntax
+  for (const blockData of payload.blocks) {
+    // eslint-disable-next-line no-await-in-loop
+    await renderStoredSection(blockData, main);
+  }
+}
+
+async function renderExperiment(root, experimentId, activeVariantId) {
+  root.innerHTML = '<p class="admin-loading">Loading experiment…</p>';
+  let data;
+  try {
+    data = await api(`/api/admin/experiments/${experimentId}`);
+  } catch (err) {
+    root.innerHTML = `<p class="admin-error">${esc(err.message)}</p>`;
+    return;
+  }
+
+  const { experiment } = data;
+  const variants = data.variants || [];
+  const active = activeVariantId && variants.find((v) => v.id === activeVariantId)
+    ? activeVariantId
+    : (variants[0]?.id || null);
+
+  const totalOut = variants.reduce((n, v) => n + (v.output_tokens || 0), 0);
+  const totalIn = variants.reduce((n, v) => n + (v.input_tokens || 0), 0);
+  const fastest = variants
+    .filter((v) => v.status === 'complete' && v.duration_ms)
+    .sort((a, b) => a.duration_ms - b.duration_ms)[0];
+
+  root.innerHTML = `
+    <nav class="admin-crumbs"><a href="#/experiments">← Experiments</a></nav>
+    <div class="admin-toolbar">
+      <h2 class="admin-page-title">${esc(experiment.query || 'Untitled experiment')}</h2>
+      <div class="admin-badges">
+        ${badge(experiment.status || '—', EXPERIMENT_STATUS_TONE[experiment.status] || 'muted')}
+        ${badge(experiment.shared_intent_type || '—', intentTone(experiment.shared_intent_type))}
+        ${badge(`${variants.length} variants`, 'accent')}
+      </div>
+    </div>
+
+    <div class="admin-stats admin-stats-strip">
+      <span class="admin-stat"><span class="admin-stat-value">${dur(experiment.shared_duration_ms)}</span><span class="admin-stat-label">upstream</span></span>
+      <span class="admin-stat"><span class="admin-stat-value">${fastest ? dur(fastest.duration_ms) : '—'}</span><span class="admin-stat-label">fastest variant</span></span>
+      <span class="admin-stat"><span class="admin-stat-value">${totalIn}</span><span class="admin-stat-label">tokens in (sum)</span></span>
+      <span class="admin-stat"><span class="admin-stat-value">${totalOut}</span><span class="admin-stat-label">tokens out (sum)</span></span>
+      <span class="admin-stat"><span class="admin-stat-value">${ts(experiment.created_at)}</span><span class="admin-stat-label">created</span></span>
+    </div>
+
+    <section class="admin-card">
+      <h3>Variant overview</h3>
+      ${variants.length === 0
+    ? '<p class="admin-empty">No variants recorded.</p>'
+    : renderExperimentOverviewTable(experiment, variants)}
+    </section>
+
+    <section class="admin-card admin-experiment-flipthrough">
+      <h3>Flip through results</h3>
+      ${renderExperimentPills(variants, active)}
+      <div class="admin-experiment-preview-slot" data-role="preview"></div>
+    </section>
+  `;
+
+  const previewSlot = root.querySelector('[data-role="preview"]');
+  const cache = new Map();
+
+  const activate = async (variantId) => {
+    root.querySelectorAll('.admin-experiment-pill').forEach((b) => {
+      b.classList.toggle('is-active', b.dataset.variantId === variantId);
+    });
+    await renderExperimentVariantPreview(previewSlot, experimentId, variantId, cache);
+    // Shallow URL update for deep-linking; don't fire another render.
+    const nextHash = `#/experiments/${experimentId}/variants/${variantId}`;
+    if (window.location.hash !== nextHash) {
+      window.history.replaceState(null, '', nextHash);
+    }
+  };
+
+  root.querySelectorAll('.admin-experiment-pill').forEach((btn) => {
+    btn.addEventListener('click', () => activate(btn.dataset.variantId));
+  });
+  root.querySelectorAll('tr[data-variant-id]').forEach((tr) => {
+    tr.addEventListener('click', () => activate(tr.dataset.variantId));
+  });
+
+  if (active) await activate(active);
+  else previewSlot.innerHTML = '<p class="admin-empty">No variants to preview.</p>';
+}
+
 // ── Entry ───────────────────────────────────────────────────────────────────
 
 function syncHeaderNav(route) {
@@ -1315,12 +1871,14 @@ function syncHeaderNav(route) {
   if (!nav) return;
   const isVec = route.view?.startsWith('vec-');
   const isLlm = route.view === 'llm-config';
+  const isExp = route.view === 'experiments' || route.view === 'experiment' || route.view === 'experiment-new';
   nav.querySelectorAll('a[data-nav]').forEach((a) => {
     const key = a.dataset.nav;
     let active = false;
     if (key === 'vectorize') active = isVec;
     else if (key === 'llm-config') active = isLlm;
-    else if (key === 'sessions') active = !isVec && !isLlm;
+    else if (key === 'experiments') active = isExp;
+    else if (key === 'sessions') active = !isVec && !isLlm && !isExp;
     a.classList.toggle('is-active', active);
   });
 }
@@ -1334,6 +1892,12 @@ async function render(root) {
     await renderPage(root, route.id, route.tab);
   } else if (route.view === 'llm-config') {
     await renderLlmConfig(root);
+  } else if (route.view === 'experiments') {
+    await renderExperimentsList(root);
+  } else if (route.view === 'experiment-new') {
+    await renderExperimentCreateForm(root);
+  } else if (route.view === 'experiment') {
+    await renderExperiment(root, route.id, route.variantId);
   } else if (route.view === 'vec-overview') {
     await renderVectorizeOverview(root);
   } else if (route.view === 'vec-search') {
@@ -1356,6 +1920,7 @@ export default async function decorate(block) {
     <div class="admin-brand">⬡ <strong>Arco Admin</strong></div>
     <nav class="admin-header-nav">
       <a href="#/" data-nav="sessions">Sessions</a>
+      <a href="#/experiments" data-nav="experiments">Experiments</a>
       <a href="#/llm-config" data-nav="llm-config">Model Settings</a>
       <a href="#/vectorize" data-nav="vectorize">Vectorize</a>
     </nav>
