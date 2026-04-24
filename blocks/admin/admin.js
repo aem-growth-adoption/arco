@@ -1500,8 +1500,8 @@ function renderVariantRow(catalog, preset = {}) {
         <input type="number" name="maxTokens" step="64" min="256" max="16384" value="${esc(maxTokens)}" required>
       </label>
       <div class="admin-experiment-variant-actions">
-        <button type="button" class="admin-experiment-variant-btn" data-action="dup" title="Duplicate this variant">⎘</button>
-        <button type="button" class="admin-experiment-variant-btn" data-action="remove" title="Remove this variant">×</button>
+        <button type="button" class="admin-experiment-variant-btn" data-action="dup" aria-label="Duplicate this variant" title="Duplicate this variant">Duplicate</button>
+        <button type="button" class="admin-experiment-variant-btn admin-experiment-variant-btn-remove" data-action="remove" aria-label="Remove this variant" title="Remove this variant">Remove</button>
       </div>
     </div>
   `;

@@ -63,11 +63,22 @@
 
 .admin .admin-btn-ghost {
   background: transparent;
+  border-color: var(--border-color);
+  color: var(--text-color);
+}
+
+.admin .admin-btn-ghost:hover {
+  background: rgb(0 0 0 / 5%);
+  border-color: var(--text-color);
+}
+
+/* Ghost buttons on the dark header keep the light palette. */
+.admin .admin-header .admin-btn-ghost {
   border-color: rgb(255 255 255 / 30%);
   color: var(--background-color);
 }
 
-.admin .admin-btn-ghost:hover {
+.admin .admin-header .admin-btn-ghost:hover {
   background: rgb(255 255 255 / 10%);
   border-color: rgb(255 255 255 / 60%);
 }
@@ -1757,15 +1768,23 @@
 
 .admin .admin-experiment-variant-btn {
   font: inherit;
-  width: 1.9rem;
-  height: 1.9rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 0.4rem 0.65rem;
   border: 1px solid var(--border-color);
   border-radius: 4px;
-  background: transparent;
-  color: var(--muted-color);
+  background: var(--background-color);
+  color: var(--text-color);
   cursor: pointer;
   transition: background var(--transition), color var(--transition),
     border-color var(--transition);
+  white-space: nowrap;
+}
+
+.admin .admin-experiment-variant-btn-remove {
+  color: #b2472e;
+  border-color: #e3c1b6;
 }
 
 .admin .admin-experiment-variant-btn:disabled {
@@ -1775,9 +1794,14 @@
 
 /* stylelint-disable-next-line no-descending-specificity */
 .admin .admin-experiment-variant-btn:hover:not(:disabled) {
-  background: rgb(0 0 0 / 4%);
-  color: var(--text-color);
+  background: rgb(0 0 0 / 5%);
   border-color: var(--text-color);
+}
+
+.admin .admin-experiment-variant-btn-remove:hover:not(:disabled) {
+  background: rgb(178 71 46 / 8%);
+  border-color: #b2472e;
+  color: #b2472e;
 }
 
 .admin .admin-experiment-variant-footer {
