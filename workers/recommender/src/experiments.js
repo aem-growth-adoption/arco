@@ -33,7 +33,7 @@ import { resolveLlmConfig } from './llm-config.js';
 import { requireAdminAuth } from './admin.js';
 
 const VARIANT_PAYLOAD_TTL = 60 * 60 * 24 * 90; // 90 days
-const MAX_VARIANTS_PER_EXPERIMENT = 6;
+const MAX_VARIANTS_PER_EXPERIMENT = 12;
 const KV_KEY = (expId, varId) => `experiment:${expId}:variant:${varId}`;
 
 // ── Request validation ─────────────────────────────────────────────────────────

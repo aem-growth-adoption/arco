@@ -301,7 +301,7 @@ Login: HTTP Basic Auth — username `admin`, password = `ADMIN_TOKEN` secret (se
 | Sessions list | `#/` | All sessions ordered by last-active; session ID, timestamps, run count, user agent |
 | Session detail | `#/sessions/:id` | Pages (grouped by page_id) with initial query, URL, run count, total duration, tokens |
 | Page detail | `#/pages/:id` | Four tabs: **Overview** (metadata + totals), **Full page** (reconstructs every run plus inline follow-up chip markers showing what was presented and which chip was clicked), **Run timeline** (per-run breakdown with options shown + selected), **Debug** (per-run RAG/prompt/LLM output) |
-| Experiments | `#/experiments` | Multi-model A/B runner. Creates an **experiment** (1–6 variants) against the same query, fans out the `llm-generate` step in parallel, and renders a side-by-side overview (duration, tokens, temperature, max tokens) plus a flip-through viewer that re-renders each variant's blocks. Upstream RAG + prompt runs **once** per experiment. |
+| Experiments | `#/experiments` | Multi-model A/B runner. Creates an **experiment** (1–12 variants) against the same query, fans out the `llm-generate` step in parallel, and renders a side-by-side overview (duration, tokens, temperature, max tokens) plus a flip-through viewer that re-renders each variant's blocks. Upstream RAG + prompt runs **once** per experiment. |
 
 The admin EDS block lives at `blocks/admin/` and is also hosted at `drafts/admin.html` for local testing. The prior `/admin` HTML SPA endpoint on the worker still exists but is superseded by the block.
 

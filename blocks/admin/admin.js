@@ -1452,7 +1452,7 @@ function prefillQueryFromUrl() {
   }
 }
 
-const MAX_EXPERIMENT_VARIANTS = 6;
+const MAX_EXPERIMENT_VARIANTS = 12;
 
 function renderModelOptions(catalog, selectedKey) {
   const byProvider = catalog.reduce((acc, entry) => {
@@ -1710,7 +1710,7 @@ async function renderExperimentCreateForm(root) {
     const variants = collectVariantsFromForm(form);
     if (!query) { summaryEl.textContent = 'Query is required.'; return; }
     if (variants.length === 0) { summaryEl.textContent = 'Select at least one variant.'; return; }
-    if (variants.length > 6) { summaryEl.textContent = 'Max 6 variants.'; return; }
+    if (variants.length > MAX_EXPERIMENT_VARIANTS) { summaryEl.textContent = `Max ${MAX_EXPERIMENT_VARIANTS} variants.`; return; }
 
     runBtn.disabled = true;
     cancelBtn.hidden = false;
