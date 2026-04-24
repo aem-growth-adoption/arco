@@ -1452,60 +1452,75 @@ function prefillQueryFromUrl() {
   }
 }
 
-function renderCatalogPicker(catalog) {
+const MAX_EXPERIMENT_VARIANTS = 6;
+
+function renderModelOptions(catalog, selectedKey) {
   const byProvider = catalog.reduce((acc, entry) => {
-    const key = entry.provider;
-    (acc[key] = acc[key] || []).push(entry);
+    (acc[entry.provider] = acc[entry.provider] || []).push(entry);
     return acc;
   }, {});
 
   return Object.entries(byProvider).map(([provider, entries]) => `
-    <fieldset class="admin-experiment-group">
-      <legend>${esc(provider)}</legend>
-      <ul class="admin-experiment-models">
-        ${entries.map((e, i) => {
+    <optgroup label="${esc(provider)}">
+      ${entries.map((e) => {
     const key = `${e.provider}::${e.model}`;
-    const id = `exp-var-${provider}-${i}`;
     const disabled = e.available === false;
     const missing = (e.missing || []).join(', ');
-    return `<li class="admin-experiment-model${disabled ? ' is-disabled' : ''}">
-      <label class="admin-experiment-check">
-        <input type="checkbox" name="variant"
-          data-provider="${esc(e.provider)}"
-          data-model="${esc(e.model)}"
-          data-label="${esc(e.label)}"
-          value="${esc(key)}"
-          id="${id}"${disabled ? ' disabled' : ''}>
-        <span class="admin-experiment-label">${esc(e.label)}</span>
-        ${disabled ? `<span class="admin-experiment-missing">needs ${esc(missing)}</span>` : ''}
-      </label>
-      <div class="admin-experiment-settings" data-for="${id}">
-        <label class="admin-experiment-field">
-          <span>temp</span>
-          <input type="number" name="temperature" step="0.05" min="0" max="2" value="${EXPERIMENT_DEFAULTS.temperature}" disabled>
-        </label>
-        <label class="admin-experiment-field">
-          <span>max tok</span>
-          <input type="number" name="maxTokens" step="64" min="256" max="16384" value="${EXPERIMENT_DEFAULTS.maxTokens}" disabled>
-        </label>
-      </div>
-    </li>`;
+    const suffix = disabled ? ` — needs ${missing}` : '';
+    return `<option value="${esc(key)}"${disabled ? ' disabled' : ''}${key === selectedKey ? ' selected' : ''}>${esc(e.label)}${esc(suffix)}</option>`;
   }).join('')}
-      </ul>
-    </fieldset>
+    </optgroup>
   `).join('');
+}
+
+function firstAvailableKey(catalog) {
+  const first = catalog.find((e) => e.available !== false) || catalog[0];
+  return first ? `${first.provider}::${first.model}` : '';
+}
+
+function renderVariantRow(catalog, preset = {}) {
+  const selectedKey = preset.key || firstAvailableKey(catalog);
+  const temperature = preset.temperature ?? EXPERIMENT_DEFAULTS.temperature;
+  const maxTokens = preset.maxTokens ?? EXPERIMENT_DEFAULTS.maxTokens;
+  return `
+    <div class="admin-experiment-variant-row" data-variant-row>
+      <span class="admin-experiment-variant-index" data-role="index">#1</span>
+      <label class="admin-experiment-variant-field admin-experiment-variant-model">
+        <span>Model</span>
+        <select name="model" required>
+          ${renderModelOptions(catalog, selectedKey)}
+        </select>
+      </label>
+      <label class="admin-experiment-variant-field">
+        <span>Temp</span>
+        <input type="number" name="temperature" step="0.05" min="0" max="2" value="${esc(temperature)}" required>
+      </label>
+      <label class="admin-experiment-variant-field">
+        <span>Max tok</span>
+        <input type="number" name="maxTokens" step="64" min="256" max="16384" value="${esc(maxTokens)}" required>
+      </label>
+      <div class="admin-experiment-variant-actions">
+        <button type="button" class="admin-experiment-variant-btn" data-action="dup" title="Duplicate this variant">⎘</button>
+        <button type="button" class="admin-experiment-variant-btn" data-action="remove" title="Remove this variant">×</button>
+      </div>
+    </div>
+  `;
 }
 
 function collectVariantsFromForm(form) {
   const variants = [];
-  form.querySelectorAll('input[name="variant"]:checked').forEach((cb) => {
-    const settings = form.querySelector(`.admin-experiment-settings[data-for="${cb.id}"]`);
-    const temperature = parseFloat(settings.querySelector('input[name="temperature"]').value);
-    const maxTokens = parseInt(settings.querySelector('input[name="maxTokens"]').value, 10);
+  form.querySelectorAll('[data-variant-row]').forEach((row) => {
+    const select = row.querySelector('select[name="model"]');
+    const [provider, ...modelParts] = (select.value || '').split('::');
+    const model = modelParts.join('::');
+    if (!provider || !model) return;
+    const temperature = parseFloat(row.querySelector('input[name="temperature"]').value);
+    const maxTokens = parseInt(row.querySelector('input[name="maxTokens"]').value, 10);
+    const label = select.selectedOptions[0]?.textContent?.replace(/\s+—\s+needs.*$/, '')?.trim() || `${provider} · ${model}`;
     variants.push({
-      provider: cb.dataset.provider,
-      model: cb.dataset.model,
-      label: cb.dataset.label,
+      provider,
+      model,
+      label,
       temperature: Number.isNaN(temperature) ? null : temperature,
       maxTokens: Number.isNaN(maxTokens) ? null : maxTokens,
     });
@@ -1564,15 +1579,19 @@ async function renderExperimentCreateForm(root) {
         </label>
 
         <h3>2. Variants</h3>
-        <p class="admin-muted">Pick 1–6 provider/model combos. Each runs with independent temperature and max_tokens.</p>
-        <div class="admin-experiment-groups">
-          ${renderCatalogPicker(catalog)}
+        <p class="admin-muted">Up to ${MAX_EXPERIMENT_VARIANTS} rows. Pick a model, set temperature and max_tokens. Add the same model multiple times with different settings to sweep a parameter.</p>
+        <div class="admin-experiment-variants" data-role="variants">
+          ${renderVariantRow(catalog)}
+        </div>
+        <div class="admin-experiment-variant-footer">
+          <button type="button" class="admin-btn admin-btn-ghost" data-role="add-variant">+ Add variant</button>
+          <button type="button" class="admin-btn admin-btn-ghost" data-role="sweep-temp" title="Duplicate the last row three times at 0.3 / 0.6 / 0.9">Temp sweep</button>
         </div>
 
         <div class="admin-experiment-actions">
           <button type="submit" class="admin-btn admin-btn-primary" data-role="run">Run experiment</button>
           <button type="button" class="admin-btn admin-btn-ghost" data-role="cancel" hidden>Cancel</button>
-          <span class="admin-experiment-summary admin-muted" data-role="summary">0 variants selected</span>
+          <span class="admin-experiment-summary admin-muted" data-role="summary">1 variant</span>
         </div>
       </form>
     </section>
@@ -1591,25 +1610,92 @@ async function renderExperimentCreateForm(root) {
   const summaryEl = form.querySelector('[data-role="summary"]');
   const runBtn = form.querySelector('[data-role="run"]');
   const cancelBtn = form.querySelector('[data-role="cancel"]');
+  const variantsContainer = form.querySelector('[data-role="variants"]');
+  const addBtn = form.querySelector('[data-role="add-variant"]');
+  const sweepBtn = form.querySelector('[data-role="sweep-temp"]');
   const progressCard = root.querySelector('[data-role="progress-card"]');
   const progressPhase = root.querySelector('[data-role="progress-phase"]');
   const progressIds = root.querySelector('[data-role="progress-ids"]');
   const cardsContainer = root.querySelector('[data-role="cards"]');
 
+  const rowNodes = () => [...variantsContainer.querySelectorAll('[data-variant-row]')];
+
   const refreshSummary = () => {
-    const variants = collectVariantsFromForm(form);
-    summaryEl.textContent = variants.length === 0
-      ? '0 variants selected'
-      : `${variants.length} variant${variants.length === 1 ? '' : 's'} · will run in parallel`;
+    const rows = rowNodes();
+    rows.forEach((row, i) => {
+      row.querySelector('[data-role="index"]').textContent = `#${i + 1}`;
+      const removeBtn = row.querySelector('[data-action="remove"]');
+      if (removeBtn) removeBtn.disabled = rows.length === 1;
+    });
+    const atMax = rows.length >= MAX_EXPERIMENT_VARIANTS;
+    addBtn.disabled = atMax;
+    sweepBtn.disabled = atMax;
+    summaryEl.textContent = rows.length === 1
+      ? '1 variant'
+      : `${rows.length} variants · running in parallel`;
   };
 
-  // Enable/disable per-variant settings when the checkbox toggles.
-  form.querySelectorAll('input[name="variant"]').forEach((cb) => {
-    cb.addEventListener('change', () => {
-      const settings = form.querySelector(`.admin-experiment-settings[data-for="${cb.id}"]`);
-      settings.querySelectorAll('input').forEach((i) => { i.disabled = !cb.checked; });
+  const appendRow = (preset) => {
+    if (rowNodes().length >= MAX_EXPERIMENT_VARIANTS) return null;
+    variantsContainer.insertAdjacentHTML('beforeend', renderVariantRow(catalog, preset));
+    refreshSummary();
+    return variantsContainer.lastElementChild;
+  };
+
+  const duplicateRow = (row) => {
+    if (rowNodes().length >= MAX_EXPERIMENT_VARIANTS) return;
+    const select = row.querySelector('select[name="model"]');
+    const temp = row.querySelector('input[name="temperature"]').value;
+    const maxTok = row.querySelector('input[name="maxTokens"]').value;
+    const clone = document.createElement('div');
+    clone.innerHTML = renderVariantRow(catalog, {
+      key: select.value,
+      temperature: temp,
+      maxTokens: maxTok,
+    }).trim();
+    row.insertAdjacentElement('afterend', clone.firstElementChild);
+    refreshSummary();
+  };
+
+  variantsContainer.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const row = btn.closest('[data-variant-row]');
+    if (!row) return;
+    if (btn.dataset.action === 'remove') {
+      if (rowNodes().length > 1) row.remove();
       refreshSummary();
+    } else if (btn.dataset.action === 'dup') {
+      duplicateRow(row);
+    }
+  });
+
+  variantsContainer.addEventListener('change', refreshSummary);
+  variantsContainer.addEventListener('input', refreshSummary);
+
+  addBtn.addEventListener('click', () => {
+    const last = rowNodes().at(-1);
+    if (last) {
+      duplicateRow(last);
+    } else {
+      appendRow();
+    }
+  });
+
+  sweepBtn.addEventListener('click', () => {
+    const last = rowNodes().at(-1);
+    if (!last) return;
+    const select = last.querySelector('select[name="model"]');
+    const maxTok = last.querySelector('input[name="maxTokens"]').value;
+    const key = select.value;
+    // Seed the last row at 0.3 if it isn't already; then add 0.6 and 0.9.
+    last.querySelector('input[name="temperature"]').value = '0.3';
+    [0.6, 0.9].forEach((t) => {
+      if (rowNodes().length < MAX_EXPERIMENT_VARIANTS) {
+        appendRow({ key, temperature: t, maxTokens: maxTok });
+      }
     });
+    refreshSummary();
   });
 
   let abortController = null;
