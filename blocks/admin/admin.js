@@ -74,11 +74,20 @@ function clearAdminToken() {
   localStorage.removeItem(TOKEN_STORAGE_KEY);
 }
 
-async function api(path) {
+async function api(path, options = {}) {
   const token = getAdminToken();
   if (!token) throw new Error('Admin token required');
+  const headers = {
+    Authorization: `Basic ${btoa(`admin:${token}`)}`,
+    ...(options.headers || {}),
+  };
+  if (options.body && !headers['Content-Type']) {
+    headers['Content-Type'] = 'application/json';
+  }
   const res = await fetch(`${ARCO_RECOMMENDER_URL}${path}`, {
-    headers: { Authorization: `Basic ${btoa(`admin:${token}`)}` },
+    method: options.method || 'GET',
+    headers,
+    body: options.body,
   });
   if (res.status === 401) {
     clearAdminToken();
@@ -93,6 +102,7 @@ async function api(path) {
 function parseRoute() {
   const hash = window.location.hash.replace(/^#/, '') || '/';
   if (hash === '/') return { view: 'sessions' };
+  if (hash === '/llm-config') return { view: 'llm-config' };
   const sessionMatch = hash.match(/^\/sessions\/([^/]+)$/);
   if (sessionMatch) return { view: 'session', id: sessionMatch[1] };
   const pageMatch = hash.match(/^\/pages\/([^/]+)(?:\/(\w+))?$/);
@@ -484,11 +494,18 @@ function renderOverviewSection(dbg, run) {
   const totalMs = dbg.timings?.total;
   const llmMs = dbg.timings?.llm;
   const totalTokens = (dbg.llm?.inputTokens || 0) + (dbg.llm?.outputTokens || 0);
+  const providerModel = dbg.llm?.provider
+    ? `<span class="admin-mono">${esc(dbg.llm.provider)}</span> / ${esc(dbg.llm?.model || '—')}`
+    : (dbg.llm?.model || '—');
+  const tempStr = dbg.llm?.temperature != null ? String(dbg.llm.temperature) : '—';
+  const maxStr = dbg.llm?.maxTokens != null ? String(dbg.llm.maxTokens) : '—';
   const rows = [
     ['Total time', `<span class="admin-badge admin-badge-${timingTone(totalMs)}">${fmtMs(totalMs)}</span>`],
     ['LLM time', `<span class="admin-badge admin-badge-${timingTone(llmMs)}">${fmtMs(llmMs)}</span>`],
     ['First token', fmtMs(dbg.timings?.llmFirstToken)],
-    ['Model', dbg.llm?.model || '—'],
+    ['Provider / model', providerModel],
+    ['Temperature', tempStr],
+    ['Max tokens', maxStr],
     ['Flow', run.flow_id || '—'],
     ['Intent', intent],
     ['Journey stage', run.journey_stage || '—'],
@@ -792,14 +809,138 @@ async function renderPage(root, pageId, tab) {
   }
 }
 
+// ── LLM Config ──────────────────────────────────────────────────────────────
+
+async function renderLlmConfig(root) {
+  root.innerHTML = '<p class="admin-loading">Loading model settings…</p>';
+  let catalog;
+  let active;
+  let limits;
+  try {
+    const [catRes, cfgRes] = await Promise.all([
+      api('/api/admin/catalog'),
+      api('/api/admin/llm-config'),
+    ]);
+    catalog = catRes.catalog || [];
+    limits = catRes.limits || {
+      temperature: { min: 0, max: 2 },
+      maxTokens: { min: 256, max: 16384 },
+    };
+    active = cfgRes.active || null;
+  } catch (err) {
+    root.innerHTML = `<p class="admin-error">${esc(err.message)}</p>`;
+    return;
+  }
+
+  const selected = active || catalog[0] || {};
+  const currentKey = `${selected.provider}::${selected.model}`;
+  const temperature = active?.temperature ?? 0.6;
+  const maxTokens = active?.maxTokens ?? 4096;
+  const currentEntry = catalog.find(
+    (e) => `${e.provider}::${e.model}` === currentKey,
+  );
+  const currentMissing = currentEntry?.available === false
+    ? (currentEntry.missing || []) : [];
+
+  root.innerHTML = `
+    <nav class="admin-crumbs"><a href="#/">← Sessions</a></nav>
+    <div class="admin-toolbar">
+      <h2>Model Settings</h2>
+      <div class="admin-stats">
+        <span class="admin-stat"><span class="admin-stat-value">${esc(selected.provider || '—')}</span><span class="admin-stat-label">active provider</span></span>
+        <span class="admin-stat"><span class="admin-stat-value">${esc(selected.model || '—')}</span><span class="admin-stat-label">active model</span></span>
+      </div>
+    </div>
+
+    <section class="admin-card">
+      <h3>Active configuration</h3>
+      <p class="admin-muted">Applied to the next <code>/api/generate</code> call. Stored in the <code>CACHE</code> KV under <code>llm-config:active</code>.</p>
+
+      <form id="llm-config-form" class="admin-llm-form">
+        <label class="admin-field">
+          <span>Provider &amp; model</span>
+          <select name="entry" required>
+            ${catalog.map((e) => {
+    const key = `${e.provider}::${e.model}`;
+    const disabled = e.available === false ? ' disabled' : '';
+    const missing = (e.missing || []).join(', ');
+    const tag = e.available === false ? ` — needs ${missing}` : '';
+    return `<option value="${esc(key)}"${currentKey === key ? ' selected' : ''}${disabled} title="${esc(e.available === false ? `Missing: ${missing}` : '')}">${esc(e.label)}${esc(tag)}</option>`;
+  }).join('')}
+          </select>
+          ${currentMissing.length
+    ? `<small class="admin-llm-warn">Active selection cannot run — missing: ${esc(currentMissing.join(', '))}. Set the secret(s) with <code>wrangler secret put &lt;NAME&gt;</code> and redeploy, or choose a different model.</small>`
+    : ''}
+        </label>
+        <label class="admin-field">
+          <span>Temperature <small class="admin-muted">(${limits.temperature.min} – ${limits.temperature.max})</small></span>
+          <input type="number" name="temperature" step="0.05" min="${limits.temperature.min}" max="${limits.temperature.max}" value="${temperature}" required>
+        </label>
+        <label class="admin-field">
+          <span>Max tokens <small class="admin-muted">(${limits.maxTokens.min} – ${limits.maxTokens.max})</small></span>
+          <input type="number" name="maxTokens" step="64" min="${limits.maxTokens.min}" max="${limits.maxTokens.max}" value="${maxTokens}" required>
+        </label>
+        <div class="admin-llm-actions">
+          <button type="submit" class="admin-btn admin-btn-primary">Save</button>
+          <span class="admin-llm-status admin-muted" data-status></span>
+        </div>
+      </form>
+
+      <dl class="admin-kvs admin-kvs-two admin-llm-current">
+        ${kv('Updated at', active?.updatedAt || '—')}
+        ${kv('Storage key', 'CACHE:llm-config:active')}
+      </dl>
+    </section>
+  `;
+
+  const form = root.querySelector('#llm-config-form');
+  const status = root.querySelector('[data-status]');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = new FormData(form);
+    const [provider, model] = String(data.get('entry') || '').split('::');
+    const body = {
+      provider,
+      model,
+      temperature: Number(data.get('temperature')),
+      maxTokens: Number(data.get('maxTokens')),
+    };
+    status.textContent = 'Saving…';
+    status.classList.remove('is-error', 'is-ok');
+    try {
+      await api('/api/admin/llm-config', { method: 'PUT', body: JSON.stringify(body) });
+      status.textContent = 'Saved.';
+      status.classList.add('is-ok');
+      await renderLlmConfig(root);
+    } catch (err) {
+      status.textContent = err.message;
+      status.classList.add('is-error');
+    }
+  });
+}
+
 // ── Entry ───────────────────────────────────────────────────────────────────
+
+function syncHeaderNav(route) {
+  const nav = document.querySelector('.admin-header-nav');
+  if (!nav) return;
+  nav.querySelectorAll('a[data-nav]').forEach((a) => {
+    const key = a.dataset.nav;
+    const active = (key === 'llm-config' && route.view === 'llm-config')
+      || (key === 'sessions' && route.view !== 'llm-config');
+    a.classList.toggle('is-active', active);
+  });
+}
 
 async function render(root) {
   const route = parseRoute();
+  syncHeaderNav(route);
   if (route.view === 'session') {
     await renderSession(root, route.id);
   } else if (route.view === 'page') {
     await renderPage(root, route.id, route.tab);
+  } else if (route.view === 'llm-config') {
+    await renderLlmConfig(root);
   } else {
     await renderSessions(root);
   }
@@ -814,6 +955,10 @@ export default async function decorate(block) {
   header.className = 'admin-header';
   header.innerHTML = `
     <div class="admin-brand">⬡ <strong>Arco Admin</strong></div>
+    <nav class="admin-header-nav">
+      <a href="#/" data-nav="sessions">Sessions</a>
+      <a href="#/llm-config" data-nav="llm-config">Model Settings</a>
+    </nav>
     <div class="admin-header-actions">
       <button type="button" class="admin-btn admin-btn-ghost" data-action="reload">Reload</button>
       <button type="button" class="admin-btn admin-btn-ghost" data-action="logout">Reset token</button>

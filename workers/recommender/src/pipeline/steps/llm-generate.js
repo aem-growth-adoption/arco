@@ -4,8 +4,8 @@
  * Token resolution and sanitization happen per-section inside this step.
  */
 
-// eslint-disable-next-line import/no-unresolved
-import Cerebras from '@cerebras/cerebras_cloud_sdk';
+import { getProvider, findCatalogEntry, catalogAvailability } from '../../providers/index.js';
+import { getActiveLlmConfig, resolveLlmConfig } from '../../llm-config.js';
 import { writeEvent } from '../../analytics.js';
 import { sectionToHtml, sanitizeBlockContent } from '../../json-to-eds.js';
 import {
@@ -337,7 +337,26 @@ export async function llmGenerate(ctx, config, env) {
     return;
   }
 
-  const client = new Cerebras({ apiKey: env.CEREBRAS_API_KEY });
+  // Resolve active provider + model from KV, with per-flow config as fallback.
+  const active = await getActiveLlmConfig(env);
+  const resolved = resolveLlmConfig(active, config);
+
+  // Preflight: make sure all env vars the chosen model needs are present.
+  // Fall through with a clear error instead of letting the vendor call fail.
+  const entry = findCatalogEntry(resolved.provider, resolved.model)
+    || { provider: resolved.provider, model: resolved.model };
+  const { available, missing } = catalogAvailability(entry, env);
+  if (!available) {
+    const err = new Error(`Missing configuration for ${resolved.provider}/${resolved.model}: ${missing.join(', ')}. Set the required secrets or pick a different model in Admin → Model Settings.`);
+    err.status = 400;
+    throw err;
+  }
+
+  const provider = getProvider(resolved.provider);
+  ctx.llm.model = resolved.model;
+  ctx.llm.provider = resolved.provider;
+  ctx.llm.temperature = resolved.temperature;
+  ctx.llm.maxTokens = resolved.maxTokens;
 
   // Heartbeat to keep the connection alive while waiting for LLM
   const heartbeatInterval = setInterval(async () => {
@@ -355,17 +374,17 @@ export async function llmGenerate(ctx, config, env) {
   ctx.timings.llmStart = Date.now();
   let completion;
   try {
-    completion = await client.chat.completions.create({
-      model: config.model || 'gpt-oss-120b',
+    completion = provider.stream({
+      env,
+      model: resolved.model,
       messages: [
         { role: 'system', content: ctx.prompt.system },
         { role: 'user', content: ctx.prompt.user },
       ],
-      max_tokens: config.maxTokens || 4096,
-      temperature: config.temperature ?? 0.7,
-      stream: true,
-      stream_options: { include_usage: true },
-    }, { signal: abortController.signal });
+      maxTokens: resolved.maxTokens,
+      temperature: resolved.temperature,
+      signal: abortController.signal,
+    });
   } catch (llmErr) {
     clearTimeout(timeoutId);
     clearInterval(heartbeatInterval);
@@ -393,7 +412,11 @@ export async function llmGenerate(ctx, config, env) {
   try {
     // eslint-disable-next-line no-restricted-syntax
     for await (const chunk of completion) {
-      const content = chunk.choices?.[0]?.delta?.content;
+      if (chunk.type === 'usage') {
+        ctx.llm.usage = chunk.usage;
+        continue; // eslint-disable-line no-continue
+      }
+      const content = chunk.type === 'delta' ? chunk.text : null;
       if (content) {
         if (!ctx.timings.llmFirstToken) ctx.timings.llmFirstToken = Date.now();
         ctx.timings.llmLastToken = Date.now();
@@ -444,8 +467,6 @@ export async function llmGenerate(ctx, config, env) {
           sectionIndex += 1;
         }
       }
-      if (chunk.usage) ctx.llm.usage = chunk.usage;
-      if (chunk.x_cerebras?.usage) ctx.llm.usage = chunk.x_cerebras.usage;
     }
   } catch (streamErr) {
     if (streamErr.name === 'AbortError' || abortController.signal.aborted) {
@@ -665,7 +686,10 @@ export async function llmGenerate(ctx, config, env) {
       },
     },
     llm: {
-      model: config.model || 'gpt-oss-120b',
+      provider: resolved.provider,
+      model: resolved.model,
+      temperature: resolved.temperature,
+      maxTokens: resolved.maxTokens,
       inputTokens: ctx.llm.usage?.prompt_tokens || null,
       outputTokens: ctx.llm.usage?.completion_tokens || null,
       totalTokens: ctx.llm.usage?.total_tokens || null,
