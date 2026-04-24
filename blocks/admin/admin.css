@@ -1718,7 +1718,7 @@
   color: var(--muted-color);
   letter-spacing: 0.06em;
   min-width: 2ch;
-  padding-bottom: 0.55rem;
+  padding-bottom: 0.65rem;
 }
 
 .admin .admin-experiment-variant-field {
@@ -1745,6 +1745,8 @@
   border-radius: 4px;
   background: var(--light-color);
   color: var(--text-color);
+  height: 2.25rem;
+  box-sizing: border-box;
 }
 
 .admin .admin-experiment-variant-field input {
@@ -1763,15 +1765,17 @@
 .admin .admin-experiment-variant-actions {
   display: flex;
   gap: 0.3rem;
-  padding-bottom: 0.3rem;
 }
 
 .admin .admin-experiment-variant-btn {
   font: inherit;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 600;
-  letter-spacing: 0.02em;
-  padding: 0.4rem 0.65rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0 0.85rem;
+  height: 2.25rem;
+  box-sizing: border-box;
   border: 1px solid var(--border-color);
   border-radius: 4px;
   background: var(--background-color);
