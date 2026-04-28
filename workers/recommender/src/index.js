@@ -33,6 +33,7 @@ import {
   handleGetExperiment,
   handleGetExperimentVariant,
 } from './experiments.js';
+import handleSuggestRequest from './suggest.js';
 
 /**
  * Full pipeline bypass for load testing — skips rate-limit, RAG, intent, and LLM.
@@ -352,6 +353,10 @@ export default {
 
     if (url.pathname === '/api/generate' && request.method === 'POST') {
       return handleGenerate(request, env);
+    }
+
+    if (url.pathname === '/api/suggest' && request.method === 'POST') {
+      return handleSuggestRequest(request, env);
     }
 
     if (url.pathname === '/api/persist' && request.method === 'POST') {
