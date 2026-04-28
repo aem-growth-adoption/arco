@@ -105,6 +105,40 @@
   margin: 0;
 }
 
+/* Speculative prefetch states (added by speculative-engine.js on hover) */
+.keep-exploring .keep-exploring-chip.chip-loading {
+  position: relative;
+  overflow: hidden;
+  cursor: wait;
+}
+
+.keep-exploring .keep-exploring-chip.chip-loading::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgb(255 255 255 / 20%) 50%,
+    transparent 100%
+  );
+  animation: keep-exploring-shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes keep-exploring-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.keep-exploring .keep-exploring-chip.chip-ready {
+  box-shadow: 0 0 0 2px rgb(181 101 29 / 25%);
+}
+
 /* Scope breadcrumb / loader styles to streamed content section so they show
    even on pages that don't import the follow-up block CSS. */
 .keep-exploring-content .follow-up-breadcrumb {

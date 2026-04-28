@@ -15,6 +15,7 @@ import { SessionContextManager } from '../../scripts/session-context.js';
 import { getAPIEndpoint } from '../../scripts/api-config.js';
 import {
   streamAndAppendContent,
+  replaySpeculativeResult,
   newPageId,
   getCurrentPageId,
   createBreadcrumb,
@@ -214,18 +215,45 @@ async function triggerInlineGeneration(block, query, label) {
     newPageId(window.location.pathname + window.location.search);
   }
 
+  // If the user hovered the chip long enough for the speculative engine to
+  // prefetch this query, replay the buffered NDJSON instead of refetching.
+  const specResult = window.arcoSpeculativeEngine?.getResult(query);
+
   try {
-    await streamAndAppendContent(query, results, {
-      followUp: { type: 'explore', label: label || query },
-      onFirstSection: () => loader.remove(),
-      onSection: scrollToStreamedSection,
-      onError: (msg) => {
-        const p = document.createElement('p');
-        p.className = 'keep-exploring-error';
-        p.textContent = msg || 'Generation failed';
-        loader.replaceChildren(p);
-      },
-    });
+    if (specResult) {
+      const ready = specResult.ready || await specResult.readyPromise;
+      if (ready && specResult.responseBuffer.length > 0) {
+        await replaySpeculativeResult(specResult.responseBuffer, results, {
+          query,
+          onFirstSection: () => loader.remove(),
+          onSection: scrollToStreamedSection,
+        });
+      } else {
+        await streamAndAppendContent(query, results, {
+          followUp: { type: 'explore', label: label || query },
+          onFirstSection: () => loader.remove(),
+          onSection: scrollToStreamedSection,
+          onError: (msg) => {
+            const p = document.createElement('p');
+            p.className = 'keep-exploring-error';
+            p.textContent = msg || 'Generation failed';
+            loader.replaceChildren(p);
+          },
+        });
+      }
+    } else {
+      await streamAndAppendContent(query, results, {
+        followUp: { type: 'explore', label: label || query },
+        onFirstSection: () => loader.remove(),
+        onSection: scrollToStreamedSection,
+        onError: (msg) => {
+          const p = document.createElement('p');
+          p.className = 'keep-exploring-error';
+          p.textContent = msg || 'Generation failed';
+          loader.replaceChildren(p);
+        },
+      });
+    }
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('[KeepExploring] Stream error:', error);
@@ -247,6 +275,35 @@ function attachChipHandlers(block) {
     if (!chip.dataset.query) return;
     e.preventDefault();
     triggerInlineGeneration(block, chip.dataset.query, chip.dataset.label);
+  });
+}
+
+/**
+ * Lazy-init the shared speculative engine and attach hover/touch listeners
+ * to the block's chips. Called once after the initial render and again after
+ * dynamic suggestions land. Hovering a chip with enough confidence kicks off
+ * a background /api/generate stream, buffered for instant replay on click.
+ */
+function attachSpeculativeEngine(block) {
+  const chips = block.querySelectorAll('.keep-exploring-chip[data-query]');
+  if (chips.length === 0) return;
+
+  if (window.arcoSpeculativeEngine) {
+    window.arcoSpeculativeEngine.attachToChips(chips);
+    return;
+  }
+
+  import('../../scripts/speculative-engine.js').then(({ default: createSpeculativeEngine }) => {
+    if (!window.arcoSpeculativeEngine) {
+      window.arcoSpeculativeEngine = createSpeculativeEngine({
+        apiEndpoint: getAPIEndpoint('recommender'),
+        getSessionContext: () => SessionContextManager.buildContextParam(),
+        getSessionId: () => SessionContextManager.getSessionId(),
+        getPageId: getCurrentPageId,
+        getPageUrl: () => window.location.pathname + window.location.search,
+      });
+    }
+    window.arcoSpeculativeEngine.attachToChips(chips);
   });
 }
 
@@ -299,6 +356,8 @@ async function fetchDynamicSuggestions(block, count, authoredItems) {
       });
       skeleton.replaceWith(chip);
     });
+    // Re-attach engine to pick up the freshly-revealed dynamic chips
+    attachSpeculativeEngine(block);
   } catch (error) {
     // eslint-disable-next-line no-console
     console.warn('[KeepExploring] Suggest fetch failed:', error);
@@ -325,6 +384,7 @@ export default function decorate(block) {
 
   renderShell(block, heading, items, dynamicCount);
   attachChipHandlers(block);
+  attachSpeculativeEngine(block);
 
   if (dynamicCount > 0) {
     fetchDynamicSuggestions(block, dynamicCount, items);
