@@ -54,6 +54,8 @@
 
   // Environment variables (set secrets via `wrangler secret put`)
   // LLM provider secrets: CEREBRAS_API_KEY, SAMBANOVA_API_KEY (Cloudflare AI uses the AI binding above)
+  // AWS Bedrock secrets: AWS_BEARER_TOKEN_BEDROCK
+  // AWS Bedrock region var: AWS_REGION (default: us-east-1, can be a var or secret)
   // Analytics: CF_API_TOKEN (Analytics Engine read permission)
   // DA secrets: DA_CLIENT_ID, DA_CLIENT_SECRET, DA_SERVICE_TOKEN (or DA_TOKEN as fallback)
   // Admin: ADMIN_TOKEN (Basic Auth password for /admin + /api/admin/*)

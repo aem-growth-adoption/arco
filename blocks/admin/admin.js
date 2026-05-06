@@ -866,6 +866,48 @@ async function renderPage(root, pageId, tab) {
   }
 }
 
+// ── Model catalog helpers (used by LLM Config and Experiments) ───────────────
+
+function renderModelOptions(catalog, selectedKey) {
+  const byProvider = catalog.reduce((acc, entry) => {
+    (acc[entry.provider] = acc[entry.provider] || []).push(entry);
+    return acc;
+  }, {});
+
+  return Object.entries(byProvider).map(([provider, entries]) => `
+    <optgroup label="${esc(provider)}">
+      ${entries.map((e) => {
+    const key = `${e.provider}::${e.model}`;
+    const disabled = e.available === false;
+    const missing = (e.missing || []).join(', ');
+    const suffix = disabled ? ` — needs ${missing}` : '';
+    return `<option value="${esc(key)}"${disabled ? ' disabled' : ''}${key === selectedKey ? ' selected' : ''}>${esc(e.label)}${esc(suffix)}</option>`;
+  }).join('')}
+    </optgroup>
+  `).join('');
+}
+
+function firstAvailableKey(catalog) {
+  const first = catalog.find((e) => e.available !== false) || catalog[0];
+  return first ? `${first.provider}::${first.model}` : '';
+}
+
+function filterModelSelect(searchInput, selectEl, catalog) {
+  const q = searchInput.value.toLowerCase().trim();
+  const prev = selectEl.value;
+  const filtered = q
+    ? catalog.filter((e) => e.label.toLowerCase().includes(q) || e.model.toLowerCase().includes(q))
+    : catalog;
+  const stillAvail = filtered.some((e) => `${e.provider}::${e.model}` === prev);
+  selectEl.innerHTML = renderModelOptions(filtered, stillAvail ? prev : '');
+  if (!stillAvail) {
+    const first = filtered.find((e) => e.available !== false) || filtered[0];
+    if (first) selectEl.value = `${first.provider}::${first.model}`;
+  } else {
+    selectEl.value = prev;
+  }
+}
+
 // ── LLM Config ──────────────────────────────────────────────────────────────
 
 async function renderLlmConfig(root) {
@@ -916,14 +958,9 @@ async function renderLlmConfig(root) {
       <form id="llm-config-form" class="admin-llm-form">
         <label class="admin-field">
           <span>Provider &amp; model</span>
+          <input type="search" id="llm-model-search" class="admin-model-search" placeholder="Filter models…" autocomplete="off" aria-label="Filter model list">
           <select name="entry" required>
-            ${catalog.map((e) => {
-    const key = `${e.provider}::${e.model}`;
-    const disabled = e.available === false ? ' disabled' : '';
-    const missing = (e.missing || []).join(', ');
-    const tag = e.available === false ? ` — needs ${missing}` : '';
-    return `<option value="${esc(key)}"${currentKey === key ? ' selected' : ''}${disabled} title="${esc(e.available === false ? `Missing: ${missing}` : '')}">${esc(e.label)}${esc(tag)}</option>`;
-  }).join('')}
+            ${renderModelOptions(catalog, currentKey)}
           </select>
           ${currentMissing.length
     ? `<small class="admin-llm-warn">Active selection cannot run — missing: ${esc(currentMissing.join(', '))}. Set the secret(s) with <code>wrangler secret put &lt;NAME&gt;</code> and redeploy, or choose a different model.</small>`
@@ -952,6 +989,9 @@ async function renderLlmConfig(root) {
 
   const form = root.querySelector('#llm-config-form');
   const status = root.querySelector('[data-status]');
+  const llmSearchInput = root.querySelector('#llm-model-search');
+  const llmSelectEl = form.querySelector('select[name="entry"]');
+  llmSearchInput.addEventListener('input', () => filterModelSelect(llmSearchInput, llmSelectEl, catalog));
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const data = new FormData(form);
@@ -1454,30 +1494,6 @@ function prefillQueryFromUrl() {
 
 const MAX_EXPERIMENT_VARIANTS = 12;
 
-function renderModelOptions(catalog, selectedKey) {
-  const byProvider = catalog.reduce((acc, entry) => {
-    (acc[entry.provider] = acc[entry.provider] || []).push(entry);
-    return acc;
-  }, {});
-
-  return Object.entries(byProvider).map(([provider, entries]) => `
-    <optgroup label="${esc(provider)}">
-      ${entries.map((e) => {
-    const key = `${e.provider}::${e.model}`;
-    const disabled = e.available === false;
-    const missing = (e.missing || []).join(', ');
-    const suffix = disabled ? ` — needs ${missing}` : '';
-    return `<option value="${esc(key)}"${disabled ? ' disabled' : ''}${key === selectedKey ? ' selected' : ''}>${esc(e.label)}${esc(suffix)}</option>`;
-  }).join('')}
-    </optgroup>
-  `).join('');
-}
-
-function firstAvailableKey(catalog) {
-  const first = catalog.find((e) => e.available !== false) || catalog[0];
-  return first ? `${first.provider}::${first.model}` : '';
-}
-
 function renderVariantRow(catalog, preset = {}) {
   const selectedKey = preset.key || firstAvailableKey(catalog);
   const temperature = preset.temperature ?? EXPERIMENT_DEFAULTS.temperature;
@@ -1487,6 +1503,7 @@ function renderVariantRow(catalog, preset = {}) {
       <span class="admin-experiment-variant-index" data-role="index">#1</span>
       <label class="admin-experiment-variant-field admin-experiment-variant-model">
         <span>Model</span>
+        <input type="search" class="admin-model-search" placeholder="Filter models…" autocomplete="off" aria-label="Filter model list">
         <select name="model" required>
           ${renderModelOptions(catalog, selectedKey)}
         </select>
@@ -1672,7 +1689,13 @@ async function renderExperimentCreateForm(root) {
   });
 
   variantsContainer.addEventListener('change', refreshSummary);
-  variantsContainer.addEventListener('input', refreshSummary);
+  variantsContainer.addEventListener('input', (e) => {
+    if (e.target.classList.contains('admin-model-search')) {
+      const row = e.target.closest('[data-variant-row]');
+      if (row) filterModelSelect(e.target, row.querySelector('select[name="model"]'), catalog);
+    }
+    refreshSummary();
+  });
 
   addBtn.addEventListener('click', () => {
     const last = rowNodes().at(-1);
