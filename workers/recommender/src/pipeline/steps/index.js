@@ -3,6 +3,7 @@
  */
 
 import { rateLimit } from './rate-limit.js';
+import { safetyGate } from './safety-gate.js';
 import { intentClassify } from './intent-classify.js';
 import { personaMatch } from './persona-match.js';
 import { useCaseMatch } from './use-case-match.js';
@@ -23,6 +24,7 @@ import { buildRecommenderPrompt } from './build-recommender-prompt.js';
 // eslint-disable-next-line import/prefer-default-export
 export const STEPS = {
   'rate-limit': rateLimit,
+  'safety-gate': safetyGate,
   'intent-classify': intentClassify,
   'persona-match': personaMatch,
   'use-case-match': useCaseMatch,
