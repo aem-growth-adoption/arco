@@ -8,6 +8,7 @@ const RECOMMENDER_FLOW = {
   description: 'Espresso machine and grinder recommendation with behavior analysis and comparison tables.',
   steps: [
     { step: 'rate-limit', gate: true },
+    { step: 'safety-gate', gate: true },
     { step: 'analyze-behavior' },
     { step: 'intent-classify' },
     { parallel: [{ step: 'persona-match' }, { step: 'use-case-match' }] },
