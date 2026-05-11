@@ -481,6 +481,102 @@ wrangler d1 execute arco-sessions --command "SELECT query, intent_type, journey_
 wrangler d1 execute arco-sessions --command "SELECT SUM(input_tokens) as total_in, SUM(output_tokens) as total_out, COUNT(*) as pages FROM generated_pages"
 ```
 
+### User Feedback (Ratings, Comments, Flags)
+
+Every freshly-generated `/?q=...` run gets a run-level feedback widget anchored above the follow-up chips. End users tap 👍 / 👎, optionally leave a comment, and on negative ratings can flag a category and tick which of the displayed products were wrong. Stored in D1 alongside `generated_pages` so the data is joinable with run metadata (model, intent, query, da_path) for model-level / intent-level aggregates.
+
+**Why it exists:** the LLM-judge in `#/evaluations` scores generations offline against a rubric, but only real users tell you whether a page actually helped. Feeds development three ways — manual review in `#/feedback`, eval cross-check via a per-cell chip on the eval matrix, and a downloadable export for ad-hoc analysis or future fine-tuning.
+
+**Data model** (migration `0008_run_feedback.sql`, auto-applied on next worker boot):
+
+```sql
+run_feedback(id, run_id, page_id, session_id, rating, comment, flags,
+             wrong_products, dwell_ms, user_agent, ip_hash,
+             created_at, updated_at, UNIQUE(run_id, session_id))
+```
+
+`UNIQUE(run_id, session_id)` means a re-submit from the same browser upserts. `flags` and `wrong_products` are JSON arrays. `dwell_ms` is captured by the widget at submit time. IPs are SHA-256 hashed via the same `hashIp()` helper used by `sessions`.
+
+**Flag categories** (closed set, validated client + server):
+
+| Key | Label |
+|-----|-------|
+| `wrong-product` | Wrong product / made-up facts |
+| `off-topic` | Off-topic / didn't answer my question |
+| `inappropriate-tone` | Inappropriate tone / off-brand |
+| `harmful-unsafe` | Harmful or unsafe |
+
+The free-text comment doubles as "other" — no explicit "other" checkbox.
+
+**Widget UX** (`scripts/feedback-widget.js`, `styles/feedback-widget.css`):
+
+1. After streaming completes, `streamAndAppendContent` async-imports the widget and inserts it before `.follow-up-container`.
+2. 👍 fires a single `POST /api/feedback {rating:+1}`, collapses to "Thanks 👍" with an optional `Add a note` chip.
+3. 👎 fires `POST /api/feedback {rating:-1}` immediately (captures the downvote even if the user bails) then expands a form: comment textarea (≤1000 chars), four flag checkboxes, and a product multi-select populated from product links in the run's already-rendered sections.
+4. `Send` upserts comment + flags + wrong-products. `Skip` collapses without a second POST.
+5. `localStorage[arco-feedback:{runId}]` remembers the rating so a page refresh doesn't re-prompt. Server-side dedup is the truth.
+
+The widget only attaches on fresh `/?q=` runs. Cached `/discover/{slug}` pages are out of scope in this iteration (re-running a deterministic-slug query bypasses the cache and triggers a fresh run).
+
+**Section→run mapping:** `renderStreamedSection` stamps `section.dataset.runId = state.runId` so the widget can scope its product detection to "this run's sections" via `[data-run-id="…"] a[href*="/products/"]`. Useful future-proofing for per-section feedback even though the widget is run-level today.
+
+**Admin views:**
+
+| Hash route | What it shows |
+|------------|---------------|
+| `#/feedback` | List with summary strip (totals, %positive, top flag, judge↔user divergence count). Filters: rating, flag, model, query substring, has-comment. `Download CSV` / `Download NDJSON` buttons in the toolbar. |
+| `#/feedback/run/:runId` | Per-run detail — run metadata + every feedback row (rating, flags, wrong products, full comment, dwell, UA, timestamp) + "View generated page" link. |
+| `#/pages/:id` `Feedback` tab | Fifth tab on the page-detail view; lists feedback for every run on that page. |
+| `#/evaluations/:id` | Each query row's label gets a `👍N 👎M` chip when real-user feedback exists for the same query. Click → jumps to `#/feedback?q=…`. Refreshes on the 3s poll. |
+| `#/insights` | Reserved route + disabled `Generate summary` button. LLM-powered feedback summarization is a follow-up spec. |
+
+**Admin API** (Basic-auth, same `ADMIN_TOKEN`):
+
+- `POST /api/feedback` (public, no auth) — upserts. Returns `204 No Content`.
+- `GET /api/admin/feedback?limit&offset&rating&flag&model&q&hasComment&since&until` — paginated list joined with `generated_pages`.
+- `GET /api/admin/feedback/summary?since=` — header-strip aggregates.
+- `GET /api/admin/feedback/run/:runId` — single-run detail + per-flag count + per-product count.
+- `GET /api/admin/feedback/export?format=csv|json&since=&until=` — flattened export, semicolon-joined `flags` and `wrong_products`.
+- `GET /api/admin/evaluations/:id?include=feedback` — opt-in expansion that adds `feedbackByQuery: { "<query>": { up, down, comments } }` to the existing payload.
+
+**Eval cross-check.** When you spot a model the LLM judge rated 4.5 but real users keep flagging — that's the signal you want. The matrix view picks this up via the `?include=feedback` expansion; the admin summary surfaces a `judge↔user diverge` count joining `experiment_variants.evaluator_score ≥ 4` against `run_feedback.rating = -1` over matching `gp.query`.
+
+**Spam / abuse protection (MVP):** the only gate is `UNIQUE(run_id, session_id)` plus server-side `comment ≤ 1000` truncation and flag/product allow-listing. No rate-limit middleware yet — if abuse appears, add an IP-hash cooldown.
+
+**Query D1 directly:**
+
+```bash
+# Recent feedback with model + query
+wrangler d1 execute arco-sessions --command \
+  "SELECT rf.created_at, rf.rating, rf.flags, gp.llm_model, gp.query
+   FROM run_feedback rf JOIN generated_pages gp ON gp.id = rf.run_id
+   ORDER BY rf.created_at DESC LIMIT 20"
+
+# Negative-only by model
+wrangler d1 execute arco-sessions --command \
+  "SELECT gp.llm_model, COUNT(*) as bad
+   FROM run_feedback rf JOIN generated_pages gp ON gp.id = rf.run_id
+   WHERE rf.rating = -1 GROUP BY gp.llm_model ORDER BY bad DESC"
+
+# Flag breakdown
+wrangler d1 execute arco-sessions --command \
+  "SELECT je.value as flag, COUNT(*) as n
+   FROM run_feedback rf, json_each(rf.flags) je
+   GROUP BY je.value ORDER BY n DESC"
+```
+
+**Key files:**
+
+| File | Role |
+|------|------|
+| `workers/recommender/migrations/0008_run_feedback.sql` | Schema + indexes |
+| `workers/recommender/src/feedback.js` | All five handlers + `attachFeedbackToQueries(env, queries)` helper for the eval matrix |
+| `workers/recommender/src/index.js` | Routes for `/api/feedback` (public) and `/api/admin/feedback/*` (admin auth gate) |
+| `workers/recommender/src/evaluations/admin.js` | Patched `handleGetEvaluation` so `?include=feedback` attaches per-query counts |
+| `scripts/feedback-widget.js` + `styles/feedback-widget.css` | DOM widget + scoped styles |
+| `scripts/recommender-stream.js` | Stamps `section.dataset.runId`; attaches widget after each run |
+| `blocks/admin/admin.js` + `blocks/admin/admin.css` | `#/feedback` list, `#/feedback/run/:id` detail, `#/insights` stub, Feedback tab on page detail, eval-matrix per-row chip |
+
 ## Testing & Quality Assurance
 
 ### Performance

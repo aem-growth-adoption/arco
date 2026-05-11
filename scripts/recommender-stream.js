@@ -88,14 +88,17 @@ async function renderDebugPanel(debugData, sessionContext, sectionEl) {
  * Render a streamed section block into the DOM.
  * @param {Object} data NDJSON section line: { type, html, sectionStyle, blockType }
  * @param {Element} content The container to insert into
+ * @param {string} [runId] If provided, stamped on `section.dataset.runId` so
+ *   downstream code (e.g., the feedback widget) can scope to a single run.
  */
-export async function renderStreamedSection(data, content) {
+export async function renderStreamedSection(data, content, runId) {
   const section = document.createElement('div');
   section.className = 'section';
   if (data.sectionStyle && data.sectionStyle !== 'default') {
     section.classList.add(data.sectionStyle);
   }
   section.dataset.sectionStatus = 'initialized';
+  if (runId) section.dataset.runId = runId;
   section.innerHTML = data.html;
 
   processSectionMetadata(section);
@@ -220,7 +223,7 @@ async function handleNdjsonEvent(data, container, state, options = {}) {
   if (data.type === 'section') {
     if (state.blockCount === 0 && options.onFirstSection) options.onFirstSection();
     state.blockCount += 1;
-    await renderStreamedSection(data, container);
+    await renderStreamedSection(data, container, state.runId);
     const lastSection = container.querySelector('.section:last-of-type');
     if (lastSection) {
       trackSectionContent(lastSection);
@@ -267,15 +270,14 @@ async function handleNdjsonEvent(data, container, state, options = {}) {
 export async function streamAndAppendContent(query, container, options = {}) {
   const startTime = Date.now();
   const sessionContext = SessionContextManager.buildContextParam();
-  const state = { blockCount: 0 };
+  const baseUrl = getAPIEndpoint('recommender');
+  const runId = crypto.randomUUID();
+  const state = { blockCount: 0, runId };
 
   if (isDebugMode()) {
     state.sessionContext = sessionContext;
     state.debugPlaceholder = createDebugPlaceholder(container);
   }
-
-  const baseUrl = getAPIEndpoint('recommender');
-  const runId = crypto.randomUUID();
   const body = {
     query,
     context: sessionContext,
@@ -337,6 +339,19 @@ export async function streamAndAppendContent(query, container, options = {}) {
 
   SessionContextManager.addQuery({ query, timestamp: Date.now(), intent: 'general' });
   SessionContextManager.addGeneratedQuery(query);
+
+  // Attach the run-level feedback widget. Loaded async so it never delays
+  // first paint or the streaming loop.
+  if (state.blockCount > 0) {
+    import('./feedback-widget.js').then(({ attachFeedbackWidget }) => {
+      attachFeedbackWidget(container, {
+        runId,
+        pageId: getCurrentPageId(),
+        sessionId: SessionContextManager.getSessionId(),
+        query,
+      });
+    }).catch(() => { /* widget is best-effort; never block the run */ });
+  }
 
   return { runId };
 }
