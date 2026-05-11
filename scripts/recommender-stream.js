@@ -361,10 +361,17 @@ export async function streamAndAppendContent(query, container, options = {}) {
  * @param {string[]} responseBuffer Buffered NDJSON lines
  * @param {Element} container Target container
  * @param {Object} options Same options as streamAndAppendContent
+ * @param {string} [options.runId] runId issued by the speculative fetch.
+ *   When provided, sections are stamped with `data-run-id` and the feedback
+ *   widget attaches against the matching server-side row. When omitted, a
+ *   fresh client UUID is generated so the widget still appears (feedback
+ *   will be orphaned from generated_pages — recorded but not joinable).
  */
 export async function replaySpeculativeResult(responseBuffer, container, options = {}) {
+  const runId = options.runId || crypto.randomUUID();
   const state = {
     blockCount: 0,
+    runId,
     sessionContext: options.sessionContext || null,
     debugPlaceholder: isDebugMode() ? createDebugPlaceholder(container) : null,
   };
@@ -386,4 +393,15 @@ export async function replaySpeculativeResult(responseBuffer, container, options
 
   SessionContextManager.addQuery({ query: options.query || '', timestamp: Date.now(), intent: 'general' });
   SessionContextManager.addGeneratedQuery(options.query || '');
+
+  if (state.blockCount > 0) {
+    import('./feedback-widget.js').then(({ attachFeedbackWidget }) => {
+      attachFeedbackWidget(container, {
+        runId,
+        pageId: getCurrentPageId(),
+        sessionId: SessionContextManager.getSessionId(),
+        query: options.query || '',
+      });
+    }).catch(() => { /* widget is best-effort; never block the replay */ });
+  }
 }
