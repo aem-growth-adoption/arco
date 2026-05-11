@@ -516,11 +516,43 @@ export async function handleEvalQueueStatus(request, env) {
   });
 }
 
+// ── Shared helper: fetch CF API and parse defensively ────────────────────────
+// Reads body as text first so non-JSON responses (HTML 5xx pages, empty bodies)
+// surface as a useful error instead of throwing inside res.json().
+async function cfApiCall(url, options) {
+  let res;
+  try {
+    res = await fetch(url, options);
+  } catch (err) {
+    const e = new Error(`CF API fetch failed: ${err.message || err}`);
+    e.status = 502;
+    throw e;
+  }
+  const rawBody = await res.text();
+  let data = null;
+  if (rawBody) {
+    try { data = JSON.parse(rawBody); } catch { /* keep raw */ }
+  }
+  if (!res.ok || (data && data.success === false)) {
+    const cfMsg = data?.errors?.[0]?.message
+      || data?.error
+      || data?.message
+      || (rawBody && rawBody.slice(0, 300))
+      || res.statusText
+      || 'unknown CF API error';
+    const e = new Error(`CF API ${options?.method || 'GET'} ${url.split('/').slice(-3).join('/')} → ${res.status}: ${cfMsg}`);
+    e.status = res.status >= 400 ? res.status : 502;
+    e.cfBody = data || rawBody;
+    throw e;
+  }
+  return data ?? {};
+}
+
 // ── Shared helper: resume delivery via queue-level PUT ───────────────────────
 
 async function cfResumeQueueDelivery(env) {
   // wrangler queues resume-delivery calls PUT /queues/{id} with settings.delivery_paused=false
-  const res = await fetch(
+  return cfApiCall(
     `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/queues/${EVAL_QUEUE_ID}`,
     {
       method: 'PUT',
@@ -534,7 +566,6 @@ async function cfResumeQueueDelivery(env) {
       }),
     },
   );
-  return res.json();
 }
 
 // ── GET /api/admin/eval-queue/consumers  (queue + delivery status) ────────────
@@ -572,8 +603,16 @@ export async function handleEvalQueueResumeDelivery(request, env) {
     return jsonResponse({ error: 'CF_API_TOKEN not configured' }, { status: 500 });
   }
 
-  const data = await cfResumeQueueDelivery(env);
-  return jsonResponse(data);
+  try {
+    const data = await cfResumeQueueDelivery(env);
+    return jsonResponse(data);
+  } catch (err) {
+    console.error('[eval-queue/resume-delivery] failed', err);
+    return jsonResponse(
+      { error: err.message || 'resume-delivery failed', cfBody: err.cfBody },
+      { status: err.status || 500 },
+    );
+  }
 }
 
 // ── POST /api/admin/eval-queue/purge ─────────────────────────────────────────
@@ -586,40 +625,65 @@ export async function handleEvalQueuePurge(request, env) {
     return jsonResponse({ error: 'CF_API_TOKEN not configured' }, { status: 500 });
   }
 
-  // Purge the CF Queue (removes all pending messages)
-  const res = await fetch(
-    `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/queues/${EVAL_QUEUE_ID}/purge`,
-    {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${env.CF_API_TOKEN}` },
-    },
-  );
-  const data = await res.json();
-  if (!data.success) {
+  // Step 1: purge the CF Queue (removes all pending messages).
+  // The current CF Queues API requires `delete_messages_permanently: true`
+  // in the body, otherwise it 400s with a confusing error.
+  try {
+    await cfApiCall(
+      `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/queues/${EVAL_QUEUE_ID}/purge`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${env.CF_API_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ delete_messages_permanently: true }),
+      },
+    );
+  } catch (err) {
+    console.error('[eval-queue/purge] CF API call failed', err);
     return jsonResponse(
-      { error: data.errors?.[0]?.message || 'Purge failed' },
+      {
+        error: err.message || 'Purge failed',
+        stage: 'cf-purge',
+        cfBody: err.cfBody,
+      },
+      { status: err.status || 500 },
+    );
+  }
+
+  // Step 2: reset active runs to 'error' phase so they don't block future runs.
+  try {
+    await env.SESSIONS_DB.prepare(`
+      UPDATE eval_runs SET phase = 'error', status = 'purged', last_activity_at = ?1
+      WHERE phase IN ('generating', 'judging')
+    `).bind(Date.now()).run();
+
+    await env.SESSIONS_DB.prepare(`
+      UPDATE experiment_variants SET status = 'error', error = 'queue purged'
+      WHERE status = 'running'
+    `).run();
+  } catch (err) {
+    console.error('[eval-queue/purge] D1 cleanup failed after successful purge', err);
+    return jsonResponse(
+      {
+        error: `Queue purged but D1 cleanup failed: ${err.message || err}`,
+        stage: 'd1-cleanup',
+        purged: true,
+      },
       { status: 500 },
     );
   }
 
-  // Reset active runs to 'error' phase so they don't block future runs
-  await env.SESSIONS_DB.prepare(`
-    UPDATE eval_runs SET phase = 'error', status = 'purged', last_activity_at = ?1
-    WHERE phase IN ('generating', 'judging')
-  `).bind(Date.now()).run();
-
-  // Reset stale 'running' variants to 'error'
-  await env.SESSIONS_DB.prepare(`
-    UPDATE experiment_variants SET status = 'error', error = 'queue purged'
-    WHERE status = 'running'
-  `).run();
-
-  // Auto-resume delivery after purge (purge always pauses the consumer)
-  if (env.CF_API_TOKEN) {
-    try {
-      await cfResumeQueueDelivery(env);
-    } catch { /* best-effort */ }
+  // Step 3: auto-resume delivery (purge always pauses the consumer).
+  // Best-effort — surface the failure as a warning, don't fail the whole call.
+  let resumeWarning = null;
+  try {
+    await cfResumeQueueDelivery(env);
+  } catch (err) {
+    console.error('[eval-queue/purge] resume-delivery after purge failed', err);
+    resumeWarning = err.message || String(err);
   }
 
-  return jsonResponse({ purged: true });
+  return jsonResponse({ purged: true, resumeWarning });
 }
