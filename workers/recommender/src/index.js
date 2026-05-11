@@ -48,8 +48,10 @@ import {
   handleRegenerateVariant,
   handleEvalQueueStatus,
   handleEvalQueuePurge,
+  handleEvalQueueConsumers,
+  handleEvalQueueResumeDelivery,
 } from './evaluations/admin.js';
-import { handleEvalQueue } from './evaluations/queue.js';
+import { handleEvalQueue, handleEvalCronFallback } from './evaluations/queue.js';
 import handleSuggestRequest from './suggest.js';
 
 /**
@@ -364,6 +366,10 @@ export default {
     await handleEvalQueue(batch, env);
   },
 
+  async scheduled(event, env) {
+    await handleEvalCronFallback(env);
+  },
+
   async fetch(request, env, ctx) {
     request.ctx = ctx;
 
@@ -457,6 +463,22 @@ export default {
     }
     if (url.pathname === '/api/admin/eval-queue/purge' && request.method === 'POST') {
       return handleEvalQueuePurge(request, env);
+    }
+    if (url.pathname === '/api/admin/eval-queue/consumers' && request.method === 'GET') {
+      return handleEvalQueueConsumers(request, env);
+    }
+    if (url.pathname === '/api/admin/eval-queue/resume-delivery' && request.method === 'POST') {
+      return handleEvalQueueResumeDelivery(request, env);
+    }
+    // Diagnostic: directly invoke the queue handler via HTTP (bypasses CF Queue delivery)
+    if (url.pathname === '/api/admin/eval-queue/test-invoke' && request.method === 'POST') {
+      const authHeader = request.headers.get('Authorization') || '';
+      const expected = `Basic ${btoa(`admin:${env.ADMIN_TOKEN}`)}`;
+      if (authHeader !== expected) return new Response('Unauthorized', { status: 401 });
+      const body = await request.json().catch(() => ({}));
+      const fakeBatch = { messages: [{ body, ack() {}, retry() {} }] };
+      await handleEvalQueue(fakeBatch, env);
+      return new Response(JSON.stringify({ invoked: true }), { headers: { 'content-type': 'application/json' } });
     }
     if (url.pathname === '/api/admin/evaluations/start' && request.method === 'POST') {
       return handleStartEvaluation(request, env);

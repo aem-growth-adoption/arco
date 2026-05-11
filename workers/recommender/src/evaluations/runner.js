@@ -1488,6 +1488,18 @@ export async function runEvalQueryStream(request, env, evalRunId, queryId, optio
 // No streaming, no request dependency — runs one query synchronously and
 // returns { ok: true } or { ok: false, error: message }.
 
+// Discards everything written — used by headless runners that don't have a client
+// to stream to. Critical: must not back-pressure, or the LLM step will deadlock
+// on `await ctx.writer.write(...)` and the worker will hit its wall-time limit.
+function createNoopWriter() {
+  const sink = new WritableStream({
+    write() { /* discard */ },
+    close() { /* nop */ },
+    abort() { /* nop */ },
+  });
+  return sink.getWriter();
+}
+
 export async function runOneQueryHeadless(env, evalRunId, queryId) {
   const cfg = await loadEvalRunConfig(env, evalRunId);
   if (!cfg) return { ok: false, error: 'Eval run not found' };
@@ -1495,9 +1507,7 @@ export async function runOneQueryHeadless(env, evalRunId, queryId) {
   const queryDef = cfg.suite.queries.find((q) => q.id === queryId);
   if (!queryDef) return { ok: false, error: `Query ${queryId} not in suite ${cfg.suite.id}` };
 
-  // Synthetic request with no-op writer (runOneQuery expects these)
-  const { writable } = new TransformStream();
-  const writer = writable.getWriter();
+  const writer = createNoopWriter();
   const encoder = new TextEncoder();
   const request = {
     headers: new Headers(),
@@ -1564,9 +1574,7 @@ export async function regenerateOneVariantHeadless(env, evalRunId, variantId) {
     `).bind(variantId).run();
   }
 
-  // Synthetic request with no-op writer
-  const { writable } = new TransformStream();
-  const writer = writable.getWriter();
+  const writer = createNoopWriter();
   const encoder = new TextEncoder();
   const request = { headers: new Headers(), evalWriter: writer, evalEncoder: encoder };
 

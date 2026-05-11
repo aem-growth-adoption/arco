@@ -57,11 +57,11 @@ export function getJudgeRates(id) {
 const MAX_BLOCK_CHARS = 24_000; // ~6k tokens of generated HTML; truncates long pages.
 // ~1.5k tokens of RAG context — enough for prices+specs without crowding blocks.
 const MAX_RAG_CHARS = 6_000;
-const MAX_RETRIES = 5;
-// Exponential backoff base (ms). Sleep on attempt N is RETRY_BASE_MS * 2^N + jitter.
-// So 1s, 2s, 4s, 8s, 16s for attempts 0..4 — keeps Bedrock 429s recoverable
-// without blocking forever.
-const RETRY_BASE_MS = 1000;
+// In-process retry only handles transient blips (1 quick retry at ~500ms).
+// For persistent 429s the consumer escalates to CF Queue's per-message retry
+// with delaySeconds, which syncs to Bedrock's 60s quota refresh window.
+const MAX_RETRIES = 2;
+const RETRY_BASE_MS = 500;
 const RETRY_JITTER_MS = 500;
 
 const RUBRIC = `Score on each dimension 1-5 (1=poor, 5=excellent) with one short sentence of reasoning:

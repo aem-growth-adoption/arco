@@ -66,9 +66,15 @@
       "queue": "arco-eval-queries",
       "max_batch_size": 1,
       "max_concurrency": 3,
-      "max_retries": 0,
+      "max_retries": 5,
       "dead_letter_queue": "arco-eval-dlq"
     }]
+  },
+
+  // Cron fallback: scan for stuck eval runs every minute and process directly
+  // (resilience layer in case CF Queue delivery fails)
+  "triggers": {
+    "crons": ["*/5 * * * *"]
   },
 
   "vars": {

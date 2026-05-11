@@ -201,7 +201,7 @@ export async function handleResumeEvaluation(request, env, evalRunId) {
   // Reset completed_queries count to account for re-published queries
   await env.SESSIONS_DB.prepare(`
     UPDATE eval_runs
-    SET phase = 'generating', completed_queries = completed_queries - ?1, last_activity_at = ?2
+    SET phase = 'generating', completed_queries = MAX(0, completed_queries - ?1), last_activity_at = ?2
     WHERE id = ?3
   `).bind(toResume.length, Date.now(), evalRunId).run();
 
@@ -506,6 +506,66 @@ export async function handleEvalQueueStatus(request, env) {
   });
 }
 
+// ── Shared helper: resume delivery via queue-level PUT ───────────────────────
+
+async function cfResumeQueueDelivery(env) {
+  // wrangler queues resume-delivery calls PUT /queues/{id} with settings.delivery_paused=false
+  const res = await fetch(
+    `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/queues/${EVAL_QUEUE_ID}`,
+    {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${env.CF_API_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        queue_name: 'arco-eval-queries',
+        settings: { delivery_paused: false },
+      }),
+    },
+  );
+  return res.json();
+}
+
+// ── GET /api/admin/eval-queue/consumers  (queue + delivery status) ────────────
+
+export async function handleEvalQueueConsumers(request, env) {
+  const unauth = await requireAdminAuth(request, env);
+  if (unauth) return unauth;
+
+  if (!env.CF_API_TOKEN) {
+    return jsonResponse({ error: 'CF_API_TOKEN not configured' }, { status: 500 });
+  }
+
+  // Fetch queue-level info (includes delivery_paused) AND consumer list in parallel
+  const [queueRes, consumerRes] = await Promise.all([
+    fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/queues/${EVAL_QUEUE_ID}`,
+      { headers: { Authorization: `Bearer ${env.CF_API_TOKEN}` } },
+    ),
+    fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/queues/${EVAL_QUEUE_ID}/consumers`,
+      { headers: { Authorization: `Bearer ${env.CF_API_TOKEN}` } },
+    ),
+  ]);
+  const [queueData, consumerData] = await Promise.all([queueRes.json(), consumerRes.json()]);
+  return jsonResponse({ queue: queueData, consumers: consumerData });
+}
+
+// ── POST /api/admin/eval-queue/resume-delivery ────────────────────────────────
+
+export async function handleEvalQueueResumeDelivery(request, env) {
+  const unauth = await requireAdminAuth(request, env);
+  if (unauth) return unauth;
+
+  if (!env.CF_API_TOKEN) {
+    return jsonResponse({ error: 'CF_API_TOKEN not configured' }, { status: 500 });
+  }
+
+  const data = await cfResumeQueueDelivery(env);
+  return jsonResponse(data);
+}
+
 // ── POST /api/admin/eval-queue/purge ─────────────────────────────────────────
 
 export async function handleEvalQueuePurge(request, env) {
@@ -543,6 +603,13 @@ export async function handleEvalQueuePurge(request, env) {
     UPDATE experiment_variants SET status = 'error', error = 'queue purged'
     WHERE status = 'running'
   `).run();
+
+  // Auto-resume delivery after purge (purge always pauses the consumer)
+  if (env.CF_API_TOKEN) {
+    try {
+      await cfResumeQueueDelivery(env);
+    } catch { /* best-effort */ }
+  }
 
   return jsonResponse({ purged: true });
 }
