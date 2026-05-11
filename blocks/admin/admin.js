@@ -2802,32 +2802,27 @@ async function renderEvaluation(root, evalRunId) {
 
   const rowKeyOf = (exp) => (exp.id || `missing-${exp.eval_query_id}`);
 
-  root.innerHTML = `
-    <nav class="admin-crumbs"><a href="#/evaluations">← Evaluations</a></nav>
-    <div class="admin-toolbar">
-      <h2 class="admin-page-title">${esc(run.suite_name || run.suite_id)}</h2>
-      <div class="admin-badges">
-        ${badge(run.phase && (run.phase === 'generating' || run.phase === 'judging')
-    ? `${run.phase} ${run.completed_queries || 0}/${run.query_count}`
-    : (run.status || '—'), EVAL_STATUS_TONE[run.status] || 'muted')}
-        ${badge(`${run.query_count} queries`, 'accent')}
-        ${badge(`${run.model_count} models`, 'purple')}
-        ${badge(run.judge_model || '—', 'warn')}
-      </div>
-    </div>
+  // Copy attributes from `source` onto `target` element. Used to update a
+  // <td>'s class / data-* in place without replacing the node itself.
+  const syncAttributes = (target, source) => {
+    [...target.attributes].forEach((attr) => {
+      if (!source.hasAttribute(attr.name)) target.removeAttribute(attr.name);
+    });
+    [...source.attributes].forEach((attr) => {
+      if (target.getAttribute(attr.name) !== attr.value) {
+        target.setAttribute(attr.name, attr.value);
+      }
+    });
+  };
 
-    <div class="admin-stats admin-stats-strip">
-      <span class="admin-stat"><span class="admin-stat-value">${run.estimated_cost_usd != null ? `$${run.estimated_cost_usd.toFixed(2)}` : '—'}</span><span class="admin-stat-label">judge cost (est.)</span></span>
-      <span class="admin-stat"><span class="admin-stat-value">${fmtInt(run.total_input_tokens || 0)}</span><span class="admin-stat-label">gen tokens in</span></span>
-      <span class="admin-stat"><span class="admin-stat-value">${fmtInt(run.total_output_tokens || 0)}</span><span class="admin-stat-label">gen tokens out</span></span>
-      <span class="admin-stat"><span class="admin-stat-value">${fmtInt((run.judge_input_tokens || 0) + (run.judge_output_tokens || 0))}</span><span class="admin-stat-label">judge tokens</span></span>
-      <span class="admin-stat"><span class="admin-stat-value">${ts(run.created_at)}</span><span class="admin-stat-label">created</span></span>
-    </div>
-
-    ${summary?.perModel?.length
-    ? `<section class="admin-card">
+  // Build the per-model summary card HTML. Returns '' when no perModel data
+  // is available yet (the run hasn't finalized). Reused by initial render
+  // AND by patchSummaryOnComplete so we never duplicate the markup.
+  const summaryCardHtml = (s) => {
+    if (!s?.perModel?.length) return '';
+    return `<section class="admin-card" data-role="eval-summary-card">
         <h3>Per-model averages <span class="admin-muted admin-eval-score-hint">· quality scale 1.00 (worst) – 5.00 (best) · ± value is 95% CI half-width</span></h3>
-        ${renderSignificanceHint(summary.perModel)}
+        ${renderSignificanceHint(s.perModel)}
         <div class="admin-table-wrap"><table class="admin-table admin-eval-summary-table">
           <thead><tr>
             <th>Model</th><th>Quality</th>
@@ -2836,7 +2831,7 @@ async function renderEvaluation(root, evalRunId) {
             <th>Blockers</th><th>Avg TTFT</th><th>Avg duration</th>
             <th>Tok in</th><th>Tok out</th><th>Errors</th>
           </tr></thead>
-          <tbody>${summary.perModel.map((m) => {
+          <tbody>${s.perModel.map((m) => {
     const qualityCell = m.avgQuality != null
       ? `<span class="admin-badge admin-badge-${QUALITY_TONE(m.avgQuality)}">${m.avgQuality.toFixed(2)}</span>${m.qualityCi95 != null ? ` <span class="admin-muted admin-eval-ci">± ${m.qualityCi95.toFixed(2)}</span>` : ''}${m.qualityN ? ` <span class="admin-muted admin-eval-n">n=${m.qualityN}</span>` : ''}`
       : '—';
@@ -2868,28 +2863,73 @@ async function renderEvaluation(root, evalRunId) {
           </tr>`;
   }).join('')}</tbody>
         </table></div>
-      </section>`
-    : ''}
+      </section>`;
+  };
+
+  // Toolbar count chips. Rebuilt on every refresh so the user sees counts
+  // decrement in real time.
+  const toolbarCountsHtml = (c, totalGen, failed) => `
+    <span class="admin-eval-count"><strong>${totalGen}</strong> generated</span>
+    <span class="admin-eval-count admin-eval-count-judged"><strong>${c.judged}</strong> judged</span>
+    <span class="admin-eval-count admin-eval-count-pending"><strong>${c.pending}</strong> pending</span>
+    ${c.notStarted > 0 ? `<span class="admin-eval-count"><strong>${c.notStarted}</strong> not started</span>` : ''}
+    ${c.stalled > 0 ? `<span class="admin-eval-count"><strong>${c.stalled}</strong> stalled</span>` : ''}
+    <span class="admin-eval-count admin-eval-count-error"><strong>${failed}</strong> error${failed === 1 ? '' : 's'}</span>
+  `;
+
+  // Toolbar action buttons. Rebuilt on every refresh so buttons appear /
+  // disappear as the run progresses. A delegated click listener handles
+  // them by data-role, so freshly-rebuilt buttons still respond.
+  const toolbarActionsHtml = (c, missingCount, failed) => `
+    ${missingCount > 0 || c.genErr > 0 ? `<button type="button" class="admin-btn admin-btn-primary" data-role="continue-generation">Resume (${missingCount + c.genErr} failed/missing)</button>` : ''}
+    ${c.pending > 0 ? `<button type="button" class="admin-btn${missingCount === 0 ? ' admin-btn-primary' : ''}" data-role="run-judging">${c.judged > 0 ? 'Continue judging' : 'Run judging'} (${c.pending})</button>` : ''}
+    ${failed > 0 ? `<button type="button" class="admin-btn" data-role="retry-failed">Retry failed cells (${failed})</button>` : ''}
+    <button type="button" class="admin-btn admin-btn-ghost" data-role="rejudge-all">Re-judge all</button>
+  `;
+
+  // Aggregate cell counts from a matrix shape — used for the toolbar refresh.
+  const aggregateCounts = (m) => m.reduce((acc, { exp, cells: cs }) => {
+    const isMiss = exp.missing === true;
+    cs.forEach((c) => {
+      const k = classifyCell(c, isMiss);
+      acc[k] = (acc[k] || 0) + 1;
+    });
+    return acc;
+  }, {
+    judged: 0, pending: 0, judgeErr: 0, genErr: 0, running: 0, empty: 0, notStarted: 0, stalled: 0,
+  });
+
+  root.innerHTML = `
+    <nav class="admin-crumbs"><a href="#/evaluations">← Evaluations</a></nav>
+    <div class="admin-toolbar">
+      <h2 class="admin-page-title">${esc(run.suite_name || run.suite_id)}</h2>
+      <div class="admin-badges">
+        ${badge(run.phase && (run.phase === 'generating' || run.phase === 'judging')
+    ? `${run.phase} ${run.completed_queries || 0}/${run.query_count}`
+    : (run.status || '—'), EVAL_STATUS_TONE[run.status] || 'muted')}
+        ${badge(`${run.query_count} queries`, 'accent')}
+        ${badge(`${run.model_count} models`, 'purple')}
+        ${badge(run.judge_model || '—', 'warn')}
+      </div>
+    </div>
+
+    <div class="admin-stats admin-stats-strip">
+      <span class="admin-stat"><span class="admin-stat-value">${run.estimated_cost_usd != null ? `$${run.estimated_cost_usd.toFixed(2)}` : '—'}</span><span class="admin-stat-label">judge cost (est.)</span></span>
+      <span class="admin-stat"><span class="admin-stat-value">${fmtInt(run.total_input_tokens || 0)}</span><span class="admin-stat-label">gen tokens in</span></span>
+      <span class="admin-stat"><span class="admin-stat-value">${fmtInt(run.total_output_tokens || 0)}</span><span class="admin-stat-label">gen tokens out</span></span>
+      <span class="admin-stat"><span class="admin-stat-value">${fmtInt((run.judge_input_tokens || 0) + (run.judge_output_tokens || 0))}</span><span class="admin-stat-label">judge tokens</span></span>
+      <span class="admin-stat"><span class="admin-stat-value">${ts(run.created_at)}</span><span class="admin-stat-label">created</span></span>
+    </div>
+
+    ${summaryCardHtml(summary)}
 
     <section class="admin-card">
       <h3>Matrix · queries × models</h3>
       <p class="admin-muted">Each cell shows speed (TTFT, duration, tokens/sec) on top and Claude's quality score below (range 1.00 – 5.00). Click any cell to view that variant's generated page. Hover a cell and click ↻ to retry just that cell.</p>
 
       <div class="admin-eval-toolbar" data-role="eval-toolbar">
-        <div class="admin-eval-counts">
-          <span class="admin-eval-count"><strong>${totalGenerated}</strong> generated</span>
-          <span class="admin-eval-count admin-eval-count-judged"><strong>${counts.judged}</strong> judged</span>
-          <span class="admin-eval-count admin-eval-count-pending"><strong>${counts.pending}</strong> pending</span>
-          ${counts.notStarted > 0 ? `<span class="admin-eval-count"><strong>${counts.notStarted}</strong> not started</span>` : ''}
-          ${counts.stalled > 0 ? `<span class="admin-eval-count"><strong>${counts.stalled}</strong> stalled</span>` : ''}
-          <span class="admin-eval-count admin-eval-count-error"><strong>${failedCount}</strong> error${failedCount === 1 ? '' : 's'}</span>
-        </div>
-        <div class="admin-eval-toolbar-actions">
-          ${missingQueries.length > 0 || counts.genErr > 0 ? `<button type="button" class="admin-btn admin-btn-primary" data-role="continue-generation">Resume (${missingQueries.length + counts.genErr} failed/missing)</button>` : ''}
-          ${counts.pending > 0 ? `<button type="button" class="admin-btn${missingQueries.length === 0 ? ' admin-btn-primary' : ''}" data-role="run-judging">${counts.judged > 0 ? 'Continue judging' : 'Run judging'} (${counts.pending})</button>` : ''}
-          ${failedCount > 0 ? `<button type="button" class="admin-btn" data-role="retry-failed">Retry failed cells (${failedCount})</button>` : ''}
-          <button type="button" class="admin-btn admin-btn-ghost" data-role="rejudge-all">Re-judge all</button>
-        </div>
+        <div class="admin-eval-counts">${toolbarCountsHtml(counts, totalGenerated, failedCount)}</div>
+        <div class="admin-eval-toolbar-actions">${toolbarActionsHtml(counts, missingQueries.length, failedCount)}</div>
         <div class="admin-eval-toolbar-status admin-muted" data-role="toolbar-status"></div>
       </div>
 
@@ -2925,7 +2965,6 @@ async function renderEvaluation(root, evalRunId) {
   const setToolbarStatus = (txt) => {
     if (toolbarStatus) toolbarStatus.textContent = txt || '';
   };
-  const reload = () => renderEvaluation(root, evalRunId);
 
   const rejudgeOneCell = async (cellEl) => {
     const { variantId } = cellEl.dataset;
@@ -3037,76 +3076,79 @@ async function renderEvaluation(root, evalRunId) {
     }
   };
 
-  // ── Resume generation: re-publish failed/missing queries to the queue ──
-  const continueGenBtn = root.querySelector('[data-role="continue-generation"]');
-  if (continueGenBtn) {
-    continueGenBtn.addEventListener('click', async () => {
-      continueGenBtn.disabled = true;
-      setToolbarStatus('Resuming…');
-      try {
-        const result = await api(`/api/admin/evaluations/${evalRunId}/resume`, {
-          method: 'POST',
-        });
-        setToolbarStatus(`Resumed ${result.resumed} / ${result.total} queries — polling for progress…`);
-        setTimeout(() => reload(), 2000);
-      } catch (err) {
-        setToolbarStatus(`Resume failed: ${err.message}`);
-      } finally {
-        continueGenBtn.disabled = false;
-      }
-    });
-  }
+  // Delegated handler — the actions area is rebuilt on every poll so the
+  // counts (and which buttons are visible) stay accurate. Direct binding
+  // would lose handlers on every refresh.
+  const toolbarEl = root.querySelector('[data-role="eval-toolbar"]');
+  if (toolbarEl) {
+    toolbarEl.addEventListener('click', async (e) => {
+      const btn = e.target.closest('button[data-role]');
+      if (!btn) return;
+      const { role } = btn.dataset;
 
-  const runJudgingBtn = root.querySelector('[data-role="run-judging"]');
-  if (runJudgingBtn) {
-    runJudgingBtn.addEventListener('click', () => runBulkJudge('pending', 'Judging pending cells'));
-  }
-  const rejudgeAllBtn = root.querySelector('[data-role="rejudge-all"]');
-  if (rejudgeAllBtn) {
-    rejudgeAllBtn.addEventListener('click', () => {
-      if (!window.confirm('Re-judge ALL completed cells in this run? This will overwrite existing scores and use Bedrock tokens for every cell.')) return;
-      runBulkJudge('all', 'Re-judging all cells');
-    });
-  }
-  const retryFailedBtn = root.querySelector('[data-role="retry-failed"]');
-  if (retryFailedBtn) {
-    retryFailedBtn.addEventListener('click', async () => {
-      // Failed cells split into three groups:
-      //   - genErr: must be regenerated (no blocks at all)
-      //   - judgeErr with KV-missing message: must be regenerated (KV expired
-      //     or pre-dates the rag-context persistence change)
-      //   - judgeErr (other): cheap re-judge from KV is enough
-      // Run regens sequentially (each costs a full pipeline run), then bulk-
-      // rejudge the rest in one streaming call.
-      const variantsById = new Map(variants.map((v) => [v.id, v]));
-      const judgeErrIsKvMissing = (variant) => {
-        const notes = parseEvaluatorNotes(variant?.evaluator_notes);
-        const msg = notes?.judge_error || '';
-        return /not found in KV/i.test(msg);
-      };
-      const genErrCells = [...root.querySelectorAll('.admin-eval-cell-class-genErr')];
-      const stalledCells = [...root.querySelectorAll('.admin-eval-cell-class-stalled')];
-      const judgeErrCells = [...root.querySelectorAll('.admin-eval-cell-class-judgeErr')];
-      const judgeErrKvMissing = judgeErrCells
-        .filter((td) => judgeErrIsKvMissing(variantsById.get(td.dataset.variantId)));
-      const regenCells = [...genErrCells, ...stalledCells, ...judgeErrKvMissing];
-      const judgeErrCount = judgeErrCells.length - judgeErrKvMissing.length;
-      const failureSummary = `${regenCells.length} regen + ${judgeErrCount} re-judge`;
-      if (!window.confirm(`Retry failed cells: ${failureSummary}? Regenerations cost upstream LLM tokens; re-judges cost Bedrock tokens.${judgeErrKvMissing.length ? `\n\n(${judgeErrKvMissing.length} judge errors will be regenerated because their stored blocks are missing from KV.)` : ''}`)) return;
-      retryFailedBtn.disabled = true;
-      try {
-        if (regenCells.length) {
-          await Promise.all(regenCells.map((td) => regenerateOneCell(td)));
+      if (role === 'continue-generation') {
+        btn.disabled = true;
+        setToolbarStatus('Resuming…');
+        try {
+          const result = await api(`/api/admin/evaluations/${evalRunId}/resume`, {
+            method: 'POST',
+          });
+          setToolbarStatus(`Resumed ${result.resumed} / ${result.total} queries — polling for progress…`);
+        } catch (err) {
+          setToolbarStatus(`Resume failed: ${err.message}`);
+        } finally {
+          btn.disabled = false;
         }
-        if (judgeErrCount > 0) {
-          await runBulkJudge('errors', 'Re-judging error cells');
+        return;
+      }
+
+      if (role === 'run-judging') {
+        runBulkJudge('pending', 'Judging pending cells');
+        return;
+      }
+
+      if (role === 'rejudge-all') {
+        if (!window.confirm('Re-judge ALL completed cells in this run? This will overwrite existing scores and use Bedrock tokens for every cell.')) return;
+        runBulkJudge('all', 'Re-judging all cells');
+        return;
+      }
+
+      if (role === 'retry-failed') {
+        // Failed cells split into three groups:
+        //   - genErr: must be regenerated (no blocks at all)
+        //   - judgeErr with KV-missing message: must be regenerated (KV expired
+        //     or pre-dates the rag-context persistence change)
+        //   - judgeErr (other): cheap re-judge from KV is enough
+        const variantsById = new Map(currentVariants.map((v) => [v.id, v]));
+        const judgeErrIsKvMissing = (variant) => {
+          const notes = parseEvaluatorNotes(variant?.evaluator_notes);
+          const msg = notes?.judge_error || '';
+          return /not found in KV/i.test(msg);
+        };
+        const genErrCells = [...root.querySelectorAll('.admin-eval-cell-class-genErr')];
+        const stalledCells = [...root.querySelectorAll('.admin-eval-cell-class-stalled')];
+        const judgeErrCells = [...root.querySelectorAll('.admin-eval-cell-class-judgeErr')];
+        const judgeErrKvMissing = judgeErrCells
+          .filter((td) => judgeErrIsKvMissing(variantsById.get(td.dataset.variantId)));
+        const regenCells = [...genErrCells, ...stalledCells, ...judgeErrKvMissing];
+        const judgeErrCount = judgeErrCells.length - judgeErrKvMissing.length;
+        const failureSummary = `${regenCells.length} regen + ${judgeErrCount} re-judge`;
+        if (!window.confirm(`Retry failed cells: ${failureSummary}? Regenerations cost upstream LLM tokens; re-judges cost Bedrock tokens.${judgeErrKvMissing.length ? `\n\n(${judgeErrKvMissing.length} judge errors will be regenerated because their stored blocks are missing from KV.)` : ''}`)) return;
+        btn.disabled = true;
+        try {
+          if (regenCells.length) {
+            await Promise.all(regenCells.map((td) => regenerateOneCell(td)));
+          }
+          if (judgeErrCount > 0) {
+            await runBulkJudge('errors', 'Re-judging error cells');
+          }
+          const total = regenCells.length + judgeErrCount;
+          setToolbarStatus(`Retry: ${total} cells queued — polling for progress…`);
+        } catch (err) {
+          setToolbarStatus(`Retry failed: ${err.message}`);
+        } finally {
+          btn.disabled = false;
         }
-        const total = regenCells.length + judgeErrCount;
-        setToolbarStatus(`Retry: ${total} cells queued — polling for progress…`);
-      } catch (err) {
-        setToolbarStatus(`Retry failed: ${err.message}`);
-      } finally {
-        retryFailedBtn.disabled = false;
       }
     });
   }
@@ -3195,15 +3237,20 @@ async function renderEvaluation(root, evalRunId) {
                 labelCell.dataset.signature = newLabelSig;
               }
 
-              // Diff each data cell — replace only when signature differs.
+              // Diff each data cell. Update existing <td> in place (sync
+              // attributes + innerHTML) so the cell element identity is
+              // preserved — no node churn, no hover flash, no layout jitter.
               cells.forEach((c, i) => {
                 const existingCell = row.children[i + 1];
                 const newSig = cellSignature(c, exp);
-                if (!existingCell || existingCell.dataset.signature !== newSig) {
+                if (!existingCell) {
+                  const newCell = parseTdHtml(cellHtml(c, exp));
+                  if (newCell) row.appendChild(newCell);
+                } else if (existingCell.dataset.signature !== newSig) {
                   const newCell = parseTdHtml(cellHtml(c, exp));
                   if (newCell) {
-                    if (existingCell) existingCell.replaceWith(newCell);
-                    else row.appendChild(newCell);
+                    syncAttributes(existingCell, newCell);
+                    existingCell.innerHTML = newCell.innerHTML;
                   }
                 }
               });
@@ -3240,6 +3287,44 @@ async function renderEvaluation(root, evalRunId) {
           }
         }
 
+        // Patch the toolbar in place so counts decrement live and stale
+        // buttons (e.g. "Run judging" with pending=0) disappear without a
+        // full reload. The delegated click listener on the toolbar handles
+        // freshly-rebuilt buttons.
+        const freshCounts = aggregateCounts(freshMatrix);
+        const freshTotalGen = freshCounts.judged + freshCounts.pending + freshCounts.judgeErr;
+        const freshFailed = freshCounts.genErr + freshCounts.judgeErr + freshCounts.stalled;
+        const freshMissingCount = (suite?.queries || [])
+          .filter((q) => !freshRanIds.has(q.id)).length;
+        const countsEl = root.querySelector('.admin-eval-counts');
+        if (countsEl) {
+          const next = toolbarCountsHtml(freshCounts, freshTotalGen, freshFailed);
+          if (countsEl.innerHTML !== next) countsEl.innerHTML = next;
+        }
+        const actionsEl = root.querySelector('.admin-eval-toolbar-actions');
+        if (actionsEl) {
+          const next = toolbarActionsHtml(freshCounts, freshMissingCount, freshFailed);
+          if (actionsEl.innerHTML !== next) actionsEl.innerHTML = next;
+        }
+
+        // Patch the per-model summary card. Appears for the first time when
+        // the run finalizes; updates in place if it already exists.
+        const freshSummary = (() => {
+          try {
+            return freshRun.summary_json ? JSON.parse(freshRun.summary_json) : null;
+          } catch { return null; }
+        })();
+        const existingSummary = root.querySelector('[data-role="eval-summary-card"]');
+        const nextSummaryHtml = summaryCardHtml(freshSummary);
+        if (nextSummaryHtml && !existingSummary) {
+          // Insert before the matrix section.
+          const matrixSection = root.querySelector('.admin-eval-matrix-wrap')?.closest('section');
+          if (matrixSection) matrixSection.insertAdjacentHTML('beforebegin', nextSummaryHtml);
+        } else if (nextSummaryHtml && existingSummary
+            && existingSummary.outerHTML !== nextSummaryHtml) {
+          existingSummary.outerHTML = nextSummaryHtml;
+        }
+
         return freshRun;
       } catch { return null; }
     };
@@ -3254,19 +3339,12 @@ async function renderEvaluation(root, evalRunId) {
         const freshRun = await refreshMatrix();
         if (freshRun) {
           const freshPhase = freshRun.phase || null;
+          // refreshMatrix already patched the summary card, toolbar, and
+          // matrix in place — nothing else to do on complete except stop
+          // polling. No reload, no scroll restore.
           if (freshPhase === 'complete' && !root.querySelector('.admin-eval-cell-busy')) {
             clearInterval(root.evalPollTimer);
             root.evalPollTimer = null;
-            // Full re-render is needed to surface the per-model summary table
-            // (computed at finalize). Preserve scroll positions so the user
-            // stays where they were.
-            const docScrollY = window.scrollY;
-            const wrap = root.querySelector('.admin-eval-matrix-wrap');
-            const wrapScrollLeft = wrap ? wrap.scrollLeft : 0;
-            await reload();
-            window.scrollTo({ top: docScrollY, left: 0, behavior: 'auto' });
-            const newWrap = root.querySelector('.admin-eval-matrix-wrap');
-            if (newWrap) newWrap.scrollLeft = wrapScrollLeft;
           }
         }
       } catch { /* ignore poll errors */ }
