@@ -2608,8 +2608,11 @@ async function renderEvaluation(root, evalRunId) {
     return aIdx - bIdx;
   });
 
-  // Mutable reference so refreshMatrix updates are reflected in cell rendering.
+  // Mutable references so refreshMatrix updates are reflected in cell rendering
+  // and delegated event handlers see the freshest data after each poll cycle.
   let currentRun = run;
+  let currentExperiments = experiments;
+  let currentVariants = variants;
 
   const cellStatusLabel = (cellClass) => {
     if (cellClass === 'running') return 'generating…';
@@ -2679,7 +2682,27 @@ async function renderEvaluation(root, evalRunId) {
     return 'running';
   };
 
-  const cellHtml = (cell, exp) => {
+  // Signature for one cell — captures everything that affects render output.
+  // Used by refreshMatrix to skip unchanged cells (no DOM thrash, no scroll loss).
+  const cellSignature = (cell, exp) => {
+    const cellClass = classifyCell(cell, exp.missing === true);
+    if (!cell) return `null|${cellClass}`;
+    const notesLen = cell.evaluator_notes ? String(cell.evaluator_notes).length : 0;
+    return [
+      cellClass,
+      cell.id || '',
+      cell.status || '',
+      cell.duration_ms || 0,
+      cell.time_to_first_token_ms || 0,
+      cell.evaluator_score == null ? '' : String(cell.evaluator_score),
+      cell.error ? '1' : '0',
+      notesLen,
+      cell.output_tokens || 0,
+      cell.input_tokens || 0,
+    ].join('|');
+  };
+
+  const cellHtmlInner = (cell, exp) => {
     const isMissing = exp.missing === true;
     if (!cell) {
       if (isMissing) {
@@ -2729,6 +2752,19 @@ async function renderEvaluation(root, evalRunId) {
     </td>`;
   };
 
+  // Inject data-signature so refreshMatrix can diff cells.
+  const cellHtml = (cell, exp) => {
+    const sig = cellSignature(cell, exp);
+    return cellHtmlInner(cell, exp).replace(/^<td/, `<td data-signature="${esc(sig)}"`);
+  };
+
+  // Parse `<td>…</td>` HTML into a real <td> element (table context required).
+  const parseTdHtml = (html) => {
+    const tpl = document.createElement('template');
+    tpl.innerHTML = `<table><tbody><tr>${html}</tr></tbody></table>`;
+    return tpl.content.querySelector('td');
+  };
+
   // Aggregate cell counts for the toolbar — drives Run/Continue judging and
   // Retry failed cells visibility + N counts.
   const counts = matrix.reduce((acc, { exp, cells }) => {
@@ -2755,6 +2791,16 @@ async function renderEvaluation(root, evalRunId) {
     }
     return `<span class="admin-eval-query-label" title="${esc(label)}">${esc(truncated)}</span><span class="admin-muted admin-eval-query-id">${esc(exp.eval_query_id || '')}</span>${fbChip}`;
   };
+
+  // Signature for a row's query-label cell. Captures missing→ran transition
+  // and feedback chip count changes — both of which can update mid-poll.
+  const queryLabelSignature = (exp) => {
+    const fb = feedbackByQuery[exp.query || ''] || null;
+    const fbKey = fb ? `${fb.up || 0}:${fb.down || 0}` : '';
+    return `${exp.id || ''}|${exp.missing ? 'm' : 'ok'}|${fbKey}`;
+  };
+
+  const rowKeyOf = (exp) => (exp.id || `missing-${exp.eval_query_id}`);
 
   root.innerHTML = `
     <nav class="admin-crumbs"><a href="#/evaluations">← Evaluations</a></nav>
@@ -2854,8 +2900,8 @@ async function renderEvaluation(root, evalRunId) {
             <th>Query</th>
             ${models.map((m) => `<th><div class="admin-eval-model-head"><strong>${esc(m.label)}</strong><span class="admin-muted admin-mono">${esc(m.provider)} · ${esc(m.model)}</span></div></th>`).join('')}
           </tr></thead>
-          <tbody>${matrix.map(({ exp, cells }) => `<tr>
-            <th class="admin-eval-query-cell">${queryLabel(exp)}</th>
+          <tbody>${matrix.map(({ exp, cells }) => `<tr data-row-key="${esc(rowKeyOf(exp))}">
+            <th class="admin-eval-query-cell" data-signature="${esc(queryLabelSignature(exp))}">${queryLabel(exp)}</th>
             ${cells.map((c) => cellHtml(c, exp)).join('')}
           </tr>`).join('')}</tbody>
         </table>
@@ -2874,21 +2920,6 @@ async function renderEvaluation(root, evalRunId) {
   const previewMeta = root.querySelector('[data-role="preview-meta"]');
   const cache = new Map();
 
-  root.querySelectorAll('.admin-eval-cell[data-variant-id]').forEach((td) => {
-    td.addEventListener('click', async (e) => {
-      // Don't open preview when the user clicks the retry button.
-      if (e.target.closest('[data-action="retry"]')) return;
-      const expId = td.dataset.experimentId;
-      const varId = td.dataset.variantId;
-      previewCard.hidden = false;
-      const exp = experiments.find((ex) => ex.id === expId);
-      const variant = variants.find((v) => v.id === varId);
-      previewMeta.textContent = `${exp?.eval_query_id || ''} · ${variant?.provider || ''} · ${variant?.model || ''} · TTFT ${variant?.time_to_first_token_ms != null ? dur(variant.time_to_first_token_ms) : '—'} · duration ${dur(variant?.duration_ms)} · quality ${variant?.evaluator_score != null ? variant.evaluator_score.toFixed(2) : '—'}`;
-      previewCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      await renderExperimentVariantPreview(previewSlot, expId, varId, cache);
-    });
-  });
-
   // ── Retry actions ─────────────────────────────────────────────────────────
   const toolbarStatus = root.querySelector('[data-role="toolbar-status"]');
   const setToolbarStatus = (txt) => {
@@ -2900,6 +2931,9 @@ async function renderEvaluation(root, evalRunId) {
     const { variantId } = cellEl.dataset;
     cellEl.classList.add('admin-eval-cell-busy');
     cellEl.innerHTML = '<span class="admin-loading">Queued for re-judge…</span>';
+    // Drop the signature so the next refresh always replaces this cell, even
+    // if upstream data hasn't moved yet (queue dispatch is async).
+    cellEl.removeAttribute('data-signature');
     try {
       const res = await fetch(
         `${ARCO_RECOMMENDER_URL}/api/admin/evaluations/${encodeURIComponent(evalRunId)}/variants/${encodeURIComponent(variantId)}/rejudge`,
@@ -2920,6 +2954,7 @@ async function renderEvaluation(root, evalRunId) {
     const { variantId } = cellEl.dataset;
     cellEl.classList.add('admin-eval-cell-busy');
     cellEl.innerHTML = '<span class="admin-loading">Queued for regeneration…</span>';
+    cellEl.removeAttribute('data-signature');
     try {
       const res = await fetch(
         `${ARCO_RECOMMENDER_URL}/api/admin/evaluations/${encodeURIComponent(evalRunId)}/variants/${encodeURIComponent(variantId)}/regenerate`,
@@ -2936,11 +2971,17 @@ async function renderEvaluation(root, evalRunId) {
     }
   };
 
-  root.querySelectorAll('.admin-eval-cell[data-variant-id]').forEach((td) => {
-    td.querySelectorAll('[data-action="retry"]').forEach((btn) => {
-      btn.addEventListener('click', async (e) => {
+  // Single delegated listener on tbody — survives per-cell DOM replacements
+  // performed by refreshMatrix. Handles both retry buttons and cell-click preview.
+  const matrixTbody = root.querySelector('.admin-eval-matrix tbody');
+  if (matrixTbody) {
+    matrixTbody.addEventListener('click', async (e) => {
+      const retryBtn = e.target.closest('[data-action="retry"]');
+      if (retryBtn) {
         e.stopPropagation();
-        const { retryAction: action } = btn.dataset;
+        const td = retryBtn.closest('.admin-eval-cell[data-variant-id]');
+        if (!td) return;
+        const { retryAction: action } = retryBtn.dataset;
         const { cellClass } = td.dataset;
         if (action === 'regenerate') {
           if (cellClass === 'judged' && !window.confirm('Regenerate this cell? This re-runs the full pipeline (upstream LLM + judge tokens) and overwrites the existing result.')) return;
@@ -2950,9 +2991,20 @@ async function renderEvaluation(root, evalRunId) {
           if (cellClass === 'judged' && !window.confirm('Re-judge this cell? This overwrites the existing score and uses Bedrock tokens.')) return;
           await rejudgeOneCell(td);
         }
-      });
+        return;
+      }
+      const td = e.target.closest('.admin-eval-cell[data-variant-id]');
+      if (!td) return;
+      const expId = td.dataset.experimentId;
+      const varId = td.dataset.variantId;
+      previewCard.hidden = false;
+      const exp = currentExperiments.find((ex) => ex.id === expId);
+      const variant = currentVariants.find((v) => v.id === varId);
+      previewMeta.textContent = `${exp?.eval_query_id || ''} · ${variant?.provider || ''} · ${variant?.model || ''} · TTFT ${variant?.time_to_first_token_ms != null ? dur(variant.time_to_first_token_ms) : '—'} · duration ${dur(variant?.duration_ms)} · quality ${variant?.evaluator_score != null ? variant.evaluator_score.toFixed(2) : '—'}`;
+      previewCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      await renderExperimentVariantPreview(previewSlot, expId, varId, cache);
     });
-  });
+  }
 
   const runBulkJudge = async (scope, label) => {
     const btn = root.querySelector('[data-role="run-judging"]')
@@ -3110,16 +3162,72 @@ async function renderEvaluation(root, evalRunId) {
           return aIdx - bIdx;
         });
 
-        // Patch the tbody
+        // Refresh closure-captured arrays so the delegated cell-click handler
+        // resolves the latest variant/experiment when the user clicks a cell.
+        currentExperiments = freshExperiments;
+        currentVariants = freshVariants;
+
+        // Patch the tbody in place — only touch cells whose signature changed.
+        // Keeps scroll position stable and avoids re-creating cells the user
+        // might be hovering over.
         const tbody = root.querySelector('.admin-eval-matrix tbody');
         if (tbody) {
-          tbody.innerHTML = freshMatrix.map(({ exp: e, cells: cs }) => `<tr>
-            <th class="admin-eval-query-cell">${queryLabel(e)}</th>
-            ${cs.map((c) => cellHtml(c, e)).join('')}
-          </tr>`).join('');
+          const existingRows = new Map();
+          tbody.querySelectorAll(':scope > tr[data-row-key]').forEach((tr) => {
+            existingRows.set(tr.dataset.rowKey, tr);
+          });
+
+          let prevRow = null;
+          freshMatrix.forEach(({ exp, cells }) => {
+            const key = rowKeyOf(exp);
+            let row = existingRows.get(key);
+            if (row) {
+              existingRows.delete(key);
+              // Move into correct order if out of place.
+              const target = prevRow ? prevRow.nextElementSibling : tbody.firstChild;
+              if (target !== row) tbody.insertBefore(row, target);
+
+              // Update the query-label cell only if its signature changed.
+              const labelCell = row.firstElementChild;
+              const newLabelSig = queryLabelSignature(exp);
+              if (labelCell && labelCell.dataset.signature !== newLabelSig) {
+                labelCell.innerHTML = queryLabel(exp);
+                labelCell.dataset.signature = newLabelSig;
+              }
+
+              // Diff each data cell — replace only when signature differs.
+              cells.forEach((c, i) => {
+                const existingCell = row.children[i + 1];
+                const newSig = cellSignature(c, exp);
+                if (!existingCell || existingCell.dataset.signature !== newSig) {
+                  const newCell = parseTdHtml(cellHtml(c, exp));
+                  if (newCell) {
+                    if (existingCell) existingCell.replaceWith(newCell);
+                    else row.appendChild(newCell);
+                  }
+                }
+              });
+              // Trim any stale cells (e.g. models removed mid-run — defensive).
+              while (row.children.length > cells.length + 1) {
+                row.lastElementChild.remove();
+              }
+            } else {
+              // New row (e.g. a previously-missing query just started running).
+              row = document.createElement('tr');
+              row.dataset.rowKey = key;
+              row.innerHTML = `<th class="admin-eval-query-cell" data-signature="${esc(queryLabelSignature(exp))}">${queryLabel(exp)}</th>${cells.map((c) => cellHtml(c, exp)).join('')}`;
+              const target = prevRow ? prevRow.nextElementSibling : tbody.firstChild;
+              tbody.insertBefore(row, target);
+            }
+            prevRow = row;
+          });
+
+          // Remove rows that no longer belong (e.g. missing→ran transition
+          // changes the row key, so the old `missing-…` row drops out).
+          existingRows.forEach((tr) => tr.remove());
         }
 
-        // Patch the status badge
+        // Patch the status badge only when its text changed.
         const badgesEl = root.querySelector('.admin-badges');
         if (badgesEl) {
           const p = freshRun.phase || null;
@@ -3127,7 +3235,9 @@ async function renderEvaluation(root, evalRunId) {
             ? `${p} ${freshRun.completed_queries || 0}/${freshRun.query_count}`
             : (freshRun.status || '—');
           const firstBadge = badgesEl.querySelector('.admin-badge');
-          if (firstBadge) firstBadge.textContent = statusText;
+          if (firstBadge && firstBadge.textContent !== statusText) {
+            firstBadge.textContent = statusText;
+          }
         }
 
         return freshRun;
@@ -3147,7 +3257,16 @@ async function renderEvaluation(root, evalRunId) {
           if (freshPhase === 'complete' && !root.querySelector('.admin-eval-cell-busy')) {
             clearInterval(root.evalPollTimer);
             root.evalPollTimer = null;
-            reload();
+            // Full re-render is needed to surface the per-model summary table
+            // (computed at finalize). Preserve scroll positions so the user
+            // stays where they were.
+            const docScrollY = window.scrollY;
+            const wrap = root.querySelector('.admin-eval-matrix-wrap');
+            const wrapScrollLeft = wrap ? wrap.scrollLeft : 0;
+            await reload();
+            window.scrollTo({ top: docScrollY, left: 0, behavior: 'auto' });
+            const newWrap = root.querySelector('.admin-eval-matrix-wrap');
+            if (newWrap) newWrap.scrollLeft = wrapScrollLeft;
           }
         }
       } catch { /* ignore poll errors */ }
