@@ -59,6 +59,18 @@ function makeAccordion(title, contentEl, defaultOpen = false) {
   return item;
 }
 
+function formatCacheStatus(llm) {
+  if (llm?.promptCacheHit) {
+    const uncached = (llm.inputTokens || 0) - (llm.cacheReadTokens || 0);
+    return `<span class="debug-badge timing-fast">HIT</span> ${llm.cacheReadTokens} cached, ${uncached} uncached`;
+  }
+  if (llm?.cacheWriteTokens) {
+    const uncached = (llm.inputTokens || 0) - (llm.cacheWriteTokens || 0);
+    return `<span class="debug-badge timing-med">WRITE</span> ${llm.cacheWriteTokens} cached, ${uncached} uncached`;
+  }
+  return '<span class="debug-dim">none</span>';
+}
+
 function renderOverview(d) {
   const el = document.createElement('div');
   el.className = 'debug-overview';
@@ -78,6 +90,7 @@ function renderOverview(d) {
     ['First Token', formatMs(d.timings?.llmFirstToken)],
     ['Tokens In / Out', d.llm?.inputTokens != null ? `${d.llm.inputTokens} / ${d.llm.outputTokens}` : '—'],
     ['Total Tokens', d.llm?.totalTokens ?? '—'],
+    ['Prompt Cache', formatCacheStatus(d.llm)],
     ['Output Chars', d.llm?.outputLength ?? '—'],
     ['Sections', d.llm?.sections ?? '—'],
   ];
