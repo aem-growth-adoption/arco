@@ -12,7 +12,11 @@
     "index-content": "node scripts/index-content.js",
     "upload-kv": "node scripts/upload-kv.js",
     "test": "node --loader ./tools/json-loader.js --test 'tests/snapshots/*.test.js'",
-    "test:capture": "node --loader ./tools/json-loader.js tools/capture-baseline.js"
+    "test:capture": "node --loader ./tools/json-loader.js tools/capture-baseline.js",
+    "bench:recommender": "promptfoo eval -c tests/promptfoo/recommender-bench.yaml --max-concurrency 5",
+    "bench:suggestions": "promptfoo eval -c tests/promptfoo/suggestions-bench.yaml --max-concurrency 5",
+    "bench:smoke": "promptfoo eval -c tests/promptfoo/recommender-bench.yaml --filter-pattern 'cold-start' --max-concurrency 3 --no-cache",
+    "bench:view": "promptfoo view"
   },
   "dependencies": {
     "@cerebras/cerebras_cloud_sdk": "^1.0.0",
@@ -20,6 +24,7 @@
     "yaml": "^2.9.0"
   },
   "devDependencies": {
+    "promptfoo": "^0.121.12",
     "wrangler": "^4.83.0"
   }
 }
