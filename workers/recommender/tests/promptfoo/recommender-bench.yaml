@@ -1,7 +1,7 @@
 description: "Arco recommender (in-repo) — multi-model benchmark"
 
 prompts:
-  - file://../../src/prompt-loader.js:renderForPromptfoo
+  - file://../../src/prompt-loader-node.js:renderForPromptfoo
 
 providers:
   # ── Google Vertex AI — Gemini ────────────────────────────────────────────────
