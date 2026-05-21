@@ -217,6 +217,31 @@ export function enrichRagForPrompt(rag) {
 // ── promptfoo adapter ───────────────────────────────────────────────────────
 
 /**
+ * Escape `{{...}}` token strings in rendered prompt content so that promptfoo's
+ * own Nunjucks pass does not try to interpolate them as template variables.
+ *
+ * promptfoo runs a second Nunjucks pass over the messages returned by a JS
+ * prompt function (via `renderVarsInObject`). Our rendered output contains
+ * literal image/content tokens like `{{story:primo}}`, `{{product-image:doppio}}`,
+ * etc. that the downstream `images.js` post-processor resolves — they are NOT
+ * Nunjucks variables. Without escaping, promptfoo's Nunjucks pass errors with
+ * "expected variable end" because those tokens contain colons and other chars
+ * that are invalid in Nunjucks variable names.
+ *
+ * The escape `{{ '{{' }}` is valid Nunjucks and evaluates back to the literal
+ * string `{{`, so the LLM receives exactly the original token strings.
+ *
+ * @param {string} s — rendered prompt text
+ * @returns {string} text safe to pass through a Nunjucks renderString call
+ */
+function escapeNunjucksTokens(s) {
+  // Single-pass replacement is essential: the two target substrings (`{{` and `}}`)
+  // can appear inside each other's replacements, so two sequential replaces corrupt
+  // the output.  A single combined regex avoids the interference.
+  return s.replace(/\{\{|\}\}/g, (m) => (m === '{{' ? "{{ '{{' }}" : "{{ '}}' }}"));
+}
+
+/**
  * promptfoo prompt function — called as
  *   file://workers/recommender/src/prompt-loader-node.js:renderForPromptfoo
  * promptfoo passes the test's `vars` here. We expect `vars` to be a complete
@@ -250,7 +275,7 @@ export async function renderForPromptfoo({ vars = {} } = {}) {
 
   const { system, user } = renderPrompt(promptName, ctx);
   return [
-    { role: 'system', content: system },
-    { role: 'user', content: user },
+    { role: 'system', content: escapeNunjucksTokens(system) },
+    { role: 'user', content: escapeNunjucksTokens(user) },
   ];
 }
