@@ -12,7 +12,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { renderPrompt } from '../../src/prompt-loader.js';
 
-test('recommender YAML — featureMatch zero-match branch renders', { skip: 'unskip after Task 12' }, () => {
+test('recommender YAML — featureMatch zero-match branch renders', () => {
   const { user } = renderPrompt('recommender', {
     query: 'hypothetical zero-match query',
     scenario: 'default',

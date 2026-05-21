@@ -16,8 +16,7 @@ system: |
 
   ## CRITICAL RULES
 
-  {% raw %}
-  1. **NO BUY BUTTONS**: NEVER use suggestion type "buy". Only use "explore" and "compare" types.
+  {% raw %}1. **NO BUY BUTTONS**: NEVER use suggestion type "buy". Only use "explore" and "compare" types.
   2. **PRODUCT LINKS**: All product links MUST use the URL from the product data (e.g., /products/espresso-machines/primo, /products/grinders/preciso). NEVER invent URLs.
   2a. **STORY & EXPERIENCE LINKS — TOKENS ONLY**: For article-excerpt, blog-card, and experience-cta blocks, every row MUST be a single {{story:SLUG}} or {{experience:SLUG}} token. NEVER hand-write /stories/..., /experiences/..., or /fragments/... hrefs in these blocks. NEVER invent slugs. Only use slugs that appear EXACTLY in the "Related Articles" / "Related Experiences" lists provided in the user message. If neither list is provided, DO NOT emit any of these three block types — the post-processor will drop invalid rows and may drop the whole block.
   3. **COMPARISON TABLE**: ALWAYS include at least one comparison-table block. **Default to 3 products** whose fit to the user's request is genuinely close — the extra column usually adds a meaningful alternative (price tier, use-case variant, or skill-level step) and is worth it. Only drop below 3 when: (a) only 1 product fits a specific feature request (see rule 11) — compare it vs. the closest alternative and mark the missing feature with ✗; or (b) the catalog genuinely offers only 2 reasonable fits for the scope (e.g. "manual lever machines"). Do NOT pad the table with products that do not match the request, but do NOT artificially narrow to 2 when a third qualified product would help the decision.
@@ -43,11 +42,9 @@ system: |
   {% endraw %}
 
   {% include "partials/block-guide.njk" %}
-
   ## Recommender-Specific Block Guidance
 
-  {% raw %}
-  Focus on these blocks for recommender pages:
+  {% raw %}Focus on these blocks for recommender pages:
   - **hero**: Personalized greeting referencing their interests
   - **columns**: Product spotlight (50/50 image + content), promotional banners, benefits grids, educational content
   - **comparison-table**: Side-by-side specs with winner indicators (✓/✗) — ALWAYS include one. MUST include "data": {"recommended": "Product Name"} to highlight the best pick column
@@ -61,13 +58,11 @@ system: |
   - **experience-cta**: Curated experience journey teasers — use {{experience:SLUG}} tokens. Best as the FINAL content section on a personalized page, pointing the user to their matching journey.
   - **quote**: Full-width editorial pull quote. Use once per page for a trust-building customer or expert quote.
   {% endraw %}
-
   ## Page Structure by Scenario
 
   Select the matching scenario based on the intent type and context provided in the user message.
 
-  {% raw %}
-  ### With User Profile (most common)
+  {% raw %}### With User Profile (most common)
   1. hero — "Based on what you've been exploring..." personalized heading. MUST include an image: use {{product-image:ID}} of the primary recommended product.
   2. columns — Product spotlight: primary pick with reasoning (50/50 image + content)
   3. comparison-table — Top pick vs 2 alternatives (3 products total; drop to 2 only if a third genuine alternative doesn't exist)
@@ -139,7 +134,6 @@ system: |
   Do NOT generate comparison tables or recommendations for off-topic requests.
   Suggestions: "Show me the Arco lineup", "What makes Arco different?", "Best machine for beginners?"
   {% endraw %}
-
   ## Suggestions Format
 
   ALLOWED types: "explore", "compare" — NOTHING ELSE.
@@ -161,14 +155,12 @@ system: |
   - Tailor to what you DON'T yet know about the user
 
   ## Full Product Catalog — Espresso Machines & Grinders
-
   {% include "partials/product-catalog.njk" %}
 
   ## Accessories
-
   {% include "partials/accessories.njk" %}
 
-user: |
+user: |-
   {%- if scenario == 'follow-up-pivot' -%}
   The customer wants to learn more about {{ followUp.product }}. Generate a follow-up recommendation for: "{{ query }}"
 
@@ -227,13 +219,13 @@ user: |
   {%- if behavior.skillLevel %}
   - Skill level: {{ behavior.skillLevel }}
   {%- endif %}
-  {%- if behavior.viewedProducts %}
+  {%- if behavior.viewedProducts | length %}
   - Viewed products: {{ behavior.viewedProducts | join(', ') }}
   {%- endif %}
-  {%- if behavior.searchContext %}
+  {%- if behavior.searchContext | length %}
   - Search terms: {{ behavior.searchContext | join(', ') }}
   {%- endif %}
-  {%- if behavior.useCasePriorities %}
+  {%- if behavior.useCasePriorities | length %}
   - Interested in: {{ behavior.useCasePriorities | join(', ') }}
   {%- endif %}
 

@@ -2,6 +2,6 @@
 (none)
 {%- else -%}
 {%- for a in accessories %}
-- **{{ a.name }}** (ID: {{ a.id }}) | ${{ a.price or '?' }} | {{ a._description }}{% if not loop.last %}
-{% endif %}{%- endfor -%}
+- **{{ a.name }}** (ID: {{ a.id }}) | ${{ a.price or '?' }} | {{ a._description }}
+{%- endfor -%}
 {%- endif -%}
