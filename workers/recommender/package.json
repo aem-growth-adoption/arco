@@ -10,7 +10,9 @@
     "list:branch:live": "node scripts/list-cf-workers.js",
     "cleanup:merged": "node scripts/cleanup-merged-branches.js",
     "index-content": "node scripts/index-content.js",
-    "upload-kv": "node scripts/upload-kv.js"
+    "upload-kv": "node scripts/upload-kv.js",
+    "test": "node --loader ./tools/json-loader.js --test 'tests/snapshots/*.test.js'",
+    "test:capture": "node --loader ./tools/json-loader.js tools/capture-baseline.js"
   },
   "dependencies": {
     "@cerebras/cerebras_cloud_sdk": "^1.0.0",
