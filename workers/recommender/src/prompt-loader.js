@@ -1,68 +1,38 @@
 /**
- * Prompt loader — Worker entry point. Parses YAML prompt templates and renders
- * them with Nunjucks. Templates are bundled as text imports (see wrangler.jsonc
- * `rules`) so the worker needs no runtime filesystem. YAML is parsed and
- * Nunjucks templates compiled exactly once at module init.
+ * Prompt loader — Worker entry point. Uses PRECOMPILED templates (see
+ * tools/precompile-prompts.js) so no runtime code generation is needed —
+ * Cloudflare Workers disallows new Function() / eval, which is what
+ * Nunjucks does internally when compiling raw template source.
  *
  * For the Node-friendly equivalent used by promptfoo, see prompt-loader-node.js.
  */
 
 import nunjucks from 'nunjucks';
-import yaml from 'yaml';
 
 /* eslint-disable import/extensions */
-import recommenderYaml from '../prompts/recommender.yaml';
-import suggestionsYaml from '../prompts/suggestions.yaml';
-import brandVoicePartial from '../prompts/partials/brand-voice.njk';
-import blockGuidePartial from '../prompts/partials/block-guide.njk';
-import productCatalogPartial from '../prompts/partials/product-catalog.njk';
-import accessoriesPartial from '../prompts/partials/accessories.njk';
+import precompiledTemplates from '../prompts/compiled.js';
 /* eslint-enable import/extensions */
 
-// ── In-memory Nunjucks loader (no filesystem on Workers) ────────────────────
-class InMemoryLoader {
-  constructor(templates) {
-    this.templates = templates;
-  }
+// PrecompiledLoader takes the precompiled map and lets the Environment
+// look up templates by name without parsing or calling new Function().
+const loader = new nunjucks.PrecompiledLoader(precompiledTemplates);
 
-  getSource(name) {
-    const src = this.templates[name];
-    if (src === undefined) {
-      throw new Error(`Template not found: ${name}`);
-    }
-    return { src, path: name, noCache: false };
-  }
-}
-
-const PARTIALS = {
-  'partials/brand-voice.njk': brandVoicePartial,
-  'partials/block-guide.njk': blockGuidePartial,
-  'partials/product-catalog.njk': productCatalogPartial,
-  'partials/accessories.njk': accessoriesPartial,
-};
-
-const env = new nunjucks.Environment(new InMemoryLoader(PARTIALS), {
+const env = new nunjucks.Environment(loader, {
   autoescape: false,
   throwOnUndefined: false,
   trimBlocks: false,
   lstripBlocks: false,
 });
 
-// ── Parse YAML + compile templates once ─────────────────────────────────────
-function parsePrompt(yamlText) {
-  const parsed = yaml.parse(yamlText);
-  if (!parsed?.system || !parsed?.user) {
-    throw new Error('Prompt YAML missing `system` or `user` key');
-  }
-  return {
-    system: nunjucks.compile(parsed.system, env),
-    user: nunjucks.compile(parsed.user, env),
-  };
-}
+// Look up the four named templates we render at runtime.
+const recommenderSystem = env.getTemplate('recommender/system', true);
+const recommenderUser = env.getTemplate('recommender/user', true);
+const suggestionsSystem = env.getTemplate('suggestions/system', true);
+const suggestionsUser = env.getTemplate('suggestions/user', true);
 
 const PROMPTS = {
-  recommender: parsePrompt(recommenderYaml),
-  suggestions: parsePrompt(suggestionsYaml),
+  recommender: { system: recommenderSystem, user: recommenderUser },
+  suggestions: { system: suggestionsSystem, user: suggestionsUser },
 };
 
 // ── Public API ──────────────────────────────────────────────────────────────
@@ -213,4 +183,3 @@ export function enrichRagForPrompt(rag) {
     })),
   };
 }
-
