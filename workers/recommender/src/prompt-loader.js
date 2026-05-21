@@ -14,6 +14,7 @@ import yaml from 'yaml';
 
 /* eslint-disable import/extensions */
 import recommenderYaml from '../prompts/recommender.yaml';
+import suggestionsYaml from '../prompts/suggestions.yaml';
 import brandVoicePartial from '../prompts/partials/brand-voice.njk';
 import blockGuidePartial from '../prompts/partials/block-guide.njk';
 import productCatalogPartial from '../prompts/partials/product-catalog.njk';
@@ -63,7 +64,7 @@ function parsePrompt(yamlText) {
 
 const PROMPTS = {
   recommender: parsePrompt(recommenderYaml),
-  // suggestions: parsePrompt(suggestionsYaml),  // wired in Task 18
+  suggestions: parsePrompt(suggestionsYaml),
 };
 
 // ── Public API ──────────────────────────────────────────────────────────────
