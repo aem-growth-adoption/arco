@@ -1,12 +1,10 @@
 /**
- * Prompt loader — parses YAML prompt templates and renders them with
- * Nunjucks. Used by:
- *  - production worker code: `renderPrompt(name, ctx)` → { system, user }
- *  - promptfoo tests:        `renderForPromptfoo({ vars })` → OpenAI messages
+ * Prompt loader — Worker entry point. Parses YAML prompt templates and renders
+ * them with Nunjucks. Templates are bundled as text imports (see wrangler.jsonc
+ * `rules`) so the worker needs no runtime filesystem. YAML is parsed and
+ * Nunjucks templates compiled exactly once at module init.
  *
- * Templates are bundled as text imports (see wrangler.jsonc `rules`) so the
- * worker needs no runtime filesystem. YAML is parsed and Nunjucks templates
- * compiled exactly once at module init.
+ * For the Node-friendly equivalent used by promptfoo, see prompt-loader-node.js.
  */
 
 import nunjucks from 'nunjucks';
@@ -216,54 +214,3 @@ export function enrichRagForPrompt(rag) {
   };
 }
 
-// ── promptfoo adapter ───────────────────────────────────────────────────────
-
-/**
- * promptfoo prompt function — called as
- *   file://workers/recommender/src/prompt-loader.js:renderForPromptfoo
- * promptfoo passes the test's `vars` here. We expect `vars` to be a complete
- * RecommenderContext (or SuggestionsContext if `vars.prompt === 'suggestions'`).
- *
- * If `vars.catalog` / `vars.accessories` are absent, we lazy-load the JSON
- * from the content/ directory so fixtures don't need to inline the catalog.
- */
-export async function renderForPromptfoo({ vars = {} } = {}) {
-  const promptName = vars.prompt === 'suggestions' ? 'suggestions' : 'recommender';
-
-  const ctx = { ...vars };
-
-  if (promptName === 'recommender' && (!ctx.catalog || !ctx.accessories)) {
-    const [products, profiles, accessories] = await Promise.all([
-      loadJson('../../../content/products/products.json'),
-      loadJson('../../../content/metadata/product-profiles.json'),
-      loadJson('../../../content/accessories/accessories.json'),
-    ]);
-    ctx.catalog = ctx.catalog || enrichCatalogForPrompt(
-      products.data || products,
-      profiles.data || profiles.profiles || profiles,
-    );
-    ctx.accessories = ctx.accessories || enrichAccessoriesForPrompt(
-      accessories.data || accessories,
-    );
-  }
-
-  if (promptName === 'recommender' && ctx.rag) {
-    ctx.rag = enrichRagForPrompt(ctx.rag);
-  }
-
-  const { system, user } = renderPrompt(promptName, ctx);
-  return [
-    { role: 'system', content: system },
-    { role: 'user', content: user },
-  ];
-}
-
-async function loadJson(relPath) {
-  // Node-only dynamic load, used by promptfoo tests (never reached on worker).
-  const { readFile } = await import('node:fs/promises');
-  const { fileURLToPath } = await import('node:url');
-  const pathMod = await import('node:path');
-  const here = pathMod.dirname(fileURLToPath(import.meta.url));
-  const txt = await readFile(pathMod.resolve(here, relPath), 'utf8');
-  return JSON.parse(txt);
-}
