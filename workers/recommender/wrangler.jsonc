@@ -5,6 +5,12 @@
   "compatibility_date": "2024-12-01",
   "compatibility_flags": ["nodejs_compat"],
 
+  // Local dev: 8787 is taken by `llmfit serve`, so bind wrangler dev to 8788.
+  // The frontend (scripts/api-config.js) points localhost at this same port.
+  "dev": {
+    "port": 8788
+  },
+
   // KV namespaces
   "kv_namespaces": [
     {

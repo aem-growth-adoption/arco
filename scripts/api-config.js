@@ -11,10 +11,10 @@
 
 const PRODUCTION_WORKER = 'https://arco-recommender.franklin-prod.workers.dev';
 
-// Local worker started via `wrangler dev` (default port 8787). Used when the
-// page is served from `aem up` on localhost so the EDS frontend streams from the
-// local recommender (e.g. for the Ollama local-runtime setup).
-const LOCAL_WORKER = 'http://localhost:8787';
+// Local worker started via `wrangler dev` (port 8788; 8787 is taken by llmfit).
+// Used when the page is served from `aem up` on localhost so the EDS frontend
+// streams from the local recommender (e.g. for the Ollama local-runtime setup).
+const LOCAL_WORKER = 'http://localhost:8788';
 
 /**
  * Detect EDS branch preview hostname: {branch}--{repo}--{owner}.aem.page
