@@ -381,7 +381,12 @@ export async function runLlmVariant(ctx, env, opts) {
     }
   }, 3000);
 
-  const timeoutMs = llmTimeoutMs || 60_000;
+  // Local Ollama (esp. reasoning models with a large maxTokens) can run well
+  // past the 60s default while thinking, so give it a longer ceiling —
+  // overridable via OLLAMA_TIMEOUT_MS.
+  const ollamaTimeout = parseInt(env.OLLAMA_TIMEOUT_MS, 10) || 300_000;
+  const defaultTimeout = providerId === 'ollama' ? ollamaTimeout : 60_000;
+  const timeoutMs = llmTimeoutMs || defaultTimeout;
   const abortController = new AbortController();
   const timeoutId = setTimeout(() => abortController.abort(), timeoutMs);
 
@@ -716,6 +721,29 @@ export async function runLlmVariant(ctx, env, opts) {
           if (!(u.prompt_eval_count && u.prompt_eval_duration)) return null;
           return Math.round((u.prompt_eval_count / (u.prompt_eval_duration / 1e9)) * 10) / 10;
         })(),
+        // Reasoning-model phase split: how much of decode was thinking vs the
+        // visible page. Counts come from the provider; the ms split apportions
+        // the provider's total decode time (eval_duration) by token share.
+        thinkingTokens: out.usage?.thinking_tokens ?? null,
+        contentTokens: out.usage?.content_tokens ?? null,
+        thinkingPct: (() => {
+          const u = out.usage || {};
+          const tot = (u.thinking_tokens || 0) + (u.content_tokens || 0);
+          return tot > 0 ? Math.round(((u.thinking_tokens || 0) / tot) * 100) : null;
+        })(),
+        thinkingMs: (() => {
+          const u = out.usage || {};
+          const tot = (u.thinking_tokens || 0) + (u.content_tokens || 0);
+          if (!u.eval_duration || !tot) return null;
+          return Math.round((u.eval_duration / 1e6) * ((u.thinking_tokens || 0) / tot));
+        })(),
+        contentMs: (() => {
+          const u = out.usage || {};
+          const tot = (u.thinking_tokens || 0) + (u.content_tokens || 0);
+          if (!u.eval_duration || !tot) return null;
+          return Math.round((u.eval_duration / 1e6) * ((u.content_tokens || 0) / tot));
+        })(),
+        doneReason: out.usage?.done_reason ?? null,
         outputLength: out.fullText.length,
         rawOutput: out.fullText,
         sections: out.sections.length,

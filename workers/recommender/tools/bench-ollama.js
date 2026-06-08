@@ -104,6 +104,12 @@ async function benchOne(baseUrl, query) {
     promptTokensPerSec: llm.promptTokensPerSec ?? null,
     generationMs: llm.generationMs ?? null,
     tokensPerSec: llm.tokensPerSec ?? null,
+    thinkingTokens: llm.thinkingTokens ?? null,
+    contentTokens: llm.contentTokens ?? null,
+    thinkingPct: llm.thinkingPct ?? null,
+    thinkingMs: llm.thinkingMs ?? null,
+    contentMs: llm.contentMs ?? null,
+    doneReason: llm.doneReason ?? null,
   };
 }
 
@@ -146,7 +152,9 @@ async function main() {
           `  ✓ ${label}\n`
           + `      TTFT ${fmt(r.ttftMs, 6)}ms | total ${fmt(r.totalMs, 6)}ms | sec ${fmt(r.sections, 2)}\n`
           + `      prefill ${fmt(r.inputTokens, 5)}tok ${fmt(r.promptEvalMs, 6)}ms → ${fmt(r.promptTokensPerSec, 7)} tok/s\n`
-          + `      decode  ${fmt(r.outputTokens, 5)}tok ${fmt(r.generationMs, 6)}ms → ${fmt(r.tokensPerSec, 7)} tok/s\n`,
+          + `      decode  ${fmt(r.outputTokens, 5)}tok ${fmt(r.generationMs, 6)}ms → ${fmt(r.tokensPerSec, 7)} tok/s\n`
+          + `      think   ${fmt(r.thinkingTokens, 5)}tok ${fmt(r.thinkingMs, 6)}ms vs content ${fmt(r.contentTokens, 5)}tok ${fmt(r.contentMs, 6)}ms `
+          + `(${fmt(r.thinkingPct, 3)}% think, finish=${r.doneReason ?? '—'})\n`,
         );
       }
     }
@@ -161,7 +169,8 @@ async function main() {
       + `  TTFT            : ${r1(mean(ok, (r) => r.ttftMs))} ms\n`
       + `  total           : ${r1(mean(ok, (r) => r.totalMs))} ms\n`
       + `  prefill tok/s   : ${r10(mean(ok, (r) => r.promptTokensPerSec))}  (avg ${r1(mean(ok, (r) => r.inputTokens))} input tok)\n`
-      + `  decode tok/s    : ${r10(mean(ok, (r) => r.tokensPerSec))}  (avg ${r1(mean(ok, (r) => r.outputTokens))} output tok)\n\n`,
+      + `  decode tok/s    : ${r10(mean(ok, (r) => r.tokensPerSec))}  (avg ${r1(mean(ok, (r) => r.outputTokens))} output tok)\n`
+      + `  thinking share  : ${r1(mean(ok, (r) => r.thinkingPct))}%  (avg ${r1(mean(ok, (r) => r.thinkingTokens))} think / ${r1(mean(ok, (r) => r.contentTokens))} content tok)\n\n`,
     );
   }
 

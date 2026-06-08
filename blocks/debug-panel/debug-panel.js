@@ -95,6 +95,17 @@ function renderOverview(d) {
     ['Decode Time', d.llm?.generationMs != null ? formatMs(d.llm.generationMs) : '—'],
     ['Prefill Speed', d.llm?.promptTokensPerSec != null ? `${d.llm.promptTokensPerSec} tok/s` : '—'],
     ['Prefill Time', d.llm?.promptEvalMs != null ? formatMs(d.llm.promptEvalMs) : '—'],
+    ['Thinking / Content', (() => {
+      const l = d.llm || {};
+      if (l.thinkingTokens == null) return '—';
+      const pct = l.thinkingPct != null ? ` <span class="debug-dim">(${l.thinkingPct}% thinking)</span>` : '';
+      return `${l.thinkingTokens} / ${l.contentTokens} tok${pct}`;
+    })()],
+    ['Thinking / Content Time', d.llm?.thinkingMs != null
+      ? `${formatMs(d.llm.thinkingMs)} / ${formatMs(d.llm.contentMs)}` : '—'],
+    ['Finish Reason', d.llm?.doneReason
+      ? `<span class="debug-badge ${d.llm.doneReason === 'length' ? 'timing-slow' : 'timing-fast'}">${escapeHtml(d.llm.doneReason)}</span>`
+      : '—'],
     ['Prompt Cache', formatCacheStatus(d.llm)],
     ['Output Chars', d.llm?.outputLength ?? '—'],
     ['Sections', d.llm?.sections ?? '—'],

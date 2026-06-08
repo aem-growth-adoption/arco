@@ -12,6 +12,9 @@ OLLAMA_MAX_TOKENS=16384
 # Optional — set to "false" to disable the thinking phase on reasoning models
 # (much faster TTFT, fewer tokens).
 # OLLAMA_THINK=false
+# Optional — LLM timeout in ms for Ollama (default 300000). Reasoning models with
+# a large OLLAMA_MAX_TOKENS can run minutes; raise if you still hit timeouts.
+# OLLAMA_TIMEOUT_MS=300000
 
 # Cloudflare auth for the remote Vectorize/AI bindings is taken from your
 # `wrangler login` session (or CLOUDFLARE_API_TOKEN). No key needed here.

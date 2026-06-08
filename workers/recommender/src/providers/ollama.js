@@ -97,6 +97,10 @@ async function* stream({
   }
 
   let final = null;
+  // Reasoning models stream a `thinking` field separately from `content`.
+  // Count each so we can report how much of decode went to thinking vs the page.
+  let thinkingTokens = 0;
+  let contentTokens = 0;
   const iter = iterateNdjson(response, signal);
   // eslint-disable-next-line no-restricted-syntax
   for await (const evt of iter) {
@@ -105,8 +109,13 @@ async function* stream({
       err.status = 500;
       throw err;
     }
-    const text = evt.message?.content;
-    if (text) yield { type: 'delta', text };
+    const msg = evt.message || {};
+    if (msg.thinking) thinkingTokens += 1;
+    const text = msg.content;
+    if (text) {
+      contentTokens += 1;
+      yield { type: 'delta', text }; // only page content is streamed; thinking is not
+    }
     // The terminal frame carries done:true plus the timing counters.
     if (evt.done) final = evt;
   }
@@ -130,6 +139,10 @@ async function* stream({
         prompt_eval_duration: final.prompt_eval_duration || 0,
         load_duration: final.load_duration || 0,
         total_duration: final.total_duration || 0,
+        done_reason: final.done_reason || null,
+        // Streamed-delta counts, split by phase (≈ tokens; one token per frame).
+        thinking_tokens: thinkingTokens,
+        content_tokens: contentTokens,
       },
     };
   }
