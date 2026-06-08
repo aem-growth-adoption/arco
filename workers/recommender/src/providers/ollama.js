@@ -70,12 +70,19 @@ async function* stream({
     throw err;
   }
 
+  // Context window. Ollama defaults to a small num_ctx (often 4096) which
+  // silently truncates our large RAG prompt (~15k tokens) — dropping the
+  // EDS-schema instructions and yielding malformed/empty pages. Send an
+  // explicit, generous num_ctx so the full prompt always fits, regardless of
+  // the server's default. Overridable via OLLAMA_NUM_CTX.
+  const numCtx = parseInt(env.OLLAMA_NUM_CTX, 10) || 32768;
   const reqBody = {
     model,
     messages,
     stream: true,
     options: {
       temperature,
+      num_ctx: numCtx,
       ...(maxTokens ? { num_predict: maxTokens } : {}),
     },
   };
