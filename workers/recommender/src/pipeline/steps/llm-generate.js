@@ -685,6 +685,37 @@ export async function runLlmVariant(ctx, env, opts) {
         cacheWriteTokens: out.usage?.cache_write_tokens || null,
         promptCacheHit: (out.usage?.cache_read_tokens || 0) > 0,
         chunks: tokenCount,
+        // Wall-clock time to first streamed token (includes prompt prefill).
+        timeToFirstTokenMs: (timings.llmFirstToken && timings.llmStart)
+          ? timings.llmFirstToken - timings.llmStart : null,
+        // Decode timing. Prefer the provider's own counters when present
+        // (Ollama native eval_count/eval_duration — GPU-level, most accurate);
+        // otherwise fall back to the wall-clock first-delta→last-delta window,
+        // which over-reports when a provider buffers its output stream.
+        generationMs: (() => {
+          const u = out.usage || {};
+          if (u.eval_duration) return Math.round(u.eval_duration / 1e6);
+          return (timings.llmLastToken && timings.llmFirstToken)
+            ? timings.llmLastToken - timings.llmFirstToken : null;
+        })(),
+        tokensPerSec: (() => {
+          const u = out.usage || {};
+          if (u.eval_count && u.eval_duration) {
+            return Math.round((u.eval_count / (u.eval_duration / 1e9)) * 10) / 10;
+          }
+          const genMs = (timings.llmLastToken && timings.llmFirstToken)
+            ? timings.llmLastToken - timings.llmFirstToken : 0;
+          const outTok = u.completion_tokens || tokenCount;
+          return genMs > 0 && outTok ? Math.round((outTok / (genMs / 1000)) * 10) / 10 : null;
+        })(),
+        // Prefill (prompt-eval) timing, when the provider reports it.
+        promptEvalMs: out.usage?.prompt_eval_duration
+          ? Math.round(out.usage.prompt_eval_duration / 1e6) : null,
+        promptTokensPerSec: (() => {
+          const u = out.usage || {};
+          if (!(u.prompt_eval_count && u.prompt_eval_duration)) return null;
+          return Math.round((u.prompt_eval_count / (u.prompt_eval_duration / 1e9)) * 10) / 10;
+        })(),
         outputLength: out.fullText.length,
         rawOutput: out.fullText,
         sections: out.sections.length,

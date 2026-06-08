@@ -1,23 +1,34 @@
 /**
- * Ollama provider — OpenAI-compatible /v1/chat/completions over HTTP.
- * Points at a local Ollama server (typically an SSH-forwarded EC2 instance at
- * http://localhost:11434/v1). Parses Server-Sent Events and yields normalized
- * delta/usage chunks — same contract as the other providers.
+ * Ollama provider — native /api/chat streaming.
  *
- * Configuration comes from env (no API key needed):
- *   OLLAMA_BASE_URL  e.g. http://localhost:11434/v1
+ * Uses Ollama's native API (not the OpenAI-compatible /v1 shim) because the
+ * native final message includes real timing counters — prompt_eval_count /
+ * prompt_eval_duration (prefill) and eval_count / eval_duration (decode) — which
+ * give an accurate, GPU-level tokens/sec. The OpenAI shim buffers deltas and
+ * omits these counters, so application-level timing through it is unreliable.
+ *
+ * Points at a local Ollama server (typically http://localhost:11434), which may
+ * be the Mac itself or an SSH-forwarded remote box.
+ *
+ * Configuration (no API key needed):
+ *   OLLAMA_BASE_URL  e.g. http://localhost:11434  (a trailing /v1 is tolerated)
  *   OLLAMA_MODEL     selected via llm-config; passed in as `model` here
+ *   OLLAMA_THINK     optional "false" to disable the thinking phase on
+ *                    reasoning-capable models (faster, fewer tokens)
+ *
+ * The normalized stream contract is unchanged: yields { type:'delta', text }
+ * chunks and a terminal { type:'usage', usage } frame. The usage frame carries
+ * the OpenAI-style token fields plus the native nanosecond timing counters.
  */
 
 function resolveEndpoint(env) {
-  const base = (env.OLLAMA_BASE_URL || '').replace(/\/$/, '');
-  // Accept both ".../v1" and a bare host; normalize to the chat completions path.
-  if (base.endsWith('/v1')) return `${base}/chat/completions`;
-  if (base.endsWith('/v1/chat/completions')) return base;
-  return `${base}/v1/chat/completions`;
+  let base = (env.OLLAMA_BASE_URL || '').replace(/\/+$/, '');
+  // Tolerate a base configured for the OpenAI shim (".../v1").
+  base = base.replace(/\/v1$/, '');
+  return `${base}/api/chat`;
 }
 
-async function* iterateSse(response, signal) {
+async function* iterateNdjson(response, signal) {
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = '';
@@ -28,20 +39,22 @@ async function* iterateSse(response, signal) {
       const { value, done } = await reader.read();
       if (done) break;
       buffer += decoder.decode(value, { stream: true });
-      const frames = buffer.split('\n\n');
-      buffer = frames.pop() || '';
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
       // eslint-disable-next-line no-restricted-syntax
-      for (const frame of frames) {
-        const line = frame.split('\n').find((l) => l.startsWith('data:'));
-        if (!line) continue; // eslint-disable-line no-continue
-        const data = line.slice(5).trim();
-        if (!data || data === '[DONE]') continue; // eslint-disable-line no-continue
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed) continue; // eslint-disable-line no-continue
         try {
-          yield JSON.parse(data);
+          yield JSON.parse(trimmed);
         } catch {
-          // ignore malformed frame
+          // ignore malformed line
         }
       }
+    }
+    const tail = buffer.trim();
+    if (tail) {
+      try { yield JSON.parse(tail); } catch { /* ignore */ }
     }
   } finally {
     try { reader.releaseLock(); } catch { /* ignore */ }
@@ -57,22 +70,22 @@ async function* stream({
     throw err;
   }
 
+  const reqBody = {
+    model,
+    messages,
+    stream: true,
+    options: {
+      temperature,
+      ...(maxTokens ? { num_predict: maxTokens } : {}),
+    },
+  };
+  // Allow disabling the thinking phase on reasoning-capable models.
+  if (String(env.OLLAMA_THINK).toLowerCase() === 'false') reqBody.think = false;
+
   const response = await fetch(resolveEndpoint(env), {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      // Ollama ignores auth, but the OpenAI shape expects a bearer.
-      Authorization: `Bearer ${env.OLLAMA_API_KEY || 'ollama'}`,
-      Accept: 'text/event-stream',
-    },
-    body: JSON.stringify({
-      model,
-      messages,
-      max_tokens: maxTokens,
-      temperature,
-      stream: true,
-      stream_options: { include_usage: true },
-    }),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(reqBody),
     signal,
   });
 
@@ -83,15 +96,43 @@ async function* stream({
     throw err;
   }
 
-  let usage = null;
-  const iter = iterateSse(response, signal);
+  let final = null;
+  const iter = iterateNdjson(response, signal);
   // eslint-disable-next-line no-restricted-syntax
   for await (const evt of iter) {
-    const text = evt.choices?.[0]?.delta?.content;
+    if (evt.error) {
+      const err = new Error(`Ollama error: ${evt.error}`);
+      err.status = 500;
+      throw err;
+    }
+    const text = evt.message?.content;
     if (text) yield { type: 'delta', text };
-    if (evt.usage) usage = evt.usage;
+    // The terminal frame carries done:true plus the timing counters.
+    if (evt.done) final = evt;
   }
-  if (usage) yield { type: 'usage', usage };
+
+  if (final) {
+    const promptTokens = final.prompt_eval_count || 0;
+    const completionTokens = final.eval_count || 0;
+    yield {
+      type: 'usage',
+      usage: {
+        prompt_tokens: promptTokens,
+        completion_tokens: completionTokens,
+        total_tokens: promptTokens + completionTokens,
+        cache_read_tokens: 0,
+        cache_write_tokens: 0,
+        // Native Ollama timing counters (nanoseconds) — used for accurate
+        // prefill/decode tokens-per-second in the debug stats.
+        eval_count: final.eval_count || 0,
+        eval_duration: final.eval_duration || 0,
+        prompt_eval_count: final.prompt_eval_count || 0,
+        prompt_eval_duration: final.prompt_eval_duration || 0,
+        load_duration: final.load_duration || 0,
+        total_duration: final.total_duration || 0,
+      },
+    };
+  }
 }
 
 export default { id: 'ollama', stream };
