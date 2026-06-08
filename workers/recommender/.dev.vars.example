@@ -6,8 +6,12 @@ OLLAMA_BASE_URL=http://localhost:11434/v1
 # Any model you've `ollama pull`ed on the server. Setting this makes the local
 # worker default to Ollama with no admin clicks (admin Model Settings overrides).
 OLLAMA_MODEL=llama3.1:8b
-# Optional — Ollama ignores auth; only set if you front it with a proxy.
-# OLLAMA_API_KEY=
+# Output token budget (default 16384). Reasoning models spend part of it on a
+# thinking phase before emitting content — keep it generous to avoid empty pages.
+OLLAMA_MAX_TOKENS=16384
+# Optional — set to "false" to disable the thinking phase on reasoning models
+# (much faster TTFT, fewer tokens).
+# OLLAMA_THINK=false
 
 # Cloudflare auth for the remote Vectorize/AI bindings is taken from your
 # `wrangler login` session (or CLOUDFLARE_API_TOKEN). No key needed here.

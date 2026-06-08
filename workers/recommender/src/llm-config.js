@@ -27,11 +27,17 @@ function clamp(n, min, max) {
  */
 function ollamaEnvDefault(env) {
   if (!env?.OLLAMA_MODEL) return null;
+  // Reasoning-capable Ollama models spend output budget on a thinking phase
+  // before emitting page content, so the flow default (5120) can be fully
+  // consumed by thinking and yield an empty page. Default Ollama to a larger
+  // budget, overridable via OLLAMA_MAX_TOKENS.
+  const parsed = parseInt(env.OLLAMA_MAX_TOKENS, 10);
+  const maxTokens = Number.isFinite(parsed) && parsed > 0 ? parsed : 16384;
   return {
     provider: 'ollama',
     model: env.OLLAMA_MODEL,
     temperature: null,
-    maxTokens: null,
+    maxTokens,
     updatedAt: null,
   };
 }
