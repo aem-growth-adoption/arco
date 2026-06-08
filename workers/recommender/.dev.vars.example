@@ -1,0 +1,17 @@
+# Local dev secrets/vars for `wrangler dev` (copy to .dev.vars — gitignored).
+#
+# Ollama (local runtime). Point at your SSH-forwarded EC2 Ollama server:
+#   ssh -N -L 11434:localhost:11434 user@your-ec2-host
+OLLAMA_BASE_URL=http://localhost:11434/v1
+# Any model you've `ollama pull`ed on the server. Setting this makes the local
+# worker default to Ollama with no admin clicks (admin Model Settings overrides).
+OLLAMA_MODEL=llama3.1:8b
+# Optional — Ollama ignores auth; only set if you front it with a proxy.
+# OLLAMA_API_KEY=
+
+# Cloudflare auth for the remote Vectorize/AI bindings is taken from your
+# `wrangler login` session (or CLOUDFLARE_API_TOKEN). No key needed here.
+
+# DA_* are intentionally omitted locally: /api/generate never writes to DA, and
+# leaving DA tokens unset keeps the page-caching /api/persist path from touching
+# the production content store.

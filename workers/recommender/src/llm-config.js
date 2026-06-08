@@ -19,21 +19,39 @@ function clamp(n, min, max) {
 }
 
 /**
- * Read the active LLM config from KV. Returns null on miss or if the stored
- * entry is no longer in the catalog.
+ * Local-dev default: when no KV config is stored but OLLAMA_MODEL is set in the
+ * environment (typically via .dev.vars during `wrangler dev`), route the main
+ * pipeline to the local Ollama server with zero clicks. A KV entry written via
+ * admin Model Settings still takes precedence. Returns null in production where
+ * OLLAMA_MODEL is unset.
+ */
+function ollamaEnvDefault(env) {
+  if (!env?.OLLAMA_MODEL) return null;
+  return {
+    provider: 'ollama',
+    model: env.OLLAMA_MODEL,
+    temperature: null,
+    maxTokens: null,
+    updatedAt: null,
+  };
+}
+
+/**
+ * Read the active LLM config from KV. Falls back to the Ollama env default (see
+ * ollamaEnvDefault) on miss, otherwise null if the stored entry is unusable.
  */
 export async function getActiveLlmConfig(env) {
-  if (!env.CACHE) return null;
+  if (!env.CACHE) return ollamaEnvDefault(env);
   let stored;
   try {
     stored = await env.CACHE.get(KV_KEY, 'json');
   } catch {
-    return null;
+    return ollamaEnvDefault(env);
   }
-  if (!stored || !stored.provider || !stored.model) return null;
+  if (!stored || !stored.provider || !stored.model) return ollamaEnvDefault(env);
   if (!findCatalogEntry(stored.provider, stored.model)) {
     console.warn(`[llm-config] stored entry not in catalog: ${stored.provider}/${stored.model}`);
-    return null;
+    return ollamaEnvDefault(env);
   }
   return {
     provider: stored.provider,
