@@ -140,6 +140,8 @@ async function* stream({
         load_duration: final.load_duration || 0,
         total_duration: final.total_duration || 0,
         done_reason: final.done_reason || null,
+        // Whether the thinking phase was explicitly disabled (OLLAMA_THINK=false).
+        thinking_disabled: reqBody.think === false,
         // Streamed-delta counts, split by phase (≈ tokens; one token per frame).
         thinking_tokens: thinkingTokens,
         content_tokens: contentTokens,

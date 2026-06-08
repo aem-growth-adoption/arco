@@ -724,6 +724,12 @@ export async function runLlmVariant(ctx, env, opts) {
         // Reasoning-model phase split: how much of decode was thinking vs the
         // visible page. Counts come from the provider; the ms split apportions
         // the provider's total decode time (eval_duration) by token share.
+        thinkingMode: (() => {
+          const u = out.usage || {};
+          if (u.thinking_disabled === undefined) return null; // non-Ollama provider
+          if (u.thinking_disabled) return 'off';
+          return (u.thinking_tokens || 0) > 0 ? 'on' : 'on (none generated)';
+        })(),
         thinkingTokens: out.usage?.thinking_tokens ?? null,
         contentTokens: out.usage?.content_tokens ?? null,
         thinkingPct: (() => {

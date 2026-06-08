@@ -75,9 +75,14 @@ function renderOverview(d) {
   const el = document.createElement('div');
   el.className = 'debug-overview';
 
-  const providerModel = d.llm?.provider
-    ? `${escapeHtml(d.llm.provider)} / ${escapeHtml(d.llm?.model || '—')}`
-    : escapeHtml(d.llm?.model);
+  const providerModel = (() => {
+    const base = d.llm?.provider
+      ? `${escapeHtml(d.llm.provider)} / ${escapeHtml(d.llm?.model || '—')}`
+      : escapeHtml(d.llm?.model);
+    if (!d.llm?.thinkingMode) return base;
+    const cls = d.llm.thinkingMode === 'off' ? 'timing-fast' : 'timing-med';
+    return `${base} <span class="debug-badge ${cls}">thinking: ${escapeHtml(d.llm.thinkingMode)}</span>`;
+  })();
   const rows = [
     ['Total Time', `<span class="debug-badge ${timingClass(d.timings?.total)}">${formatMs(d.timings?.total)}</span>`],
     ['Provider / Model', providerModel],
