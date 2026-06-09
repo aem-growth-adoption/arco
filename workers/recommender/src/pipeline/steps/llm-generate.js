@@ -339,6 +339,7 @@ export async function runLlmVariant(ctx, env, opts) {
     model,
     temperature,
     maxTokens,
+    thinking = null,
     out = ctx.llm,
     timings = ctx.timings,
     emitDebug = true,
@@ -381,7 +382,15 @@ export async function runLlmVariant(ctx, env, opts) {
     }
   }, 3000);
 
-  const timeoutMs = llmTimeoutMs || 60_000;
+  // Reasoning models with a big prompt can run well past the 60s default while
+  // thinking. LLM_TIMEOUT_MS overrides for any provider; Ollama keeps its own
+  // generous default (OLLAMA_TIMEOUT_MS) since it's typically local/slowest.
+  const explicitTimeout = parseInt(env.LLM_TIMEOUT_MS, 10);
+  const ollamaTimeout = parseInt(env.OLLAMA_TIMEOUT_MS, 10) || 300_000;
+  const providerDefault = providerId === 'ollama' ? ollamaTimeout : 60_000;
+  const envTimeout = Number.isFinite(explicitTimeout) && explicitTimeout > 0
+    ? explicitTimeout : providerDefault;
+  const timeoutMs = llmTimeoutMs || envTimeout;
   const abortController = new AbortController();
   const timeoutId = setTimeout(() => abortController.abort(), timeoutMs);
 
@@ -397,6 +406,7 @@ export async function runLlmVariant(ctx, env, opts) {
       ],
       maxTokens,
       temperature,
+      thinking,
       signal: abortController.signal,
     });
   } catch (llmErr) {
@@ -685,6 +695,66 @@ export async function runLlmVariant(ctx, env, opts) {
         cacheWriteTokens: out.usage?.cache_write_tokens || null,
         promptCacheHit: (out.usage?.cache_read_tokens || 0) > 0,
         chunks: tokenCount,
+        // Wall-clock time to first streamed token (includes prompt prefill).
+        timeToFirstTokenMs: (timings.llmFirstToken && timings.llmStart)
+          ? timings.llmFirstToken - timings.llmStart : null,
+        // Decode timing. Prefer the provider's own counters when present
+        // (Ollama native eval_count/eval_duration — GPU-level, most accurate);
+        // otherwise fall back to the wall-clock first-delta→last-delta window,
+        // which over-reports when a provider buffers its output stream.
+        generationMs: (() => {
+          const u = out.usage || {};
+          if (u.eval_duration) return Math.round(u.eval_duration / 1e6);
+          return (timings.llmLastToken && timings.llmFirstToken)
+            ? timings.llmLastToken - timings.llmFirstToken : null;
+        })(),
+        tokensPerSec: (() => {
+          const u = out.usage || {};
+          if (u.eval_count && u.eval_duration) {
+            return Math.round((u.eval_count / (u.eval_duration / 1e9)) * 10) / 10;
+          }
+          const genMs = (timings.llmLastToken && timings.llmFirstToken)
+            ? timings.llmLastToken - timings.llmFirstToken : 0;
+          const outTok = u.completion_tokens || tokenCount;
+          return genMs > 0 && outTok ? Math.round((outTok / (genMs / 1000)) * 10) / 10 : null;
+        })(),
+        // Prefill (prompt-eval) timing, when the provider reports it.
+        promptEvalMs: out.usage?.prompt_eval_duration
+          ? Math.round(out.usage.prompt_eval_duration / 1e6) : null,
+        promptTokensPerSec: (() => {
+          const u = out.usage || {};
+          if (!(u.prompt_eval_count && u.prompt_eval_duration)) return null;
+          return Math.round((u.prompt_eval_count / (u.prompt_eval_duration / 1e9)) * 10) / 10;
+        })(),
+        // Reasoning-model phase split: how much of decode was thinking vs the
+        // visible page. Counts come from the provider; the ms split apportions
+        // the provider's total decode time (eval_duration) by token share.
+        thinkingMode: (() => {
+          const u = out.usage || {};
+          if (u.thinking_disabled === undefined) return null; // non-Ollama provider
+          if (u.thinking_disabled) return 'off';
+          return (u.thinking_tokens || 0) > 0 ? 'on' : 'on (none generated)';
+        })(),
+        thinkingTokens: out.usage?.thinking_tokens ?? null,
+        contentTokens: out.usage?.content_tokens ?? null,
+        thinkingPct: (() => {
+          const u = out.usage || {};
+          const tot = (u.thinking_tokens || 0) + (u.content_tokens || 0);
+          return tot > 0 ? Math.round(((u.thinking_tokens || 0) / tot) * 100) : null;
+        })(),
+        thinkingMs: (() => {
+          const u = out.usage || {};
+          const tot = (u.thinking_tokens || 0) + (u.content_tokens || 0);
+          if (!u.eval_duration || !tot) return null;
+          return Math.round((u.eval_duration / 1e6) * ((u.thinking_tokens || 0) / tot));
+        })(),
+        contentMs: (() => {
+          const u = out.usage || {};
+          const tot = (u.thinking_tokens || 0) + (u.content_tokens || 0);
+          if (!u.eval_duration || !tot) return null;
+          return Math.round((u.eval_duration / 1e6) * ((u.content_tokens || 0) / tot));
+        })(),
+        doneReason: out.usage?.done_reason ?? null,
         outputLength: out.fullText.length,
         rawOutput: out.fullText,
         sections: out.sections.length,
@@ -756,6 +826,7 @@ export async function llmGenerate(ctx, config, env) {
     model: resolved.model,
     temperature: resolved.temperature,
     maxTokens: resolved.maxTokens,
+    thinking: resolved.thinking,
     out: ctx.llm,
     timings: ctx.timings,
     emitDebug: true,

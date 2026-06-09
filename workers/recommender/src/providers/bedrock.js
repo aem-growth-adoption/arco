@@ -98,7 +98,14 @@ async function* stream({
     inferenceConfig: { maxTokens, temperature },
   };
   if (systemParts.length) {
-    body.system = [...systemParts, { cachePoint: { type: 'default' } }];
+    // Prompt caching (cachePoint) is only supported by some Bedrock model
+    // families (Anthropic Claude, Amazon Nova). Others — e.g. NVIDIA Nemotron —
+    // reject the request with a 403 if a cachePoint is present, so only add it
+    // for models known to support it.
+    const supportsCaching = /(^|\.)anthropic\.|(^|\.)amazon\.nova/i.test(model);
+    body.system = supportsCaching
+      ? [...systemParts, { cachePoint: { type: 'default' } }]
+      : systemParts;
   }
 
   const url = `https://bedrock-runtime.${region}.amazonaws.com/model/${encodeURIComponent(model)}/converse-stream`;

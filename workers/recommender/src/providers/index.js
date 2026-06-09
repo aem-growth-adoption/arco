@@ -11,12 +11,16 @@ import bedrock from './bedrock.js';
 import cerebras from './cerebras.js';
 import cloudflare from './cloudflare.js';
 import sambanova from './sambanova.js';
+import ollama from './ollama.js';
+import vllm from './vllm.js';
 
 const PROVIDERS = {
   bedrock,
   cerebras,
   cloudflare,
   sambanova,
+  ollama,
+  vllm,
 };
 
 /**
@@ -312,15 +316,43 @@ export const MODEL_CATALOG = [
     model: 'gpt-oss-120b',
     label: 'SambaNova · GPT-OSS 120B',
   },
+  // Ollama (local dev only — points at OLLAMA_BASE_URL, typically an
+  // SSH-forwarded EC2 instance). These are representative entries for the admin
+  // dropdown; any pulled model works via env (OLLAMA_MODEL) thanks to the
+  // synthesize path in findCatalogEntry below.
+  {
+    provider: 'ollama',
+    model: 'llama3.1:8b',
+    label: 'Ollama · Llama 3.1 8B (local)',
+  },
+  {
+    provider: 'ollama',
+    model: 'qwen2.5:7b',
+    label: 'Ollama · Qwen 2.5 7B (local)',
+  },
+  // vLLM (OpenAI-compatible server at VLLM_BASE_URL — local or SSH-forwarded).
+  // Representative entry for the dropdown; any served model works via the
+  // synthesize path in findCatalogEntry below.
+  {
+    provider: 'vllm',
+    model: 'served-model',
+    label: 'vLLM · served model (set VLLM_BASE_URL)',
+  },
 ];
 
 export const DEFAULT_CATALOG_ENTRY = MODEL_CATALOG[0];
 
 export function findCatalogEntry(provider, model) {
-  return (
-    MODEL_CATALOG.find((e) => e.provider === provider && e.model === model)
-    || null
-  );
+  const found = MODEL_CATALOG.find((e) => e.provider === provider && e.model === model);
+  if (found) return found;
+  // Ollama and vLLM run arbitrary served models; synthesize an entry for any
+  // model string so env-driven selection and admin Model Settings both validate
+  // without a catalog edit per model.
+  if ((provider === 'ollama' || provider === 'vllm') && model) {
+    const label = provider === 'ollama' ? `Ollama · ${model}` : `vLLM · ${model}`;
+    return { provider, model, label };
+  }
+  return null;
 }
 
 export function getProvider(name) {
@@ -339,6 +371,8 @@ const PROVIDER_BASE_REQUIREMENTS = {
   cerebras: (env) => (env.CEREBRAS_API_KEY ? [] : ['CEREBRAS_API_KEY']),
   sambanova: (env) => (env.SAMBANOVA_API_KEY ? [] : ['SAMBANOVA_API_KEY']),
   cloudflare: (env) => (env.AI ? [] : ['AI (binding)']),
+  ollama: (env) => (env.OLLAMA_BASE_URL ? [] : ['OLLAMA_BASE_URL']),
+  vllm: (env) => (env.VLLM_BASE_URL ? [] : ['VLLM_BASE_URL']),
 };
 
 /**

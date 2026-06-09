@@ -75,9 +75,14 @@ function renderOverview(d) {
   const el = document.createElement('div');
   el.className = 'debug-overview';
 
-  const providerModel = d.llm?.provider
-    ? `${escapeHtml(d.llm.provider)} / ${escapeHtml(d.llm?.model || '—')}`
-    : escapeHtml(d.llm?.model);
+  const providerModel = (() => {
+    const base = d.llm?.provider
+      ? `${escapeHtml(d.llm.provider)} / ${escapeHtml(d.llm?.model || '—')}`
+      : escapeHtml(d.llm?.model);
+    if (!d.llm?.thinkingMode) return base;
+    const cls = d.llm.thinkingMode === 'off' ? 'timing-fast' : 'timing-med';
+    return `${base} <span class="debug-badge ${cls}">thinking: ${escapeHtml(d.llm.thinkingMode)}</span>`;
+  })();
   const rows = [
     ['Total Time', `<span class="debug-badge ${timingClass(d.timings?.total)}">${formatMs(d.timings?.total)}</span>`],
     ['Provider / Model', providerModel],
@@ -90,6 +95,22 @@ function renderOverview(d) {
     ['First Token', formatMs(d.timings?.llmFirstToken)],
     ['Tokens In / Out', d.llm?.inputTokens != null ? `${d.llm.inputTokens} / ${d.llm.outputTokens}` : '—'],
     ['Total Tokens', d.llm?.totalTokens ?? '—'],
+    ['TTFT', d.llm?.timeToFirstTokenMs != null ? formatMs(d.llm.timeToFirstTokenMs) : '—'],
+    ['Decode Speed', d.llm?.tokensPerSec != null ? `${d.llm.tokensPerSec} tok/s` : '—'],
+    ['Decode Time', d.llm?.generationMs != null ? formatMs(d.llm.generationMs) : '—'],
+    ['Prefill Speed', d.llm?.promptTokensPerSec != null ? `${d.llm.promptTokensPerSec} tok/s` : '—'],
+    ['Prefill Time', d.llm?.promptEvalMs != null ? formatMs(d.llm.promptEvalMs) : '—'],
+    ['Thinking / Content', (() => {
+      const l = d.llm || {};
+      if (l.thinkingTokens == null) return '—';
+      const pct = l.thinkingPct != null ? ` <span class="debug-dim">(${l.thinkingPct}% thinking)</span>` : '';
+      return `${l.thinkingTokens} / ${l.contentTokens} tok${pct}`;
+    })()],
+    ['Thinking / Content Time', d.llm?.thinkingMs != null
+      ? `${formatMs(d.llm.thinkingMs)} / ${formatMs(d.llm.contentMs)}` : '—'],
+    ['Finish Reason', d.llm?.doneReason
+      ? `<span class="debug-badge ${d.llm.doneReason === 'length' ? 'timing-slow' : 'timing-fast'}">${escapeHtml(d.llm.doneReason)}</span>`
+      : '—'],
     ['Prompt Cache', formatCacheStatus(d.llm)],
     ['Output Chars', d.llm?.outputLength ?? '—'],
     ['Sections', d.llm?.sections ?? '—'],
