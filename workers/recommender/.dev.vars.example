@@ -19,9 +19,21 @@ OLLAMA_NUM_CTX=32768
 # Optional — LLM timeout in ms for Ollama (default 300000). Reasoning models with
 # a large OLLAMA_MAX_TOKENS can run minutes; raise if you still hit timeouts.
 # OLLAMA_TIMEOUT_MS=300000
+# Optional — LLM timeout in ms for ANY provider (default per-provider). Useful
+# for slow cloud reasoning models under `--local`.
+# LLM_TIMEOUT_MS=300000
 
-# Cloudflare auth for the remote Vectorize/AI bindings is taken from your
-# `wrangler login` session (or CLOUDFLARE_API_TOKEN). No key needed here.
+# Cloudflare Workers AI via REST (no remote-binding proxy needed — works under
+# `wrangler dev --local`). Set both to enable the cloudflare provider locally.
+# The token needs the "Workers AI: Read + Edit" permission.
+# CF_ACCOUNT_ID=your-account-id
+# CLOUDFLARE_API_TOKEN=your-workers-ai-token   # or CF_AI_TOKEN
+# Optional — disable the thinking phase on CF reasoning models (Nemotron etc.).
+# The Model Settings "Reasoning" control overrides this per-config.
+# CF_THINK=false
+
+# (Cloudflare auth for the remote Vectorize/AI *bindings* is separate — taken
+# from `wrangler login` / a Workers-scoped token, only needed in non-local mode.)
 
 # DA_* are intentionally omitted locally: /api/generate never writes to DA, and
 # leaving DA tokens unset keeps the page-caching /api/persist path from touching

@@ -339,6 +339,7 @@ export async function runLlmVariant(ctx, env, opts) {
     model,
     temperature,
     maxTokens,
+    thinking = null,
     out = ctx.llm,
     timings = ctx.timings,
     emitDebug = true,
@@ -381,12 +382,15 @@ export async function runLlmVariant(ctx, env, opts) {
     }
   }, 3000);
 
-  // Local Ollama (esp. reasoning models with a large maxTokens) can run well
-  // past the 60s default while thinking, so give it a longer ceiling —
-  // overridable via OLLAMA_TIMEOUT_MS.
+  // Reasoning models with a big prompt can run well past the 60s default while
+  // thinking. LLM_TIMEOUT_MS overrides for any provider; Ollama keeps its own
+  // generous default (OLLAMA_TIMEOUT_MS) since it's typically local/slowest.
+  const explicitTimeout = parseInt(env.LLM_TIMEOUT_MS, 10);
   const ollamaTimeout = parseInt(env.OLLAMA_TIMEOUT_MS, 10) || 300_000;
-  const defaultTimeout = providerId === 'ollama' ? ollamaTimeout : 60_000;
-  const timeoutMs = llmTimeoutMs || defaultTimeout;
+  const providerDefault = providerId === 'ollama' ? ollamaTimeout : 60_000;
+  const envTimeout = Number.isFinite(explicitTimeout) && explicitTimeout > 0
+    ? explicitTimeout : providerDefault;
+  const timeoutMs = llmTimeoutMs || envTimeout;
   const abortController = new AbortController();
   const timeoutId = setTimeout(() => abortController.abort(), timeoutMs);
 
@@ -402,6 +406,7 @@ export async function runLlmVariant(ctx, env, opts) {
       ],
       maxTokens,
       temperature,
+      thinking,
       signal: abortController.signal,
     });
   } catch (llmErr) {
@@ -821,6 +826,7 @@ export async function llmGenerate(ctx, config, env) {
     model: resolved.model,
     temperature: resolved.temperature,
     maxTokens: resolved.maxTokens,
+    thinking: resolved.thinking,
     out: ctx.llm,
     timings: ctx.timings,
     emitDebug: true,

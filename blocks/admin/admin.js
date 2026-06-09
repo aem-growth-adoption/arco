@@ -954,6 +954,7 @@ async function renderLlmConfig(root) {
   const currentKey = `${selected.provider}::${selected.model}`;
   const temperature = active?.temperature ?? 0.6;
   const maxTokens = active?.maxTokens ?? 4096;
+  const thinkingVal = typeof active?.thinking === 'boolean' ? active.thinking : null;
   const currentEntry = catalog.find(
     (e) => `${e.provider}::${e.model}` === currentKey,
   );
@@ -993,6 +994,15 @@ async function renderLlmConfig(root) {
           <span>Max tokens <small class="admin-muted">(${limits.maxTokens.min} – ${limits.maxTokens.max})</small></span>
           <input type="number" name="maxTokens" step="64" min="${limits.maxTokens.min}" max="${limits.maxTokens.max}" value="${maxTokens}" required>
         </label>
+        <label class="admin-field">
+          <span>Reasoning <small class="admin-muted">(Ollama / Cloudflare reasoning models)</small></span>
+          <select name="thinking">
+            <option value="default"${thinkingVal === null ? ' selected' : ''}>Default (model decides)</option>
+            <option value="on"${thinkingVal === true ? ' selected' : ''}>On — enable thinking</option>
+            <option value="off"${thinkingVal === false ? ' selected' : ''}>Off — disable thinking (faster)</option>
+          </select>
+          <small class="admin-muted">Off disables the thinking phase where supported; ignored by models without it.</small>
+        </label>
         <div class="admin-llm-actions">
           <button type="submit" class="admin-btn admin-btn-primary">Save</button>
           <span class="admin-llm-status admin-muted" data-status></span>
@@ -1015,11 +1025,17 @@ async function renderLlmConfig(root) {
     e.preventDefault();
     const data = new FormData(form);
     const [provider, model] = String(data.get('entry') || '').split('::');
+    const thinkingSel = String(data.get('thinking') || 'default');
+    // tri-state: on -> true, off -> false, default -> null
+    let thinking = null;
+    if (thinkingSel === 'on') thinking = true;
+    else if (thinkingSel === 'off') thinking = false;
     const body = {
       provider,
       model,
       temperature: Number(data.get('temperature')),
       maxTokens: Number(data.get('maxTokens')),
+      thinking,
     };
     status.textContent = 'Saving…';
     status.classList.remove('is-error', 'is-ok');

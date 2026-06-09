@@ -62,7 +62,7 @@ async function* iterateNdjson(response, signal) {
 }
 
 async function* stream({
-  env, model, messages, temperature, maxTokens, signal,
+  env, model, messages, temperature, maxTokens, thinking, signal,
 }) {
   if (!env.OLLAMA_BASE_URL) {
     const err = new Error('Ollama base URL is not configured (set OLLAMA_BASE_URL).');
@@ -86,8 +86,12 @@ async function* stream({
       ...(maxTokens ? { num_predict: maxTokens } : {}),
     },
   };
-  // Allow disabling the thinking phase on reasoning-capable models.
-  if (String(env.OLLAMA_THINK).toLowerCase() === 'false') reqBody.think = false;
+  // Allow disabling the thinking phase on reasoning-capable models. The
+  // per-request `thinking` config (Model Settings) wins; null falls back to the
+  // OLLAMA_THINK env default.
+  const disableThink = thinking === false
+    || (thinking == null && String(env.OLLAMA_THINK).toLowerCase() === 'false');
+  if (disableThink) reqBody.think = false;
 
   const response = await fetch(resolveEndpoint(env), {
     method: 'POST',

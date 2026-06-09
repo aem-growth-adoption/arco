@@ -38,6 +38,7 @@ function ollamaEnvDefault(env) {
     model: env.OLLAMA_MODEL,
     temperature: null,
     maxTokens,
+    thinking: String(env.OLLAMA_THINK).toLowerCase() === 'false' ? false : null,
     updatedAt: null,
   };
 }
@@ -64,6 +65,7 @@ export async function getActiveLlmConfig(env) {
     model: stored.model,
     temperature: typeof stored.temperature === 'number' ? stored.temperature : null,
     maxTokens: typeof stored.maxTokens === 'number' ? stored.maxTokens : null,
+    thinking: typeof stored.thinking === 'boolean' ? stored.thinking : null,
     updatedAt: stored.updatedAt || null,
   };
 }
@@ -83,11 +85,18 @@ export async function putActiveLlmConfig(env, patch) {
     ? clamp(Math.round(patch.maxTokens), TOKENS_MIN, TOKENS_MAX)
     : null;
 
+  // Tri-state reasoning toggle: true = force on, false = force off, null = use
+  // the model/provider default. Interpreted by providers that support it
+  // (Ollama `think`, Cloudflare `enable_thinking`).
+  let thinking = null;
+  if (patch.thinking === true || patch.thinking === false) thinking = patch.thinking;
+
   const value = {
     provider: entry.provider,
     model: entry.model,
     temperature,
     maxTokens,
+    thinking,
     updatedAt: new Date().toISOString(),
   };
 
@@ -101,8 +110,9 @@ export function resolveLlmConfig(active, flowConfig) {
   const temperature = active?.temperature
     ?? (typeof flowConfig?.temperature === 'number' ? flowConfig.temperature : 0.6);
   const maxTokens = active?.maxTokens ?? flowConfig?.maxTokens ?? 4096;
+  const thinking = typeof active?.thinking === 'boolean' ? active.thinking : null;
   return {
-    provider, model, temperature, maxTokens,
+    provider, model, temperature, maxTokens, thinking,
   };
 }
 
