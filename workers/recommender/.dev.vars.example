@@ -35,6 +35,13 @@ OLLAMA_NUM_CTX=32768
 # (Cloudflare auth for the remote Vectorize/AI *bindings* is separate — taken
 # from `wrangler login` / a Workers-scoped token, only needed in non-local mode.)
 
+# vLLM (OpenAI-compatible server — local or SSH-forwarded). Set the base URL to
+# enable the vllm provider; the model name is whatever vLLM is serving.
+# VLLM_BASE_URL=http://localhost:8000/v1
+# VLLM_API_KEY=                 # only if vLLM was started with --api-key
+# CF_THINK-style toggle for vLLM reasoning models (Model Settings overrides it):
+# VLLM_THINK=false
+
 # DA_* are intentionally omitted locally: /api/generate never writes to DA, and
 # leaving DA tokens unset keeps the page-caching /api/persist path from touching
 # the production content store.

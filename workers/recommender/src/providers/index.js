@@ -12,6 +12,7 @@ import cerebras from './cerebras.js';
 import cloudflare from './cloudflare.js';
 import sambanova from './sambanova.js';
 import ollama from './ollama.js';
+import vllm from './vllm.js';
 
 const PROVIDERS = {
   bedrock,
@@ -19,6 +20,7 @@ const PROVIDERS = {
   cloudflare,
   sambanova,
   ollama,
+  vllm,
 };
 
 /**
@@ -328,6 +330,14 @@ export const MODEL_CATALOG = [
     model: 'qwen2.5:7b',
     label: 'Ollama · Qwen 2.5 7B (local)',
   },
+  // vLLM (OpenAI-compatible server at VLLM_BASE_URL — local or SSH-forwarded).
+  // Representative entry for the dropdown; any served model works via the
+  // synthesize path in findCatalogEntry below.
+  {
+    provider: 'vllm',
+    model: 'served-model',
+    label: 'vLLM · served model (set VLLM_BASE_URL)',
+  },
 ];
 
 export const DEFAULT_CATALOG_ENTRY = MODEL_CATALOG[0];
@@ -335,11 +345,12 @@ export const DEFAULT_CATALOG_ENTRY = MODEL_CATALOG[0];
 export function findCatalogEntry(provider, model) {
   const found = MODEL_CATALOG.find((e) => e.provider === provider && e.model === model);
   if (found) return found;
-  // Ollama runs arbitrary locally-pulled models; synthesize an entry for any
+  // Ollama and vLLM run arbitrary served models; synthesize an entry for any
   // model string so env-driven selection and admin Model Settings both validate
   // without a catalog edit per model.
-  if (provider === 'ollama' && model) {
-    return { provider: 'ollama', model, label: `Ollama · ${model}` };
+  if ((provider === 'ollama' || provider === 'vllm') && model) {
+    const label = provider === 'ollama' ? `Ollama · ${model}` : `vLLM · ${model}`;
+    return { provider, model, label };
   }
   return null;
 }
@@ -361,6 +372,7 @@ const PROVIDER_BASE_REQUIREMENTS = {
   sambanova: (env) => (env.SAMBANOVA_API_KEY ? [] : ['SAMBANOVA_API_KEY']),
   cloudflare: (env) => (env.AI ? [] : ['AI (binding)']),
   ollama: (env) => (env.OLLAMA_BASE_URL ? [] : ['OLLAMA_BASE_URL']),
+  vllm: (env) => (env.VLLM_BASE_URL ? [] : ['VLLM_BASE_URL']),
 };
 
 /**
