@@ -220,6 +220,14 @@ async function renderFollowUpSection(items, container) {
 async function handleNdjsonEvent(data, container, state, options = {}) {
   if (data.type === 'heartbeat') return;
 
+  if (data.type === 'template-selected') {
+    state.template = data.template;
+    if (isDebugMode()) {
+      // eslint-disable-next-line no-console
+      console.debug('[Recommender] Template selected:', data.template);
+    }
+  }
+
   if (data.type === 'section') {
     if (state.blockCount === 0 && options.onFirstSection) options.onFirstSection();
     state.blockCount += 1;
