@@ -83,6 +83,10 @@ function normalizeContext(ctx) {
     excludeQueries: ctx.excludeQueries,
     pageUrl: ctx.pageUrl,
     pageTitle: ctx.pageTitle,
+    // template-fill fields
+    template: ctx.template || null,
+    templateBlocks: ctx.templateBlocks || [],
+    behaviorProfile: ctx.behavior?.summary || ctx.behaviorProfile || null,
   };
 }
 

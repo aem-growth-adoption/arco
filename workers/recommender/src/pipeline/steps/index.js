@@ -14,6 +14,7 @@ import { ragContent } from './rag-content.js';
 import { llmGenerate } from './llm-generate.js';
 import { analyzeBehavior } from './analyze-behavior.js';
 import { buildRecommenderPrompt } from './build-recommender-prompt.js';
+import { buildTemplatePrompt } from './build-template-prompt.js';
 import { templateSelect } from './template-select.js';
 
 /**
@@ -37,5 +38,6 @@ export const STEPS = {
   'llm-generate': llmGenerate,
   'analyze-behavior': analyzeBehavior,
   'build-recommender-prompt': buildRecommenderPrompt,
+  'build-template-prompt': buildTemplatePrompt,
   'template-select': templateSelect,
 };
