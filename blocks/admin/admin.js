@@ -515,6 +515,7 @@ function renderTimelineTab(container, data) {
                     ${kv('Run ID', run.id)}
                     ${kv('Parent run', run.parent_run_id)}
                     ${kv('Intent', run.intent_type)}
+                    ${kv('Template', run.template_name)}
                     ${kv('Flow', run.flow_id)}
                     ${kv('Journey', run.journey_stage)}
                     ${kv('DA path', run.da_path)}
@@ -854,6 +855,7 @@ async function renderPage(root, pageId, tab) {
       <div class="admin-badges">
         ${badge(initialRun?.intent_type, intentTone(initialRun?.intent_type))}
         ${badge(`${runs.length} run${runs.length === 1 ? '' : 's'}`, 'accent')}
+        ${initialRun?.template_name ? badge(initialRun.template_name, 'neutral') : ''}
       </div>
     </div>
     <nav class="admin-tabs">
