@@ -12,6 +12,8 @@
  * This script reads:
  *   - prompts/recommender.yaml      (extracts system + user template bodies)
  *   - prompts/suggestions.yaml      (extracts system + user template bodies)
+ *   - prompts/template-select.yaml  (extracts system + user template bodies)
+ *   - prompts/template-fill.yaml    (extracts system + user template bodies)
  *   - prompts/partials/brand-voice.njk
  *   - prompts/partials/block-guide.njk
  *   - prompts/partials/product-catalog.njk
@@ -49,7 +51,7 @@ const TEMPLATES = {
 };
 
 // Extract system + user template bodies from the YAML prompt files.
-for (const [yamlFile, prefix] of [['recommender.yaml', 'recommender'], ['suggestions.yaml', 'suggestions'], ['template-select.yaml', 'template-select']]) {
+for (const [yamlFile, prefix] of [['recommender.yaml', 'recommender'], ['suggestions.yaml', 'suggestions'], ['template-select.yaml', 'template-select'], ['template-fill.yaml', 'template-fill']]) {
   const parsed = yaml.parse(read(yamlFile));
   if (!parsed?.system || !parsed?.user) {
     throw new Error(`${yamlFile} missing system/user`);
