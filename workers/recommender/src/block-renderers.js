@@ -40,7 +40,7 @@ function heroSection(block) {
 
   const rows = [[headlineCell]];
 
-  if (block.image) {
+  if (block.image && block.image.startsWith('{{')) {
     rows.push([[{ type: 'token', value: block.image }]]);
   }
 
@@ -109,7 +109,7 @@ function cardsSection(block) {
  * data.recommended drives the data-recommended attribute on the block div.
  */
 function comparisonTableSection(block) {
-  const products = Array.isArray(block.products) ? block.products : [];
+  const products = (block.products || []).filter((s) => s && typeof s === 'string');
 
   const rows = products.map((slug) => [
     [{ type: 'token', value: `{{product:${slug}}}` }],
@@ -126,7 +126,7 @@ function comparisonTableSection(block) {
  * One row per product, two cells: token | reason paragraph.
  */
 function productListSection(block) {
-  const products = Array.isArray(block.products) ? block.products : [];
+  const products = (block.products || []).filter((p) => p && typeof p === 'object' && p.slug);
 
   const rows = products.map(({ slug, reason }) => [
     [{ type: 'token', value: `{{product:${slug}}}` }],
@@ -243,13 +243,13 @@ const RENDERERS = {
  *
  * @param {Object} typedBlock - Typed block from the template-fill LLM response.
  *   Must have a `type` field matching one of the 9 supported block types.
- * @param {Object} [ctx] - Pipeline context (currently unused at render time;
- *   product slug resolution happens later via resolveTokens()).
  * @returns {string} EDS block HTML string, or '' if the block type is unknown
  *   or results in no content after sanitization.
+ *
+ * Callers are responsible for running sanitizeContentCards, resolveTokens,
+ * normalizeProductUrls, and sanitizeHTML on the returned HTML.
  */
-// eslint-disable-next-line no-unused-vars
-export function renderBlock(typedBlock, ctx) {
+export function renderBlock(typedBlock) {
   if (!typedBlock || !typedBlock.type) {
     console.warn('[block-renderers] renderBlock called with missing type:', typedBlock);
     return '';
