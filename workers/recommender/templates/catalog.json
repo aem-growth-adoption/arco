@@ -1,4 +1,5 @@
 {
+  "version": "1.0.0",
   "byIntent": {
     "recommendation": ["arco-recommendation-spotlight", "arco-recommendation-bundle"],
     "comparison":     ["arco-comparison-versus", "arco-comparison-guide"],
@@ -9,6 +10,7 @@
       "name": "arco-recommendation-spotlight",
       "intent": "recommendation",
       "description": "Single best-match machine recommendation with clear reasons and alternatives for context",
+      "selectionHint": "Use when the user wants one clear best recommendation. Best for queries like 'best espresso machine under $1000' or 'what should I buy?'",
       "blocks": [
         {
           "type": "hero",
@@ -34,6 +36,7 @@
       "name": "arco-recommendation-bundle",
       "intent": "recommendation",
       "description": "Machine and grinder pairing recommendation with a brewing recipe to get started",
+      "selectionHint": "Use when the user asks about a complete setup, mentions needing a grinder, or is starting from scratch with no equipment.",
       "blocks": [
         {
           "type": "hero",
@@ -47,6 +50,7 @@
         },
         {
           "type": "recipe-steps",
+          "skipIfNoRag": "recipes",
           "guidance": "A beginner-friendly recipe to try immediately with the recommended setup"
         },
         {
@@ -59,6 +63,7 @@
       "name": "arco-comparison-versus",
       "intent": "comparison",
       "description": "Head-to-head comparison of 2–3 specific machines the user named or implied",
+      "selectionHint": "Use when the user names or clearly implies 2–3 specific machines to compare (e.g. 'Primo vs Doppio', 'compare the Studio and Doppio').",
       "blocks": [
         {
           "type": "hero",
@@ -85,6 +90,7 @@
       "name": "arco-comparison-guide",
       "intent": "comparison",
       "description": "Decision guide comparing options across price points when the user needs help choosing",
+      "selectionHint": "Use when the user wants help choosing but hasn't named specific machines — they need guidance across price tiers.",
       "blocks": [
         {
           "type": "hero",
@@ -110,6 +116,7 @@
       "name": "arco-discovery-editorial",
       "intent": "discovery",
       "description": "Brand-first editorial page for users exploring the world of specialty coffee for the first time",
+      "selectionHint": "Use when the user is brand new to specialty coffee and exploring the world of craft espresso for the first time.",
       "blocks": [
         {
           "type": "hero",
@@ -122,7 +129,7 @@
         },
         {
           "type": "cards",
-          "guidance": "4 coffee journey stages as cards: Beginner, Home Barista, Enthusiast, Pro — each with a short description and CTA",
+          "guidance": "4 cards representing coffee journey stages (Beginner, Home Barista, Enthusiast, Pro). Each card has a title, 1-sentence description, and a CTA. Use '#' for href rather than inventing URLs.",
           "config": { "maxItems": 4 }
         },
         {
@@ -135,6 +142,7 @@
       "name": "arco-discovery-guide",
       "intent": "discovery",
       "description": "Product-family exploration for users who know they want espresso but aren't sure where to start",
+      "selectionHint": "Use when the user knows they want espresso but doesn't know which machine family or price tier to look at.",
       "blocks": [
         {
           "type": "hero",
@@ -152,6 +160,7 @@
         },
         {
           "type": "recipe-steps",
+          "skipIfNoRag": "recipes",
           "guidance": "A simple first-shot recipe to inspire confidence in a beginner"
         }
       ]
