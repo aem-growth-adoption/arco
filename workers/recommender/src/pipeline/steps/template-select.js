@@ -103,7 +103,9 @@ export async function templateSelect(ctx, config = {}, env = {}) {
     if (!available) {
       console.warn(`[template-select] Provider ${providerId}/${model} unavailable (missing: ${missing.join(', ')}), using fallback template`);
       ctx.template = fallback;
-      ctx.intent = { type: fallback.intent, confidence: 1, journeyStage: ctx.intent?.journeyStage || null };
+      ctx.intent = {
+        type: fallback.intent, confidence: 1, journeyStage: ctx.intent?.journeyStage || null,
+      };
       return;
     }
 
@@ -139,7 +141,9 @@ export async function templateSelect(ctx, config = {}, env = {}) {
     if (!templateName) {
       console.warn(`[template-select] Could not parse template name from LLM response: "${rawText.substring(0, 200)}", using fallback`);
       ctx.template = fallback;
-      ctx.intent = { type: fallback.intent, confidence: 1, journeyStage: ctx.intent?.journeyStage || null };
+      ctx.intent = {
+        type: fallback.intent, confidence: 1, journeyStage: ctx.intent?.journeyStage || null,
+      };
       return;
     }
 
@@ -148,16 +152,22 @@ export async function templateSelect(ctx, config = {}, env = {}) {
     if (!found) {
       console.warn(`[template-select] LLM returned unknown template name "${templateName}", using fallback`);
       ctx.template = fallback;
-      ctx.intent = { type: fallback.intent, confidence: 1, journeyStage: ctx.intent?.journeyStage || null };
+      ctx.intent = {
+        type: fallback.intent, confidence: 1, journeyStage: ctx.intent?.journeyStage || null,
+      };
       return;
     }
 
     ctx.template = found;
-    ctx.intent = { type: found.intent, confidence: 1, journeyStage: ctx.intent?.journeyStage || null };
+    ctx.intent = {
+      type: found.intent, confidence: 1, journeyStage: ctx.intent?.journeyStage || null,
+    };
   } catch (err) {
     console.warn(`[template-select] Error during template selection: ${err.message}, using fallback`);
     ctx.template = fallback;
-    ctx.intent = { type: fallback.intent, confidence: 1, journeyStage: ctx.intent?.journeyStage || null };
+    ctx.intent = {
+      type: fallback.intent, confidence: 1, journeyStage: ctx.intent?.journeyStage || null,
+    };
   } finally {
     ctx.timings.templateSelect = Date.now() - start;
   }

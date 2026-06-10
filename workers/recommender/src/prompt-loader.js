@@ -44,23 +44,6 @@ const PROMPTS = {
 // ── Public API ──────────────────────────────────────────────────────────────
 
 /**
- * Render a named prompt with the given context object.
- *
- * @param {'recommender'|'suggestions'|'template-select'|'template-fill'} name
- * @param {object} ctx — see prompts/README.md for the schema per prompt
- * @returns {{ system: string, user: string }}
- */
-export function renderPrompt(name, ctx) {
-  const prompt = PROMPTS[name];
-  if (!prompt) throw new Error(`Unknown prompt: ${name}`);
-  const safe = normalizeContext(ctx);
-  return {
-    system: prompt.system.render(safe),
-    user: prompt.user.render(safe),
-  };
-}
-
-/**
  * Defensive defaults — let templates use `intent.type`, `behavior.foo`,
  * `rag.bar` without null checks. Missing optional sections render to empty.
  */
@@ -93,6 +76,23 @@ function normalizeContext(ctx) {
   };
 }
 
+/**
+ * Render a named prompt with the given context object.
+ *
+ * @param {'recommender'|'suggestions'|'template-select'|'template-fill'} name
+ * @param {object} ctx — see prompts/README.md for the schema per prompt
+ * @returns {{ system: string, user: string }}
+ */
+export function renderPrompt(name, ctx) {
+  const prompt = PROMPTS[name];
+  if (!prompt) throw new Error(`Unknown prompt: ${name}`);
+  const safe = normalizeContext(ctx);
+  return {
+    system: prompt.system.render(safe),
+    user: prompt.user.render(safe),
+  };
+}
+
 // ── Catalog enrichment helpers ──────────────────────────────────────────────
 // These pre-compute underscore fields the catalog/accessories partials consume.
 // IMPORTANT: the output of these helpers must produce strings that, when
@@ -118,10 +118,10 @@ export function enrichCatalogForPrompt(products, profiles) {
     const profile = profileLookup.get(p.id);
     const topUsesStr = profile?.scores
       ? Object.entries(profile.scores)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 3)
-          .map(([uc, score]) => `${uc}(${score})`)
-          .join(', ')
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+        .map(([uc, score]) => `${uc}(${score})`)
+        .join(', ')
       : '';
 
     const specials = [];

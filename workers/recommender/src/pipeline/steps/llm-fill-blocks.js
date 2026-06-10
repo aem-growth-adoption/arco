@@ -63,6 +63,7 @@ function hasContent(html) {
  * @param {object} config Flow step config ({model?, temperature?, maxTokens?, llmTimeout?})
  * @param {object} env   Worker bindings + secrets
  */
+// eslint-disable-next-line import/prefer-default-export
 export async function llmFillBlocks(ctx, config = {}, env = {}) {
   // Ensure llm state bag exists (defensive — executor normally initialises ctx.llm).
   ctx.llm = ctx.llm || {};
