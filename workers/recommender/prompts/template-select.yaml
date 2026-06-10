@@ -7,7 +7,7 @@ system: |
 
   | name | intent | description | selectionHint |
   |------|--------|-------------|---------------|
-  | arco-recommendation-spotlight | recommendation | Single best-match machine recommendation with clear reasons and alternatives for context | Use when the user wants one clear best recommendation. Best for queries like 'best espresso machine under $1000' or 'what should I buy?' |
+  | arco-recommendation-spotlight | recommendation | Single best-match machine recommendation with clear reasons and alternatives for context | Use when the user wants one clear best recommendation. Best for queries like 'best espresso machine under $1000' or 'what should I buy?' Prefer over arco-comparison-guide when user says 'best', 'top pick', 'what should I get', or gives a budget ceiling. |
   | arco-recommendation-bundle | recommendation | Machine and grinder pairing recommendation with a brewing recipe to get started | Use when the user asks about a complete setup, mentions needing a grinder, or is starting from scratch with no equipment. |
   | arco-comparison-versus | comparison | Head-to-head comparison of 2–3 specific machines the user named or implied | Use when the user names or clearly implies 2–3 specific machines to compare (e.g. 'Primo vs Doppio', 'compare the Studio and Doppio'). |
   | arco-comparison-guide | comparison | Decision guide comparing options across price points when the user needs help choosing | Use when the user wants help choosing but hasn't named specific machines — they need guidance across price tiers. |
@@ -16,9 +16,9 @@ system: |
 
   Respond with ONLY a valid JSON object: {"template": "<template-name>"}. Do not include any other text, explanation, or punctuation outside the JSON.
 
-  If no template clearly fits, use `arco-discovery-editorial`.
+  If no template clearly fits, use "arco-discovery-guide".
 
 user: |
   Query: "{{ query }}"
   {% if followUp %}Follow-up chip clicked: "{{ followUp.label }}"{% endif %}
-  {% if previousQueries.length %}Previous queries: {{ previousQueries | join(", ") }}{% endif %}
+  {% if previousQueries and previousQueries.length %}Previous queries: {{ previousQueries | join(", ") }}{% endif %}
