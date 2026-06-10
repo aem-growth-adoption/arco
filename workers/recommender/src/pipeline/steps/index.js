@@ -16,6 +16,7 @@ import { analyzeBehavior } from './analyze-behavior.js';
 import { buildRecommenderPrompt } from './build-recommender-prompt.js';
 import { buildTemplatePrompt } from './build-template-prompt.js';
 import { templateSelect } from './template-select.js';
+import { llmFillBlocks } from './llm-fill-blocks.js';
 
 /**
  * Step function map — keys match the "step" field in flow configs.
@@ -40,4 +41,5 @@ export const STEPS = {
   'build-recommender-prompt': buildRecommenderPrompt,
   'build-template-prompt': buildTemplatePrompt,
   'template-select': templateSelect,
+  'llm-fill-blocks': llmFillBlocks,
 };
