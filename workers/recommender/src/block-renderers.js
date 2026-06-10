@@ -278,3 +278,25 @@ export function renderBlock(typedBlock) {
 
   return sectionToHtml(sanitized);
 }
+
+/**
+ * Build the section object for a typed block — applies sanitizeBlockContent
+ * but does NOT call sectionToHtml(). Callers that need to run sanitizeContentCards
+ * should use this instead of renderBlock().
+ *
+ * @param {Object} typedBlock - Typed block from the template-fill LLM response.
+ * @returns {Object|null} Sanitized section object, or null if the block is unknown
+ *   or results in no content after sanitization.
+ */
+export function buildSection(typedBlock) {
+  if (!typedBlock || !typedBlock.type) return null;
+  const renderer = RENDERERS[typedBlock.type];
+  if (!renderer) return null;
+  try {
+    const section = renderer(typedBlock);
+    return sanitizeBlockContent(section);
+  } catch (err) {
+    console.warn(`[block-renderers] Error building section for ${typedBlock.type}:`, err.message);
+    return null;
+  }
+}

@@ -6,7 +6,7 @@
  *
  * Unlike llm-generate.js this step does NOT stream sections incrementally.
  * It accumulates the full response, then parses the JSON, renders each block
- * via renderBlock(), post-processes it, and emits one `section` event per block.
+ * via processBlock(), post-processes it, and emits one `section` event per block.
  *
  * This is intentional: template-fill LLM output is a compact structured JSON
  * blob (no === section delimiters), so a streaming parser would add complexity
@@ -16,24 +16,36 @@
 
 import { getProvider, findCatalogEntry, catalogAvailability } from '../../providers/index.js';
 import { getActiveLlmConfig, resolveLlmConfig } from '../../llm-config.js';
-import { renderBlock } from '../../block-renderers.js';
+import { buildSection } from '../../block-renderers.js';
 import {
-  resolveTokens, normalizeProductUrls,
+  resolveTokens, normalizeProductUrls, sanitizeContentCards,
 } from '../../images.js';
+import { sectionToHtml } from '../../json-to-eds.js';
 import sanitizeHTML from '../../sanitize.js';
 import { processSuggestions, extractTitle } from './llm-generate.js';
-import { unescapeHtml } from '../../da-persist.js'; // eslint-disable-line no-unused-vars
 
 // ---------------------------------------------------------------------------
 // Post-processing helpers
 // ---------------------------------------------------------------------------
 
-function processBlockHtml(html) {
+function processBlock(typedBlock) {
+  const section = buildSection(typedBlock);
+  if (!section) return '';
+
+  // Apply card sanitization: drops article-excerpt/blog-card/experience-cta rows
+  // with slugs not in the bundled stories/experiences indices.
+  const cardClean = sanitizeContentCards(section);
+  if (Array.isArray(cardClean?.rows) && cardClean.rows.length === 0
+      && Array.isArray(section?.rows) && section.rows.length > 0) {
+    return '';
+  }
+
+  let html = sectionToHtml(cardClean);
   if (!html) return '';
-  let out = resolveTokens(html);
-  out = normalizeProductUrls(out);
-  out = sanitizeHTML(out);
-  return out;
+  html = resolveTokens(html);
+  html = normalizeProductUrls(html);
+  html = sanitizeHTML(html);
+  return html;
 }
 
 function hasContent(html) {
@@ -172,9 +184,8 @@ export async function llmFillBlocks(ctx, config = {}, env = {}) {
   } finally {
     clearTimeout(timeoutId);
     clearInterval(heartbeatInterval);
+    if (!ctx.timings.llmEnd) ctx.timings.llmEnd = Date.now();
   }
-
-  ctx.timings.llmEnd = Date.now();
   ctx.llm.fullText = rawText;
 
   // Parse the accumulated JSON response.
@@ -197,8 +208,7 @@ export async function llmFillBlocks(ctx, config = {}, env = {}) {
   let sectionIndex = 0;
   // eslint-disable-next-line no-restricted-syntax
   for (const block of blocks) {
-    const rawHtml = renderBlock(block);
-    const html = processBlockHtml(rawHtml);
+    const html = processBlock(block);
     if (!hasContent(html)) continue; // eslint-disable-line no-continue
     ctx.llm.sections.push(html);
     // eslint-disable-next-line no-await-in-loop
