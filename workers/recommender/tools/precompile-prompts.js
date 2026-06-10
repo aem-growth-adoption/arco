@@ -49,7 +49,7 @@ const TEMPLATES = {
 };
 
 // Extract system + user template bodies from the YAML prompt files.
-for (const [yamlFile, prefix] of [['recommender.yaml', 'recommender'], ['suggestions.yaml', 'suggestions']]) {
+for (const [yamlFile, prefix] of [['recommender.yaml', 'recommender'], ['suggestions.yaml', 'suggestions'], ['template-select.yaml', 'template-select']]) {
   const parsed = yaml.parse(read(yamlFile));
   if (!parsed?.system || !parsed?.user) {
     throw new Error(`${yamlFile} missing system/user`);

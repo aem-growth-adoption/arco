@@ -24,15 +24,18 @@ const env = new nunjucks.Environment(loader, {
   lstripBlocks: false,
 });
 
-// Look up the four named templates we render at runtime.
+// Look up the six named templates we render at runtime.
 const recommenderSystem = env.getTemplate('recommender/system', true);
 const recommenderUser = env.getTemplate('recommender/user', true);
 const suggestionsSystem = env.getTemplate('suggestions/system', true);
 const suggestionsUser = env.getTemplate('suggestions/user', true);
+const templateSelectSystem = env.getTemplate('template-select/system', true);
+const templateSelectUser = env.getTemplate('template-select/user', true);
 
 const PROMPTS = {
   recommender: { system: recommenderSystem, user: recommenderUser },
   suggestions: { system: suggestionsSystem, user: suggestionsUser },
+  'template-select': { system: templateSelectSystem, user: templateSelectUser },
 };
 
 // ── Public API ──────────────────────────────────────────────────────────────
@@ -40,7 +43,7 @@ const PROMPTS = {
 /**
  * Render a named prompt with the given context object.
  *
- * @param {'recommender'|'suggestions'} name
+ * @param {'recommender'|'suggestions'|'template-select'} name
  * @param {object} ctx — see prompts/README.md for the schema per prompt
  * @returns {{ system: string, user: string }}
  */
