@@ -1,0 +1,160 @@
+{
+  "byIntent": {
+    "recommendation": ["arco-recommendation-spotlight", "arco-recommendation-bundle"],
+    "comparison":     ["arco-comparison-versus", "arco-comparison-guide"],
+    "discovery":      ["arco-discovery-editorial", "arco-discovery-guide"]
+  },
+  "templates": [
+    {
+      "name": "arco-recommendation-spotlight",
+      "intent": "recommendation",
+      "description": "Single best-match machine recommendation with clear reasons and alternatives for context",
+      "blocks": [
+        {
+          "type": "hero",
+          "skipOnFollowUp": true,
+          "guidance": "Headline names the recommended machine and captures the key reason it fits. Subheadline gives price range or key spec."
+        },
+        {
+          "type": "text",
+          "guidance": "2–3 paragraphs explaining why this machine, who it is for, and the key differentiator vs alternatives"
+        },
+        {
+          "type": "comparison-table",
+          "guidance": "Top recommended pick plus 2 alternatives at different price points",
+          "config": { "maxProducts": 3 }
+        },
+        {
+          "type": "article-excerpt",
+          "guidance": "The most relevant guide or story for this machine (e.g. dialing in espresso, maintenance tips)"
+        }
+      ]
+    },
+    {
+      "name": "arco-recommendation-bundle",
+      "intent": "recommendation",
+      "description": "Machine and grinder pairing recommendation with a brewing recipe to get started",
+      "blocks": [
+        {
+          "type": "hero",
+          "skipOnFollowUp": true,
+          "guidance": "Headline focuses on the complete setup: machine + grinder combination name and key benefit"
+        },
+        {
+          "type": "product-list",
+          "guidance": "The recommended machine and grinder pairing, each with a short reason why they work together",
+          "config": { "maxProducts": 2 }
+        },
+        {
+          "type": "recipe-steps",
+          "guidance": "A beginner-friendly recipe to try immediately with the recommended setup"
+        },
+        {
+          "type": "text",
+          "guidance": "Tips for getting started: grind settings, water temperature, workflow advice"
+        }
+      ]
+    },
+    {
+      "name": "arco-comparison-versus",
+      "intent": "comparison",
+      "description": "Head-to-head comparison of 2–3 specific machines the user named or implied",
+      "blocks": [
+        {
+          "type": "hero",
+          "skipOnFollowUp": true,
+          "guidance": "Headline frames the comparison directly (e.g. 'Primo vs Doppio: which is right for you?')"
+        },
+        {
+          "type": "comparison-table",
+          "guidance": "Feature-by-feature matrix of the machines being compared with a recommended winner",
+          "config": { "maxProducts": 3 }
+        },
+        {
+          "type": "text",
+          "guidance": "Verdict: 2–3 paragraphs explaining who should pick which machine and why"
+        },
+        {
+          "type": "testimonials",
+          "guidance": "Real owner quotes about the compared machines",
+          "config": { "maxItems": 3 }
+        }
+      ]
+    },
+    {
+      "name": "arco-comparison-guide",
+      "intent": "comparison",
+      "description": "Decision guide comparing options across price points when the user needs help choosing",
+      "blocks": [
+        {
+          "type": "hero",
+          "skipOnFollowUp": true,
+          "guidance": "Headline positions this as a buyer's guide (e.g. 'Finding your perfect espresso machine')"
+        },
+        {
+          "type": "cards",
+          "guidance": "3 options at different price tiers (entry, mid, premium) each with title, body and CTA",
+          "config": { "maxItems": 3 }
+        },
+        {
+          "type": "accordion",
+          "guidance": "Decision guide Q&A: 4–6 questions that help the user identify which tier is right for them"
+        },
+        {
+          "type": "article-excerpt",
+          "guidance": "A beginner or buying guide article for further reading"
+        }
+      ]
+    },
+    {
+      "name": "arco-discovery-editorial",
+      "intent": "discovery",
+      "description": "Brand-first editorial page for users exploring the world of specialty coffee for the first time",
+      "blocks": [
+        {
+          "type": "hero",
+          "skipOnFollowUp": true,
+          "guidance": "Inviting headline that welcomes a new coffee explorer (warm, not product-forward)"
+        },
+        {
+          "type": "text",
+          "guidance": "Brief brand story and philosophy: what makes specialty coffee different, Arco's approach (2–3 paragraphs)"
+        },
+        {
+          "type": "cards",
+          "guidance": "4 coffee journey stages as cards: Beginner, Home Barista, Enthusiast, Pro — each with a short description and CTA",
+          "config": { "maxItems": 4 }
+        },
+        {
+          "type": "article-excerpt",
+          "guidance": "An editorial story or experience article that sets the mood"
+        }
+      ]
+    },
+    {
+      "name": "arco-discovery-guide",
+      "intent": "discovery",
+      "description": "Product-family exploration for users who know they want espresso but aren't sure where to start",
+      "blocks": [
+        {
+          "type": "hero",
+          "skipOnFollowUp": true,
+          "guidance": "Headline invites exploration (e.g. 'Which Arco machine is your match?')"
+        },
+        {
+          "type": "cards",
+          "guidance": "3 machine families as cards: entry-level, enthusiast, prosumer — each with headline, key benefits, and CTA",
+          "config": { "maxItems": 3 }
+        },
+        {
+          "type": "text",
+          "guidance": "Getting started tips: what to expect, grind importance, maintenance basics (2–3 paragraphs)"
+        },
+        {
+          "type": "recipe-steps",
+          "guidance": "A simple first-shot recipe to inspire confidence in a beginner"
+        }
+      ]
+    }
+  ]
+}
