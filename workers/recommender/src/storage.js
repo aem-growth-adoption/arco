@@ -119,13 +119,15 @@ async function insertRun(db, runId, sessionId, ctx, now, meta) {
        query, previous_queries, title, intent_type, journey_stage,
        flow_id, follow_up_type, follow_up_label, follow_up_options,
        block_count, created_at, duration_ms, input_tokens, output_tokens,
-       da_path, preview_url, live_url, llm_provider, llm_model)
+       da_path, preview_url, live_url, llm_provider, llm_model,
+       template_name)
     VALUES
       (?1, ?2, ?3, ?4, ?5, ?6,
        ?7, ?8, ?9, ?10, ?11,
        ?12, ?13, ?14, ?15,
        ?16, ?17, ?18, ?19, ?20,
-       ?21, ?22, ?23, ?24, ?25)
+       ?21, ?22, ?23, ?24, ?25,
+       ?26)
   `).bind(
     runId,
     sessionId,
@@ -152,6 +154,7 @@ async function insertRun(db, runId, sessionId, ctx, now, meta) {
     ctx.daUrls?.live || null,
     ctx.llm?.provider || null,
     ctx.llm?.model || null,
+    ctx.template?.name || null,
   ).run();
 }
 
