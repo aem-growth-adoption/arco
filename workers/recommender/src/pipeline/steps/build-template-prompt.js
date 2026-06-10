@@ -26,9 +26,15 @@ export async function buildTemplatePrompt(ctx, config = {}, env = {}) {
     return true;
   });
 
-  const { system, user } = renderPrompt('template-fill', ctx);
-  ctx.prompt.system = system;
-  ctx.prompt.user = user;
+  if (!ctx.template) {
+    console.warn('[build-template-prompt] ctx.template is null — was template-select skipped?');
+  }
 
-  ctx.timings.templatePrompt = Date.now() - start;
+  try {
+    const { system, user } = renderPrompt('template-fill', ctx);
+    ctx.prompt.system = system;
+    ctx.prompt.user = user;
+  } finally {
+    ctx.timings.templatePrompt = Date.now() - start;
+  }
 }
