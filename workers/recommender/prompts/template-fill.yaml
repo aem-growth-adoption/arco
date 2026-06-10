@@ -48,30 +48,29 @@ system: |
 
   {% endfor %}
 
-  {% if rag.guides.length %}
+  {% if rag.guides %}
   ## Guides & Stories (use slugs for article-excerpt)
   {% for guide in rag.guides %}
-  - {{ guide.slug }}: {{ guide.title }}{% if guide.summary %} — {{ guide.summary }}{% endif %}
+  - {{ guide.slug }}: {{ guide.title }}{% if guide.category %} ({{ guide.category }}){% endif %}
 
   {% endfor %}
   {% endif %}
 
-  {% if rag.experiences.length %}
+  {% if rag.experiences %}
   ## Experiences
   {% for exp in rag.experiences %}
   - {{ exp.slug }}: {{ exp.title }}
   {% endfor %}
   {% endif %}
 
-  {% if rag.recipes.length %}
+  {% if rag.recipes %}
   ## Recipes (use for recipe-steps content)
   {% for recipe in rag.recipes %}
-  - {{ recipe.name }}{% if recipe.steps %}: {{ recipe.steps | join(' → ') | truncate(120) }}{% endif %}
-
+  - {{ recipe.slug }}: {{ recipe.title }}
   {% endfor %}
   {% endif %}
 
-  {% if rag.faqs.length %}
+  {% if rag.faqs %}
   ## FAQs (use for accordion content)
   {% for faq in rag.faqs %}
   Q: {{ faq.question }}
