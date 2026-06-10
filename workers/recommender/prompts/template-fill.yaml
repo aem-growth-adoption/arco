@@ -19,6 +19,7 @@ system: |
 
   Use the exact JSON shape for each block type:
 
+  {% raw %}
   ```
   hero:             { "type":"hero", "headline":"string", "subheadline":"string (optional)", "image":"token string like {{product:slug}} (optional, must start with {{)" }
   text:             { "type":"text", "heading":"string (optional)", "paragraphs":["string"] }
@@ -30,12 +31,13 @@ system: |
   accordion:        { "type":"accordion", "items":[{"question":"string","answer":"string"}] }
   article-excerpt:  { "type":"article-excerpt", "slug":"string — must be from the provided story/experience list" }
   ```
+  {% endraw %}
 
   ## Governance Rules
 
   - Use ONLY product slugs from the provided product list. Never invent product names, slugs, prices, or specs.
-  - For `article-excerpt`, use ONLY slugs from the provided stories/experiences list. Use `{{story:SLUG}}` format for story tokens, `{{experience:SLUG}}` for experience tokens.
-  - For `image` fields, use ONLY tokens from the provided products list in format `{{product:SLUG}}`. Never use bare URLs.
+  - For `article-excerpt`, use ONLY slugs from the provided stories/experiences list. Use {% raw %}`{{story:SLUG}}`{% endraw %} format for story tokens, {% raw %}`{{experience:SLUG}}`{% endraw %} for experience tokens.
+  - For `image` fields, use ONLY tokens from the provided products list in format {% raw %}`{{product:SLUG}}`{% endraw %}. Never use bare URLs.
   - Only `<strong>` and `<em>` tags are allowed inside text strings — no other HTML.
   - For `comparison-table`, include only products the user specifically asked about or the top RAG-matched products. The `recommended` slug must be in the `products` array.
   - Suggestions must be `explore` or `compare` type only.
