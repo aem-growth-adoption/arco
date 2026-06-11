@@ -120,3 +120,44 @@ export const LLM_CONFIG_LIMITS = {
   temperature: { min: TEMP_MIN, max: TEMP_MAX },
   maxTokens: { min: TOKENS_MIN, max: TOKENS_MAX },
 };
+
+// ── Template routing (call-1) config ─────────────────────────────────────────
+
+const KV_KEY_ROUTING = 'llm-config:routing';
+
+const ROUTING_DEFAULTS = { provider: 'cerebras', model: 'llama3.1-8b' };
+
+/**
+ * Read the active template-routing (call-1) config from KV.
+ * Falls back to the hardcoded Cerebras defaults.
+ */
+export async function getActiveRoutingConfig(env) {
+  if (!env.CACHE) return ROUTING_DEFAULTS;
+  let stored;
+  try {
+    stored = await env.CACHE.get(KV_KEY_ROUTING, 'json');
+  } catch {
+    return ROUTING_DEFAULTS;
+  }
+  if (!stored || !stored.provider || !stored.model) return ROUTING_DEFAULTS;
+  if (!findCatalogEntry(stored.provider, stored.model)) {
+    console.warn(`[llm-config] routing entry not in catalog: ${stored.provider}/${stored.model}`);
+    return ROUTING_DEFAULTS;
+  }
+  return { provider: stored.provider, model: stored.model, updatedAt: stored.updatedAt || null };
+}
+
+/**
+ * Validate + persist a routing config patch. Only provider + model are stored.
+ */
+export async function putActiveRoutingConfig(env, patch) {
+  if (!env.CACHE) return { error: 'CACHE KV binding is not configured.' };
+  if (!patch || typeof patch !== 'object') return { error: 'Invalid body.' };
+  const entry = findCatalogEntry(patch.provider, patch.model);
+  if (!entry) return { error: `Unknown provider/model: ${patch.provider}/${patch.model}` };
+  const value = {
+    provider: entry.provider, model: entry.model, updatedAt: new Date().toISOString(),
+  };
+  await env.CACHE.put(KV_KEY_ROUTING, JSON.stringify(value));
+  return { value };
+}

@@ -769,17 +769,30 @@ function renderSuggestionsSection(suggestions) {
   </details>`;
 }
 
-function renderPromptSection(prompt) {
-  if (!prompt || (!prompt.systemPrompt && !prompt.userMessage)) return '';
-  return `<details class="admin-collapsible">
-    <summary>Prompt (${prompt.systemLength || 0} + ${prompt.userLength || 0} chars)</summary>
-    <div class="admin-card-sub-body">
-      <h4>System prompt</h4>
-      <pre class="admin-pre">${esc(prompt.systemPrompt || '(empty)')}</pre>
-      <h4>User message</h4>
-      <pre class="admin-pre">${esc(prompt.userMessage || '(empty)')}</pre>
-    </div>
-  </details>`;
+function renderPromptSection(prompt, templateSelectPrompt) {
+  const hasMain = prompt && (prompt.systemPrompt || prompt.userMessage);
+  const hasTSP = templateSelectPrompt
+    && (templateSelectPrompt.systemPrompt || templateSelectPrompt.userMessage);
+  if (!hasMain && !hasTSP) return '';
+  return `
+    ${hasTSP ? `<details class="admin-collapsible">
+      <summary>Call-1 Template Select (${templateSelectPrompt.systemLength || 0} + ${templateSelectPrompt.userLength || 0} chars)</summary>
+      <div class="admin-card-sub-body">
+        <h4>System prompt</h4>
+        <pre class="admin-pre">${esc(templateSelectPrompt.systemPrompt || '(empty)')}</pre>
+        <h4>User message</h4>
+        <pre class="admin-pre">${esc(templateSelectPrompt.userMessage || '(empty)')}</pre>
+      </div>
+    </details>` : ''}
+    ${hasMain ? `<details class="admin-collapsible">
+      <summary>Call-2 Content Fill (${prompt.systemLength || 0} + ${prompt.userLength || 0} chars)</summary>
+      <div class="admin-card-sub-body">
+        <h4>System prompt</h4>
+        <pre class="admin-pre">${esc(prompt.systemPrompt || '(empty)')}</pre>
+        <h4>User message</h4>
+        <pre class="admin-pre">${esc(prompt.userMessage || '(empty)')}</pre>
+      </div>
+    </details>` : ''}`;
 }
 
 function renderLlmOutputSection(llm) {
@@ -825,7 +838,7 @@ function renderDebugTab(container, data) {
         ${renderPipelineStepsSection(dbg.timings)}
         ${renderRagSection(dbg.rag)}
         ${renderSuggestionsSection(dbg.llm?.suggestions)}
-        ${renderPromptSection(dbg.prompt)}
+        ${renderPromptSection(dbg.prompt, dbg.templateSelectPrompt)}
         ${renderLlmOutputSection(dbg.llm)}
       </section>`;
   }).join('')}
@@ -935,11 +948,13 @@ async function renderLlmConfig(root) {
   root.innerHTML = '<p class="admin-loading">Loading model settings…</p>';
   let catalog;
   let active;
+  let routing;
   let limits;
   try {
-    const [catRes, cfgRes] = await Promise.all([
+    const [catRes, cfgRes, routingRes] = await Promise.all([
       api('/api/admin/catalog'),
       api('/api/admin/llm-config'),
+      api('/api/admin/llm-config/routing'),
     ]);
     catalog = catRes.catalog || [];
     limits = catRes.limits || {
@@ -947,6 +962,7 @@ async function renderLlmConfig(root) {
       maxTokens: { min: 256, max: 16384 },
     };
     active = cfgRes.active || null;
+    routing = routingRes.active || null;
   } catch (err) {
     root.innerHTML = `<p class="admin-error">${esc(err.message)}</p>`;
     return;
@@ -957,25 +973,29 @@ async function renderLlmConfig(root) {
   const temperature = active?.temperature ?? 0.6;
   const maxTokens = active?.maxTokens ?? 4096;
   const thinkingVal = typeof active?.thinking === 'boolean' ? active.thinking : null;
-  const currentEntry = catalog.find(
-    (e) => `${e.provider}::${e.model}` === currentKey,
-  );
-  const currentMissing = currentEntry?.available === false
-    ? (currentEntry.missing || []) : [];
+  const currentEntry = catalog.find((e) => `${e.provider}::${e.model}` === currentKey);
+  const currentMissing = currentEntry?.available === false ? (currentEntry.missing || []) : [];
+
+  const routingSelected = routing || { provider: 'cerebras', model: 'llama3.1-8b' };
+  const routingKey = `${routingSelected.provider}::${routingSelected.model}`;
+  const routingEntry = catalog.find((e) => `${e.provider}::${e.model}` === routingKey);
+  const routingMissing = routingEntry?.available === false ? (routingEntry.missing || []) : [];
 
   root.innerHTML = `
     <nav class="admin-crumbs"><a href="#/">← Sessions</a></nav>
     <div class="admin-toolbar">
       <h2>Model Settings</h2>
       <div class="admin-stats">
-        <span class="admin-stat"><span class="admin-stat-value">${esc(selected.provider || '—')}</span><span class="admin-stat-label">active provider</span></span>
-        <span class="admin-stat"><span class="admin-stat-value">${esc(selected.model || '—')}</span><span class="admin-stat-label">active model</span></span>
+        <span class="admin-stat"><span class="admin-stat-value">${esc(selected.provider || '—')}</span><span class="admin-stat-label">call-2 provider</span></span>
+        <span class="admin-stat"><span class="admin-stat-value">${esc(selected.model || '—')}</span><span class="admin-stat-label">call-2 model</span></span>
+        <span class="admin-stat"><span class="admin-stat-value">${esc(routingSelected.provider || '—')}</span><span class="admin-stat-label">call-1 provider</span></span>
+        <span class="admin-stat"><span class="admin-stat-value">${esc(routingSelected.model || '—')}</span><span class="admin-stat-label">call-1 model</span></span>
       </div>
     </div>
 
     <section class="admin-card">
-      <h3>Active configuration</h3>
-      <p class="admin-muted">Applied to the next <code>/api/generate</code> call. Stored in the <code>CACHE</code> KV under <code>llm-config:active</code>.</p>
+      <h3>Call-2 — Content generation</h3>
+      <p class="admin-muted">Fills block content from the selected template. Applied to the next <code>/api/generate</code> call. Stored in <code>CACHE:llm-config:active</code>.</p>
 
       <form id="llm-config-form" class="admin-llm-form">
         <label class="admin-field">
@@ -1016,8 +1036,36 @@ async function renderLlmConfig(root) {
         ${kv('Storage key', 'CACHE:llm-config:active')}
       </dl>
     </section>
+
+    <section class="admin-card">
+      <h3>Call-1 — Template routing</h3>
+      <p class="admin-muted">Classifies the query and picks a page template (~100 tokens, temp=0). Stored in <code>CACHE:llm-config:routing</code>. Default: <code>cerebras / llama3.1-8b</code>.</p>
+
+      <form id="routing-config-form" class="admin-llm-form">
+        <label class="admin-field">
+          <span>Provider &amp; model</span>
+          <input type="search" id="routing-model-search" class="admin-model-search" placeholder="Filter models…" autocomplete="off" aria-label="Filter routing model list">
+          <select name="entry" required>
+            ${renderModelOptions(catalog, routingKey)}
+          </select>
+          ${routingMissing.length
+    ? `<small class="admin-llm-warn">Active selection cannot run — missing: ${esc(routingMissing.join(', '))}.</small>`
+    : ''}
+        </label>
+        <div class="admin-llm-actions">
+          <button type="submit" class="admin-btn admin-btn-primary">Save</button>
+          <span class="admin-llm-status admin-muted" data-routing-status></span>
+        </div>
+      </form>
+
+      <dl class="admin-kvs admin-kvs-two admin-llm-current">
+        ${kv('Updated at', routing?.updatedAt || '—')}
+        ${kv('Storage key', 'CACHE:llm-config:routing')}
+      </dl>
+    </section>
   `;
 
+  // Call-2 form
   const form = root.querySelector('#llm-config-form');
   const status = root.querySelector('[data-status]');
   const llmSearchInput = root.querySelector('#llm-model-search');
@@ -1028,7 +1076,6 @@ async function renderLlmConfig(root) {
     const data = new FormData(form);
     const [provider, model] = String(data.get('entry') || '').split('::');
     const thinkingSel = String(data.get('thinking') || 'default');
-    // tri-state: on -> true, off -> false, default -> null
     let thinking = null;
     if (thinkingSel === 'on') thinking = true;
     else if (thinkingSel === 'off') thinking = false;
@@ -1049,6 +1096,29 @@ async function renderLlmConfig(root) {
     } catch (err) {
       status.textContent = err.message;
       status.classList.add('is-error');
+    }
+  });
+
+  // Call-1 routing form
+  const routingForm = root.querySelector('#routing-config-form');
+  const routingStatus = root.querySelector('[data-routing-status]');
+  const routingSearchInput = root.querySelector('#routing-model-search');
+  const routingSelectEl = routingForm.querySelector('select[name="entry"]');
+  routingSearchInput.addEventListener('input', () => filterModelSelect(routingSearchInput, routingSelectEl, catalog));
+  routingForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = new FormData(routingForm);
+    const [provider, model] = String(data.get('entry') || '').split('::');
+    routingStatus.textContent = 'Saving…';
+    routingStatus.classList.remove('is-error', 'is-ok');
+    try {
+      await api('/api/admin/llm-config/routing', { method: 'PUT', body: JSON.stringify({ provider, model }) });
+      routingStatus.textContent = 'Saved.';
+      routingStatus.classList.add('is-ok');
+      await renderLlmConfig(root);
+    } catch (err) {
+      routingStatus.textContent = err.message;
+      routingStatus.classList.add('is-error');
     }
   });
 }

@@ -1,0 +1,775 @@
+<body>
+  <header></header>
+  <main>
+
+    <!-- ══════════════════════════════════════════════════════════
+         INTRO
+    ══════════════════════════════════════════════════════════ -->
+    <div>
+      <h1>Arco Recommender: Page Templates</h1>
+      <p>Six page templates used by the AI recommender pipeline. The pipeline runs in two calls: <strong>call-1</strong> (fast, ~50 tokens) routes the query to the best template; <strong>call-2</strong> fills each block with typed JSON content. Open <a href="/?q=best espresso under 1000">/?q=best espresso under 1000</a> to see it live.</p>
+      <p>Each template section below includes a header with intent, block sequence, and selection hint, followed by a rendered example using sample Arco content.</p>
+    </div>
+
+    <!-- Template index -->
+    <div>
+      <h2>All Templates at a Glance</h2>
+      <div class="table">
+        <div>
+          <div>Template</div>
+          <div>Intent</div>
+          <div>Block sequence</div>
+          <div>When to use</div>
+        </div>
+        <div>
+          <div>arco-recommendation-spotlight</div>
+          <div>recommendation</div>
+          <div>hero → text → comparison-table → article-excerpt</div>
+          <div>"best espresso machine under $1000"</div>
+        </div>
+        <div>
+          <div>arco-recommendation-bundle</div>
+          <div>recommendation</div>
+          <div>hero → product-list → recipe-steps → text</div>
+          <div>"complete beginner setup, need machine and grinder"</div>
+        </div>
+        <div>
+          <div>arco-comparison-versus</div>
+          <div>comparison</div>
+          <div>hero → comparison-table → text → testimonials</div>
+          <div>"Primo vs Doppio, which one?"</div>
+        </div>
+        <div>
+          <div>arco-comparison-guide</div>
+          <div>comparison</div>
+          <div>hero → cards → accordion → article-excerpt</div>
+          <div>"help me choose, not sure which tier I need"</div>
+        </div>
+        <div>
+          <div>arco-discovery-editorial</div>
+          <div>discovery</div>
+          <div>hero → text → cards → article-excerpt</div>
+          <div>"I'm new to specialty coffee, where do I start?"</div>
+        </div>
+        <div>
+          <div>arco-discovery-guide</div>
+          <div>discovery</div>
+          <div>hero → cards → text → recipe-steps</div>
+          <div>"I want espresso at home but don't know which machine"</div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════════════════════════
+         TEMPLATE 1 — arco-recommendation-spotlight
+    ══════════════════════════════════════════════════════════ -->
+    <div>
+      <h2>Template 1 of 6 — arco-recommendation-spotlight</h2>
+      <p><strong>Intent:</strong> recommendation &nbsp;·&nbsp; <strong>Blocks:</strong> hero → text → comparison-table → article-excerpt</p>
+      <p><strong>When selected:</strong> User wants one clear best recommendation. Query examples: <em>"best espresso machine under $1000"</em>, <em>"what should I buy as a first serious machine?"</em></p>
+      <p><strong>Follow-up behaviour:</strong> <code>hero</code> is skipped (<code>skipOnFollowUp: true</code>). Follow-up pages open directly with the text section.</p>
+      <div class="section-metadata">
+        <div>
+          <div>Style</div>
+          <div>highlight</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Block 1.1 — hero -->
+    <div>
+      <div class="hero">
+        <div>
+          <div>
+            <picture>
+              <img src="https://content.da.live/froesef/arco/media/product-primo.jpeg" alt="Arco Primo espresso machine" loading="eager" width="1920" height="1080">
+            </picture>
+            <h1>The Primo: Built for the serious home barista</h1>
+            <p>Dual thermoblock, PID temperature control, commercial-grade group head — under $900</p>
+            <p><strong><a href="/products/espresso-machines/primo">Explore the Primo</a></strong> <em><a href="/stories/dialing-in-your-espresso">Dialing-in guide</a></em></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Block 1.2 — text -->
+    <div>
+      <h2>Why the Primo wins for most home baristas</h2>
+      <p>The Primo hits the sweet spot that most home baristas are looking for: enough precision to produce café-quality espresso without the footprint, price tag, or learning curve of a dual-boiler machine. Its thermoblock heats in 90 seconds, its PID controller keeps brew temperature accurate to ±0.5°C, and its 58mm commercial portafilter means your technique translates directly from any café setup.</p>
+      <p>At $899 it undercuts the Doppio by nearly $700 while delivering 90% of the same shot quality. The trade-off is sequential brewing — you steam milk after pulling your shot, not simultaneously. For one or two drinks in the morning, that rarely matters. If you're regularly making four or more milk drinks in a row, the Doppio starts to justify the price premium.</p>
+      <p>The Primo is also the most repairable machine in the lineup. Every component is user-serviceable, and Arco stocks parts for every machine it has ever made. The long-term cost of ownership is low.</p>
+    </div>
+
+    <!-- Block 1.3 — comparison-table -->
+    <div>
+      <div class="comparison-table">
+        <div>
+          <div>Feature</div>
+          <div>Primo — <strong>Recommended</strong></div>
+          <div>Doppio</div>
+          <div>Nano</div>
+        </div>
+        <div>
+          <div>Price</div>
+          <div>$899</div>
+          <div>$1,599</div>
+          <div>$649</div>
+        </div>
+        <div>
+          <div>Boiler</div>
+          <div>Thermoblock, PID</div>
+          <div>Dual boiler (brass brew + stainless steam)</div>
+          <div>Thermoblock</div>
+        </div>
+        <div>
+          <div>Heat-Up Time</div>
+          <div>90 seconds</div>
+          <div>3 minutes</div>
+          <div>45 seconds</div>
+        </div>
+        <div>
+          <div>Brew &amp; Steam</div>
+          <div>Sequential</div>
+          <div>Simultaneous</div>
+          <div>Sequential</div>
+        </div>
+        <div>
+          <div>Group Head</div>
+          <div>58mm commercial</div>
+          <div>58mm commercial, E61</div>
+          <div>54mm</div>
+        </div>
+        <div>
+          <div>Best for</div>
+          <div>Home barista, 1–2 drinks</div>
+          <div>Milk drinks, high volume</div>
+          <div>Compact kitchens, travel</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Block 1.4 — article-excerpt -->
+    <div>
+      <div class="article-excerpt">
+        <div>
+          <div>
+            <picture>
+              <img src="https://content.da.live/froesef/arco/media/product-macinino.jpeg" alt="Arco Macinino grinder with portafilter" loading="lazy" width="400" height="300">
+            </picture>
+          </div>
+          <div>
+            <p><em>How-To</em></p>
+            <h3>Dialing In Your Espresso: A Step-by-Step Guide</h3>
+            <p>Dialing in a new bag of beans does not have to be a drawn-out ritual that wastes half your coffee. With a structured approach and a willingness to taste honestly, you can land on a solid recipe in three to five shots.</p>
+            <p><strong>Marcus Webb · 8 min read</strong></p>
+            <p><a href="/stories/dialing-in-your-espresso">Read Article</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════════════════════════
+         TEMPLATE 2 — arco-recommendation-bundle
+    ══════════════════════════════════════════════════════════ -->
+    <div>
+      <h2>Template 2 of 6 — arco-recommendation-bundle</h2>
+      <p><strong>Intent:</strong> recommendation &nbsp;·&nbsp; <strong>Blocks:</strong> hero → product-list → recipe-steps → text</p>
+      <p><strong>When selected:</strong> User asks about a complete setup, mentions needing a grinder, or is starting from scratch. Query examples: <em>"beginner setup, need everything"</em>, <em>"first espresso machine and grinder to buy together"</em></p>
+      <p><strong>Note:</strong> <code>recipe-steps</code> is conditional (<code>skipIfNoRag: "recipes"</code>) — skipped when no recipes are available from RAG.</p>
+      <div class="section-metadata">
+        <div>
+          <div>Style</div>
+          <div>highlight</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Block 2.1 — hero -->
+    <div>
+      <div class="hero">
+        <div>
+          <div>
+            <picture>
+              <img src="https://content.da.live/froesef/arco/media/product-primo.jpeg" alt="Arco Primo and Macinino bundle" loading="eager" width="1920" height="1080">
+            </picture>
+            <h1>The perfect starter setup: Primo + Macinino</h1>
+            <p>Everything you need to pull café-quality espresso at home from day one</p>
+            <p><strong><a href="/products/espresso-machines/primo">Shop the Primo</a></strong> <em><a href="/products/grinders/macinino">Shop the Macinino</a></em></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Block 2.2 — product-list -->
+    <div>
+      <div class="product-list">
+        <div>
+          <div>
+            <picture>
+              <img src="https://content.da.live/froesef/arco/media/product-primo.jpeg" alt="Arco Primo espresso machine" loading="lazy" width="600" height="450">
+            </picture>
+          </div>
+          <div>
+            <p><em>Espresso Machines</em></p>
+            <h3>Primo</h3>
+            <p>$899</p>
+            <p>The ideal first proper machine. PID temperature control, 58mm group head, 90-second heat-up. Precise enough to grow with your skills for years.</p>
+            <p><a href="/products/espresso-machines/primo">View Details</a></p>
+          </div>
+        </div>
+        <div>
+          <div>
+            <picture>
+              <img src="https://content.da.live/froesef/arco/media/product-macinino.jpeg" alt="Arco Macinino flat-burr grinder" loading="lazy" width="600" height="450">
+            </picture>
+          </div>
+          <div>
+            <p><em>Grinders</em></p>
+            <h3>Macinino</h3>
+            <p>$549</p>
+            <p>64mm flat burrs with stepless adjustment. The grinder that makes the Primo sing — consistent particle distribution is the single biggest lever for shot quality.</p>
+            <p><a href="/products/grinders/macinino">View Details</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Block 2.3 — recipe-steps -->
+    <div>
+      <div class="recipe-steps">
+        <div>
+          <div>
+            <h2>Your first espresso shot</h2>
+            <p>Pull this recipe on your first day with the Primo + Macinino. It's a calibration shot — not meant to be perfect, but to tell you which way to adjust.</p>
+          </div>
+        </div>
+        <div>
+          <div>Equipment</div>
+          <div>
+            <ul>
+              <li>Arco Primo (warmed up for 15 minutes)</li>
+              <li>Arco Macinino grinder</li>
+              <li>Precision scale (0.1g)</li>
+              <li>Shot glasses or small cup</li>
+              <li>Fresh beans (4–14 days post-roast)</li>
+            </ul>
+          </div>
+        </div>
+        <div>
+          <div>
+            <ol>
+              <li>Flush the group head for 3 seconds to stabilise temperature.</li>
+              <li>Set the Macinino to a medium-fine grind (start at position 4).</li>
+              <li>Weigh 18g of coffee into the portafilter basket.</li>
+              <li>Distribute evenly, then tamp with firm, level pressure.</li>
+              <li>Lock the portafilter in and start the shot immediately.</li>
+              <li>Aim for 36g yield in 25–30 seconds. Stop the shot at 36g.</li>
+              <li>Taste. Too sour and fast? Grind finer. Too bitter and slow? Grind coarser.</li>
+            </ol>
+          </div>
+        </div>
+        <div>
+          <div>Tips</div>
+          <div>
+            <ul>
+              <li>Don't dial in with a brand-new bag — let beans degas for at least 4 days after roast.</li>
+              <li>Change only one variable (grind size) between shots until you're in range.</li>
+              <li>A naked portafilter reveals channelling — worth the upgrade once you're dialled in.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Block 2.4 — text -->
+    <div>
+      <h2>Getting started: what to expect in week one</h2>
+      <p>The first week with a new espresso setup is a calibration exercise. Your goal is not to pull the perfect shot — it's to understand your grinder's range and how your beans behave. Expect to adjust grind size with every new bag and after the first 20 shots with a fresh bag as CO₂ degases.</p>
+      <p>Water quality matters more than most beginners expect. If your tap water tastes fine, it'll probably work. If it tastes of chlorine or lime, use filtered water. A TDS of 75–150 ppm is ideal for espresso extraction.</p>
+      <p>Keep a simple log for the first two weeks: dose in, yield out, time, and a tasting note (sour / balanced / bitter). Three data points like that and you'll understand your setup faster than any guide can teach you.</p>
+    </div>
+
+
+    <!-- ══════════════════════════════════════════════════════════
+         TEMPLATE 3 — arco-comparison-versus
+    ══════════════════════════════════════════════════════════ -->
+    <div>
+      <h2>Template 3 of 6 — arco-comparison-versus</h2>
+      <p><strong>Intent:</strong> comparison &nbsp;·&nbsp; <strong>Blocks:</strong> hero → comparison-table → text → testimonials</p>
+      <p><strong>When selected:</strong> User names or clearly implies 2–3 specific machines. Query examples: <em>"Primo vs Doppio"</em>, <em>"compare the Studio and Doppio, which is worth the upgrade?"</em></p>
+      <div class="section-metadata">
+        <div>
+          <div>Style</div>
+          <div>highlight</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Block 3.1 — hero -->
+    <div>
+      <div class="hero">
+        <div>
+          <div>
+            <picture>
+              <img src="https://content.da.live/froesef/arco/media/product-doppio.jpeg" alt="Arco Doppio dual-boiler espresso machine" loading="eager" width="1920" height="1080">
+            </picture>
+            <h1>Primo vs Doppio: which one is right for you?</h1>
+            <p>Both make excellent espresso. The question is whether simultaneous steaming is worth $700 more.</p>
+            <p><strong><a href="/products/espresso-machines/primo">View Primo</a></strong> <em><a href="/products/espresso-machines/doppio">View Doppio</a></em></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Block 3.2 — comparison-table -->
+    <div>
+      <div class="comparison-table">
+        <div>
+          <div>Feature</div>
+          <div>Primo</div>
+          <div>Doppio — <strong>Best for milk drinks</strong></div>
+        </div>
+        <div>
+          <div>Price</div>
+          <div>$899</div>
+          <div>$1,599</div>
+        </div>
+        <div>
+          <div>Boiler configuration</div>
+          <div>Single thermoblock</div>
+          <div>Dual boiler (dedicated brew + steam)</div>
+        </div>
+        <div>
+          <div>Temperature stability</div>
+          <div>±0.5°C (PID)</div>
+          <div>±0.3°C (PID, independent circuits)</div>
+        </div>
+        <div>
+          <div>Brew &amp; steam simultaneously</div>
+          <div>No — sequential only</div>
+          <div>Yes — full simultaneous operation</div>
+        </div>
+        <div>
+          <div>Heat-up time</div>
+          <div>90 seconds</div>
+          <div>3 minutes</div>
+        </div>
+        <div>
+          <div>Steam wand power</div>
+          <div>Good (single boiler)</div>
+          <div>Excellent (dedicated 1200W steam boiler)</div>
+        </div>
+        <div>
+          <div>Footprint</div>
+          <div>Compact (280 × 350 × 340 mm)</div>
+          <div>Larger (320 × 380 × 390 mm)</div>
+        </div>
+        <div>
+          <div>Ideal volume</div>
+          <div>1–3 drinks per session</div>
+          <div>4+ milk drinks per session</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Block 3.3 — text (verdict) -->
+    <div>
+      <h2>Verdict: who should pick which</h2>
+      <p><strong>Choose the Primo</strong> if you primarily drink espresso or americanos, make one or two drinks at a time, have a compact kitchen, or are buying your first quality machine. The $700 difference buys a lot of great coffee. The Primo's sequential workflow becomes natural within a week.</p>
+      <p><strong>Choose the Doppio</strong> if you regularly steam milk for lattes or flat whites, often serve two or more people at once, or find yourself waiting for the machine to recover between shots. The dual-boiler architecture eliminates that friction completely — you can pull a shot and steam milk simultaneously with no temperature recovery time.</p>
+      <p>If you're on the fence, the Primo is the safer starting point. You can always upgrade to the Doppio later; you'll understand exactly what you're buying when you do.</p>
+    </div>
+
+    <!-- Block 3.4 — testimonials -->
+    <div>
+      <div class="testimonials">
+        <div>
+          <div>
+            <picture>
+              <img src="https://content.da.live/froesef/arco/media/avatar-ml.jpeg" alt="Marco L." loading="lazy" width="200" height="200">
+            </picture>
+          </div>
+          <div>
+            <p>I spent two weeks agonising over the Primo vs Doppio. Went with the Primo. Zero regrets — the shot quality is identical and the 90-second heat-up fits my morning perfectly.</p>
+            <p><strong>Marco L.</strong>, Home barista, Milan</p>
+            <p>5</p>
+          </div>
+        </div>
+        <div>
+          <div>
+            <picture>
+              <img src="https://content.da.live/froesef/arco/media/avatar-sk.jpeg" alt="Sarah K." loading="lazy" width="200" height="200">
+            </picture>
+          </div>
+          <div>
+            <p>The Doppio is the first home machine that doesn't make me feel like I'm compromising. As someone who makes four lattes every morning, simultaneous steaming isn't a luxury — it's essential.</p>
+            <p><strong>Sarah K.</strong>, Head barista, London</p>
+            <p>5</p>
+          </div>
+        </div>
+        <div>
+          <div>
+            <picture>
+              <img src="https://content.da.live/froesef/arco/media/avatar-jt.jpeg" alt="James T." loading="lazy" width="200" height="200">
+            </picture>
+          </div>
+          <div>
+            <p>Upgraded from the Primo to the Doppio after two years. The Primo was great — the Doppio is exceptional. Worth every cent for a household of coffee drinkers.</p>
+            <p><strong>James T.</strong>, Coffee enthusiast, Sydney</p>
+            <p>5</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════════════════════════
+         TEMPLATE 4 — arco-comparison-guide
+    ══════════════════════════════════════════════════════════ -->
+    <div>
+      <h2>Template 4 of 6 — arco-comparison-guide</h2>
+      <p><strong>Intent:</strong> comparison &nbsp;·&nbsp; <strong>Blocks:</strong> hero → cards → accordion → article-excerpt</p>
+      <p><strong>When selected:</strong> User wants help choosing but hasn't named specific machines — needs guidance across price tiers. Query examples: <em>"help me choose an espresso machine"</em>, <em>"not sure which tier I need, budget is flexible"</em></p>
+      <div class="section-metadata">
+        <div>
+          <div>Style</div>
+          <div>highlight</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Block 4.1 — hero -->
+    <div>
+      <div class="hero">
+        <div>
+          <div>
+            <picture>
+              <img src="https://content.da.live/froesef/arco/media/hero-main.jpeg" alt="Arco espresso machine lineup" loading="eager" width="1920" height="1080">
+            </picture>
+            <h1>Finding your perfect espresso machine</h1>
+            <p>Three tiers, one clear answer — use this guide to find the Arco that fits your life.</p>
+            <p><strong><a href="/products/espresso-machines">Browse all machines</a></strong></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Block 4.2 — cards (3 price tiers) -->
+    <div>
+      <div class="cards">
+        <div>
+          <div>
+            <picture>
+              <img src="https://content.da.live/froesef/arco/media/product-nano.jpeg" alt="Arco Nano compact espresso machine" loading="lazy" width="600" height="400">
+            </picture>
+          </div>
+          <div>
+            <h3>Entry tier — from $649</h3>
+            <p>The Nano delivers reliable espresso in a compact footprint. Perfect if you're new to espresso, have a small kitchen, or want a great machine without a steep learning curve. Heats up in 45 seconds.</p>
+            <p><strong><a href="/products/espresso-machines/nano">See the Nano</a></strong></p>
+          </div>
+        </div>
+        <div>
+          <div>
+            <picture>
+              <img src="https://content.da.live/froesef/arco/media/product-primo.jpeg" alt="Arco Primo espresso machine" loading="lazy" width="600" height="400">
+            </picture>
+          </div>
+          <div>
+            <h3>Enthusiast tier — from $899</h3>
+            <p>The Primo is the sweet spot for most serious home baristas. PID temperature control, 58mm commercial group head, and a build quality that lasts a decade. The step-up that most home baristas never need to go beyond.</p>
+            <p><strong><a href="/products/espresso-machines/primo">See the Primo</a></strong></p>
+          </div>
+        </div>
+        <div>
+          <div>
+            <picture>
+              <img src="https://content.da.live/froesef/arco/media/product-doppio.jpeg" alt="Arco Doppio dual-boiler espresso machine" loading="lazy" width="600" height="400">
+            </picture>
+          </div>
+          <div>
+            <h3>Prosumer tier — from $1,599</h3>
+            <p>The Doppio and Studio are for households that take espresso seriously. Dual boilers mean simultaneous brewing and steaming, rock-steady temperatures, and the kind of workflow that removes all friction from your morning routine.</p>
+            <p><strong><a href="/products/espresso-machines/doppio">See the Doppio</a></strong></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Block 4.3 — accordion (decision guide Q&A) -->
+    <div>
+      <div class="accordion">
+        <div>
+          <div>How many coffee drinks do I make each morning?</div>
+          <div>
+            <p>If it's 1–2 drinks for yourself: any tier works well. If it's 3–5 drinks for a household: the Primo handles this comfortably if drinks are spaced slightly. If it's 4+ milk drinks back-to-back without waiting: you want a dual-boiler machine (Doppio or above) for simultaneous steaming.</p>
+          </div>
+        </div>
+        <div>
+          <div>Do I mostly drink espresso or milk drinks (lattes, flat whites)?</div>
+          <div>
+            <p>Mostly espresso and americanos: any machine in the lineup will excel. Milk drinks are the bigger differentiator — the Primo makes excellent milk drinks sequentially; the Doppio and above steam while you pull the shot, which matters when you're making multiple drinks in a rush.</p>
+          </div>
+        </div>
+        <div>
+          <div>How important is heat-up speed?</div>
+          <div>
+            <p>The Nano heats in 45 seconds — ideal if you forget to turn it on until you need it. The Primo takes 90 seconds. The Doppio takes 3 minutes but rewards you with better thermal stability once it's up to temperature. If your routine involves leaving the machine on a timer, heat-up time matters less.</p>
+          </div>
+        </div>
+        <div>
+          <div>Will I want to upgrade in two or three years?</div>
+          <div>
+            <p>If you're buying your first quality machine and aren't sure how deep into espresso you'll go: start with the Primo. It has a high ceiling — you can improve your technique for years before the machine becomes the limiting factor. Upgrading from Primo to Doppio is a meaningful step with clear, feelable differences.</p>
+          </div>
+        </div>
+        <div>
+          <div>What budget should I set aside for a grinder?</div>
+          <div>
+            <p>Budget the same as your machine, or roughly half at minimum. A good grinder has more impact on shot quality than a machine upgrade. The Macinino ($549) pairs perfectly with the Nano and Primo. The Macinino Pro ($799) is the right match for the Doppio and Studio. Don't buy a $900 machine with a $100 grinder.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Block 4.4 — article-excerpt -->
+    <div>
+      <div class="article-excerpt">
+        <div>
+          <div>
+            <picture>
+              <img src="https://content.da.live/froesef/arco/media/story-dialing-in.jpeg" alt="Dialing in espresso" loading="lazy" width="400" height="300">
+            </picture>
+          </div>
+          <div>
+            <p><em>Buying Guide</em></p>
+            <h3>What to Look for in Your First Proper Espresso Machine</h3>
+            <p>Buying your first quality espresso machine is a decision you'll live with for a decade. This guide breaks down the five specifications that actually matter — and the three that are mostly marketing.</p>
+            <p><strong>Elena Rossi · 10 min read</strong></p>
+            <p><a href="/stories/first-espresso-machine-buying-guide">Read Article</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════════════════════════
+         TEMPLATE 5 — arco-discovery-editorial
+    ══════════════════════════════════════════════════════════ -->
+    <div>
+      <h2>Template 5 of 6 — arco-discovery-editorial</h2>
+      <p><strong>Intent:</strong> discovery &nbsp;·&nbsp; <strong>Blocks:</strong> hero → text → cards → article-excerpt</p>
+      <p><strong>When selected:</strong> User is brand new to specialty coffee and exploring the craft for the first time. Query examples: <em>"I'm new to specialty coffee, where do I start?"</em>, <em>"what even is third-wave coffee?"</em></p>
+      <div class="section-metadata">
+        <div>
+          <div>Style</div>
+          <div>highlight</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Block 5.1 — hero -->
+    <div>
+      <div class="hero">
+        <div>
+          <div>
+            <picture>
+              <img src="https://content.da.live/froesef/arco/media/hero-main.jpeg" alt="A sunlit kitchen counter with Arco espresso machine and a perfect shot" loading="eager" width="1920" height="1080">
+            </picture>
+            <h1>Welcome to the world of specialty coffee</h1>
+            <p>It's not complicated. It's just coffee, made with curiosity and care.</p>
+            <p><strong><a href="/stories">Read our guides</a></strong> <em><a href="/experiences">Find your style</a></em></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Block 5.2 — text (brand story) -->
+    <div>
+      <h2>Coffee worth paying attention to</h2>
+      <p>Specialty coffee is coffee at its most traceable — beans with a known origin, processed with care, roasted to highlight what makes them distinct rather than to hide defects. When you drink a great espresso, you taste the altitude of the farm, the variety of the plant, and the skill of the roaster. It's a long chain of craft that ends in your cup.</p>
+      <p>Arco was founded in Treviso, Italy in 2008 by engineers and baristas who believed the gap between professional café equipment and home machines had grown too wide. Every machine we make is designed to close that gap — to give a home barista the same temperature stability, pressure control, and build quality as a commercial setup, at a price and size that fits a real kitchen.</p>
+      <p>You don't need to become a coffee nerd to enjoy what we make. But if you want to go deeper, we've published every guide, recipe, and technique we know. It's all free, because a more curious coffee culture benefits everyone.</p>
+    </div>
+
+    <!-- Block 5.3 — cards (journey stages) -->
+    <div>
+      <div class="cards">
+        <div>
+          <div></div>
+          <div>
+            <h3>Beginner</h3>
+            <p>You've had a great espresso somewhere and want to make that at home. Start here: one machine, one grinder, one recipe. The Nano + Macinino is the entry point that won't hold you back.</p>
+            <p><strong><a href="/?q=beginner espresso setup">Start your journey</a></strong></p>
+          </div>
+        </div>
+        <div>
+          <div></div>
+          <div>
+            <h3>Home Barista</h3>
+            <p>You're pulling consistent shots and want more control. This is the Primo tier — PID temperature, commercial group head, and enough precision to taste the difference when you dial in a new bean.</p>
+            <p><strong><a href="/?q=best machine for serious home barista">Level up your setup</a></strong></p>
+          </div>
+        </div>
+        <div>
+          <div></div>
+          <div>
+            <h3>Enthusiast</h3>
+            <p>You're chasing thermal stability, milk texture, and back-to-back shots without waiting. The Doppio is the crossover point where home equipment stops making compromises.</p>
+            <p><strong><a href="/?q=dual boiler espresso machine at home">Explore the Doppio</a></strong></p>
+          </div>
+        </div>
+        <div>
+          <div></div>
+          <div>
+            <h3>Pro Setup</h3>
+            <p>You want what's in the café. The Studio and Studio Pro bring commercial architecture — saturated group heads, rotary pumps, pressure profiling — into a home footprint.</p>
+            <p><strong><a href="/?q=prosumer espresso machine for home">See the Studio range</a></strong></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Block 5.4 — article-excerpt -->
+    <div>
+      <div class="article-excerpt">
+        <div>
+          <div>
+            <picture>
+              <img src="https://content.da.live/froesef/arco/media/story-morning-routines.jpeg" alt="Morning espresso ritual" loading="lazy" width="400" height="300">
+            </picture>
+          </div>
+          <div>
+            <p><em>Brand</em></p>
+            <h3>What Makes Specialty Coffee Different?</h3>
+            <p>Specialty coffee is a grade, a supply chain, and a philosophy. Here's what actually changes between a commodity espresso and the coffee Arco designs machines to brew — and why it matters for how you make it at home.</p>
+            <p><strong>Elena Marchetti · 6 min read</strong></p>
+            <p><a href="/stories/what-makes-specialty-coffee-different">Read Article</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════════════════════════
+         TEMPLATE 6 — arco-discovery-guide
+    ══════════════════════════════════════════════════════════ -->
+    <div>
+      <h2>Template 6 of 6 — arco-discovery-guide</h2>
+      <p><strong>Intent:</strong> discovery &nbsp;·&nbsp; <strong>Blocks:</strong> hero → cards → text → recipe-steps</p>
+      <p><strong>When selected:</strong> User knows they want espresso but doesn't know which machine family or price tier to look at. Query examples: <em>"I want espresso at home but don't know where to start"</em>, <em>"which Arco machine should I look at?"</em></p>
+      <p><strong>Note:</strong> <code>recipe-steps</code> is conditional (<code>skipIfNoRag: "recipes"</code>).</p>
+      <div class="section-metadata">
+        <div>
+          <div>Style</div>
+          <div>highlight</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Block 6.1 — hero -->
+    <div>
+      <div class="hero">
+        <div>
+          <div>
+            <picture>
+              <img src="https://content.da.live/froesef/arco/media/hero-main.jpeg" alt="Arco machine lineup" loading="eager" width="1920" height="1080">
+            </picture>
+            <h1>Which Arco machine is your match?</h1>
+            <p>Four machine families, one clear fit for your kitchen and how you make coffee.</p>
+            <p><strong><a href="/products/espresso-machines">Browse all machines</a></strong></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Block 6.2 — cards (machine families) -->
+    <div>
+      <div class="cards">
+        <div>
+          <div>
+            <picture>
+              <img src="https://content.da.live/froesef/arco/media/product-nano.jpeg" alt="Arco Nano" loading="lazy" width="600" height="400">
+            </picture>
+          </div>
+          <div>
+            <h3>Nano — Entry level from $649</h3>
+            <p>Compact, quick (45-second heat-up), and capable of producing excellent espresso without a steep learning curve. The right starting point if you're new, have a small kitchen, or want simplicity without sacrificing quality.</p>
+            <p><strong><a href="/products/espresso-machines/nano">Explore Nano</a></strong></p>
+          </div>
+        </div>
+        <div>
+          <div>
+            <picture>
+              <img src="https://content.da.live/froesef/arco/media/product-primo.jpeg" alt="Arco Primo" loading="lazy" width="600" height="400">
+            </picture>
+          </div>
+          <div>
+            <h3>Primo — Enthusiast from $899</h3>
+            <p>The sweet spot for most serious home baristas. PID temperature control, 58mm commercial group head, 90-second heat-up. High enough ceiling to grow with your skills for years, compact enough for any counter.</p>
+            <p><strong><a href="/products/espresso-machines/primo">Explore Primo</a></strong></p>
+          </div>
+        </div>
+        <div>
+          <div>
+            <picture>
+              <img src="https://content.da.live/froesef/arco/media/product-doppio.jpeg" alt="Arco Doppio" loading="lazy" width="600" height="400">
+            </picture>
+          </div>
+          <div>
+            <h3>Doppio &amp; Studio — Prosumer from $1,599</h3>
+            <p>Dual boilers mean you never wait between steaming and brewing. Built for households that take espresso seriously: multiple milk drinks per session, precise temperature stability, and the kind of workflow that removes all friction from the morning.</p>
+            <p><strong><a href="/products/espresso-machines/doppio">Explore Doppio</a></strong></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Block 6.3 — text (getting started) -->
+    <div>
+      <h2>What to expect when you get started</h2>
+      <p>Every espresso machine has a learning curve. The first week is mostly about grind size — that's the variable with the most impact on shot quality, and dialling it in takes a handful of shots per new bean bag. Expect this and enjoy the process. A shot pulled 10% too fast is still better than a pod machine.</p>
+      <p>Grind fresh. Pre-ground espresso loses flavour within minutes. A flat-burr grinder like the Macinino will have more impact on your shot quality than any machine upgrade. It's not optional — it's the foundation. Budget at least half the price of your machine for a grinder.</p>
+      <p>Water quality matters. If your tap water tastes clean, it'll work. If you're in a hard-water area, a simple filter or bottled mineral water (TDS 75–150 ppm) will improve both the taste and the longevity of your machine. Descale every 2–3 months.</p>
+    </div>
+
+    <!-- Block 6.4 — recipe-steps -->
+    <div>
+      <div class="recipe-steps">
+        <div>
+          <div>
+            <h2>Your first shot: the calibration recipe</h2>
+            <p>Pull this on day one. It's not meant to be perfect — it's meant to show you which direction to adjust.</p>
+          </div>
+        </div>
+        <div>
+          <div>
+            <ol>
+              <li>Warm up your machine for 15 minutes before the first shot of the day.</li>
+              <li>Flush the group head for 3 seconds to stabilise temperature.</li>
+              <li>Grind 18g of coffee at a medium-fine setting into your portafilter.</li>
+              <li>Tamp with firm, level pressure — about 15 kg. Keep the tamp straight.</li>
+              <li>Lock the portafilter in and start the shot. Watch the drip.</li>
+              <li>Stop at 36g of liquid in the cup. Note the time — target is 25–30 seconds.</li>
+            </ol>
+          </div>
+        </div>
+        <div>
+          <div>Tips</div>
+          <div>
+            <ul>
+              <li><strong>Shot too fast, tastes sour?</strong> Grind finer. One notch at a time.</li>
+              <li><strong>Shot too slow, tastes bitter?</strong> Grind coarser. One notch at a time.</li>
+              <li><strong>Shot tastes good but ratio is off?</strong> Adjust dose (in) or yield (out), not grind.</li>
+              <li>Once in range on one bag, expect to re-dial for every fresh bag — beans change.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+  <footer></footer>
+</body>

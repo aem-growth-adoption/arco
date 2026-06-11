@@ -244,6 +244,12 @@ export async function llmFillBlocks(ctx, config = {}, env = {}) {
       systemPrompt: ctx.prompt?.system || '',
       userMessage: ctx.prompt?.user || '',
     },
+    templateSelectPrompt: ctx.templateSelectPrompt ? {
+      systemLength: ctx.templateSelectPrompt.system?.length || 0,
+      userLength: ctx.templateSelectPrompt.user?.length || 0,
+      systemPrompt: ctx.templateSelectPrompt.system || '',
+      userMessage: ctx.templateSelectPrompt.user || '',
+    } : null,
     llm: {
       provider: ctx.llm.provider,
       model: ctx.llm.model,

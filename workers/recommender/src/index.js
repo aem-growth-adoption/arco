@@ -21,6 +21,8 @@ import {
   handleAdminCatalog,
   handleAdminLlmConfigGet,
   handleAdminLlmConfigPut,
+  handleAdminRoutingConfigGet,
+  handleAdminRoutingConfigPut,
   requireAdminAuth,
 } from './admin.js';
 import {
@@ -450,6 +452,12 @@ export default {
     }
     if (url.pathname === '/api/admin/llm-config' && request.method === 'PUT') {
       return handleAdminLlmConfigPut(request, env);
+    }
+    if (url.pathname === '/api/admin/llm-config/routing' && request.method === 'GET') {
+      return handleAdminRoutingConfigGet(request, env);
+    }
+    if (url.pathname === '/api/admin/llm-config/routing' && request.method === 'PUT') {
+      return handleAdminRoutingConfigPut(request, env);
     }
 
     // Admin routes — experiments (multi-model A/B)

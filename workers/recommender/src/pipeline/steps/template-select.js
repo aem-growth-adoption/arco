@@ -13,12 +13,10 @@
 import catalog from '../../../templates/catalog.json';
 import { renderPrompt } from '../../prompt-loader.js';
 import { getProvider, findCatalogEntry, catalogAvailability } from '../../providers/index.js';
+import { getActiveRoutingConfig } from '../../llm-config.js';
 
 const FALLBACK_TEMPLATE_NAME = 'arco-discovery-guide';
 
-// Fast/cheap model for this routing call — ~50 token output.
-const STEP_PROVIDER = 'cerebras';
-const STEP_MODEL = 'llama3.1-8b';
 const STEP_MAX_TOKENS = 100;
 const STEP_TEMPERATURE = 0;
 
@@ -90,9 +88,15 @@ export async function templateSelect(ctx, config = {}, env = {}) {
       previousQueries: ctx.request.previousQueries,
     });
 
-    // Flow config can override provider/model/params, but defaults are fast + cheap.
-    const providerId = config.templateSelectProvider || STEP_PROVIDER;
-    const model = config.templateSelectModel || STEP_MODEL;
+    // Store prompt for debug output.
+    ctx.templateSelectPrompt = { system: prompt.system, user: prompt.user };
+
+    // KV routing config overrides the flow config and hardcoded defaults.
+    const routingConfig = await getActiveRoutingConfig(env);
+
+    // Flow config can further override the KV value (used by eval runs etc.).
+    const providerId = config.templateSelectProvider || routingConfig.provider;
+    const model = config.templateSelectModel || routingConfig.model;
     const temperature = typeof config.templateSelectTemperature === 'number'
       ? config.templateSelectTemperature : STEP_TEMPERATURE;
     const maxTokens = config.templateSelectMaxTokens || STEP_MAX_TOKENS;

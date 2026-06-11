@@ -419,8 +419,12 @@ export default function decorate(block) {
   accordion.appendChild(makeAccordion('Behavior Analysis', renderBehaviorAnalysis(info.behaviorAnalysis)));
   accordion.appendChild(makeAccordion(`Pipeline Steps (${info.timings?.steps?.length ?? 0})`, renderPipelineSteps(info.timings?.steps)));
   accordion.appendChild(makeAccordion('RAG Results', renderRagResults(info.rag)));
-  accordion.appendChild(makeAccordion('System Prompt', renderPrompt('System', info.prompt?.systemPrompt)));
-  accordion.appendChild(makeAccordion('User Message', renderPrompt('User', info.prompt?.userMessage)));
+  if (info.templateSelectPrompt) {
+    accordion.appendChild(makeAccordion('Call-1 Template Select — System Prompt', renderPrompt('System (template-select)', info.templateSelectPrompt.systemPrompt)));
+    accordion.appendChild(makeAccordion('Call-1 Template Select — User Message', renderPrompt('User (template-select)', info.templateSelectPrompt.userMessage)));
+  }
+  accordion.appendChild(makeAccordion('Call-2 Fill — System Prompt', renderPrompt('System', info.prompt?.systemPrompt)));
+  accordion.appendChild(makeAccordion('Call-2 Fill — User Message', renderPrompt('User', info.prompt?.userMessage)));
   accordion.appendChild(makeAccordion('LLM Raw Output', renderLlmOutput(info.llm)));
   accordion.appendChild(makeAccordion(`Section Details (${info.sectionDetails?.length ?? 0})`, renderSectionDetails(info.sectionDetails)));
 

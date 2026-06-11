@@ -17,7 +17,10 @@
 import { CORS_HEADERS } from './pipeline/context.js';
 import { rowToRunDto } from './storage.js';
 import { MODEL_CATALOG, catalogAvailability } from './providers/index.js';
-import { getActiveLlmConfig, putActiveLlmConfig, LLM_CONFIG_LIMITS } from './llm-config.js';
+import {
+  getActiveLlmConfig, putActiveLlmConfig, LLM_CONFIG_LIMITS,
+  getActiveRoutingConfig, putActiveRoutingConfig,
+} from './llm-config.js';
 
 // ─── Auth ────────────────────────────────────────────────────────────────────
 
@@ -273,6 +276,41 @@ export async function handleAdminLlmConfigPut(request, env) {
     });
   }
   const result = await putActiveLlmConfig(env, body);
+  if (result.error) {
+    return new Response(JSON.stringify({ error: result.error }), {
+      status: 400, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+    });
+  }
+  return new Response(JSON.stringify({ active: result.value }), {
+    headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+  });
+}
+
+/**
+ * Read the active template-routing (call-1) config from KV.
+ */
+export async function handleAdminRoutingConfigGet(request, env) {
+  if (!await checkCookieAuth(request, env) && !checkBasicAuth(request, env)) return unauthorized();
+  const active = await getActiveRoutingConfig(env);
+  return new Response(JSON.stringify({ active }), {
+    headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+  });
+}
+
+/**
+ * Update the active template-routing (call-1) config. Only provider + model.
+ */
+export async function handleAdminRoutingConfigPut(request, env) {
+  if (!await checkCookieAuth(request, env) && !checkBasicAuth(request, env)) return unauthorized();
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
+      status: 400, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+    });
+  }
+  const result = await putActiveRoutingConfig(env, body);
   if (result.error) {
     return new Response(JSON.stringify({ error: result.error }), {
       status: 400, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
