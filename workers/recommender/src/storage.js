@@ -113,6 +113,12 @@ async function insertRun(db, runId, sessionId, ctx, now, meta) {
   const outputTokens = ctx.llm?.usage?.completion_tokens || null;
   const blockCount = ctx.llm?.sections?.length || 0;
 
+  // Call-2 LLM-only duration (excludes RAG, prompt build, rendering).
+  const llmDurationMs = (ctx.timings?.llmEnd && ctx.timings?.llmStart)
+    ? ctx.timings.llmEnd - ctx.timings.llmStart : null;
+  const llmTtftMs = (ctx.timings?.llmFirstToken && ctx.timings?.llmStart)
+    ? ctx.timings.llmFirstToken - ctx.timings.llmStart : null;
+
   await db.prepare(`
     INSERT INTO generated_pages
       (id, session_id, page_id, page_url, run_index, parent_run_id,
@@ -120,14 +126,18 @@ async function insertRun(db, runId, sessionId, ctx, now, meta) {
        flow_id, follow_up_type, follow_up_label, follow_up_options,
        block_count, created_at, duration_ms, input_tokens, output_tokens,
        da_path, preview_url, live_url, llm_provider, llm_model,
-       template_name)
+       template_name,
+       routing_provider, routing_model, routing_duration_ms,
+       llm_duration_ms, llm_ttft_ms)
     VALUES
       (?1, ?2, ?3, ?4, ?5, ?6,
        ?7, ?8, ?9, ?10, ?11,
        ?12, ?13, ?14, ?15,
        ?16, ?17, ?18, ?19, ?20,
        ?21, ?22, ?23, ?24, ?25,
-       ?26)
+       ?26,
+       ?27, ?28, ?29,
+       ?30, ?31)
   `).bind(
     runId,
     sessionId,
@@ -155,6 +165,11 @@ async function insertRun(db, runId, sessionId, ctx, now, meta) {
     ctx.llm?.provider || null,
     ctx.llm?.model || null,
     ctx.template?.name || null,
+    ctx.templateSelectLlm?.provider || null,
+    ctx.templateSelectLlm?.model || null,
+    ctx.templateSelectLlm?.durationMs || null,
+    llmDurationMs,
+    llmTtftMs,
   ).run();
 }
 
@@ -199,6 +214,13 @@ function buildDebugSnapshot(ctx) {
       systemPrompt: ctx.prompt?.system || '',
       userMessage: ctx.prompt?.user || '',
     },
+    templateSelectPrompt: ctx.templateSelectPrompt ? {
+      systemLength: ctx.templateSelectPrompt.system?.length || 0,
+      userLength: ctx.templateSelectPrompt.user?.length || 0,
+      systemPrompt: ctx.templateSelectPrompt.system || '',
+      userMessage: ctx.templateSelectPrompt.user || '',
+    } : null,
+    templateSelectLlm: ctx.templateSelectLlm || null,
     timings: ctx.timings || {},
     llm: {
       provider: ctx.llm?.provider || null,

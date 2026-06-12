@@ -29,25 +29,6 @@ function getFallbackTemplate() {
 }
 
 /**
- * Accumulate all delta chunks from a streaming provider call into a single string.
- * The output is tiny (~50 tokens) so we always collect the full response.
- *
- * @param {AsyncIterable} stream — provider async iterable
- * @returns {Promise<string>}
- */
-async function accumulateStream(stream) {
-  let text = '';
-  // eslint-disable-next-line no-restricted-syntax
-  for await (const chunk of stream) {
-    if (chunk.type === 'delta' && chunk.text) {
-      text += chunk.text;
-    }
-    // 'usage' and other frame types are ignored — output is tiny.
-  }
-  return text;
-}
-
-/**
  * Parse the template name from the LLM response text.
  * Tries JSON.parse first, then falls back to regex extraction.
  *
@@ -115,14 +96,15 @@ export async function templateSelect(ctx, config = {}, env = {}) {
 
     const provider = getProvider(providerId);
 
-    // Wrap the provider call with a timeout — a stalled Cerebras request would
-    // otherwise hang the entire pipeline. 15 s is generous for a ~50-token call.
     const abortController = new AbortController();
     const timeoutId = setTimeout(
       () => abortController.abort(),
       parseInt(env.LLM_TIMEOUT_MS, 10) || 15_000,
     );
+
     let rawText = '';
+    const llmStart = Date.now();
+    let llmFirstToken = null;
     try {
       const stream = provider.stream({
         env,
@@ -135,10 +117,25 @@ export async function templateSelect(ctx, config = {}, env = {}) {
         temperature,
         signal: abortController.signal,
       });
-      rawText = await accumulateStream(stream);
+      // eslint-disable-next-line no-restricted-syntax
+      for await (const chunk of stream) {
+        if (chunk.type === 'delta' && chunk.text) {
+          if (!llmFirstToken) llmFirstToken = Date.now();
+          rawText += chunk.text;
+        }
+      }
     } finally {
       clearTimeout(timeoutId);
     }
+    const llmEnd = Date.now();
+
+    // Store per-call-1 LLM metrics for storage and debug output.
+    ctx.templateSelectLlm = {
+      provider: providerId,
+      model,
+      durationMs: llmEnd - llmStart,
+      ttftMs: llmFirstToken ? llmFirstToken - llmStart : null,
+    };
 
     const templateName = parseTemplateName(rawText);
 

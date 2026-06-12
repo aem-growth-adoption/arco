@@ -23,6 +23,7 @@ import {
   handleAdminLlmConfigPut,
   handleAdminRoutingConfigGet,
   handleAdminRoutingConfigPut,
+  handleAdminMetricsTiming,
   requireAdminAuth,
 } from './admin.js';
 import {
@@ -458,6 +459,9 @@ export default {
     }
     if (url.pathname === '/api/admin/llm-config/routing' && request.method === 'PUT') {
       return handleAdminRoutingConfigPut(request, env);
+    }
+    if (url.pathname === '/api/admin/metrics/timing' && request.method === 'GET') {
+      return handleAdminMetricsTiming(request, env);
     }
 
     // Admin routes — experiments (multi-model A/B)

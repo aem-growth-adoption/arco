@@ -321,6 +321,68 @@ export async function handleAdminRoutingConfigPut(request, env) {
   });
 }
 
+// ─── Metrics ─────────────────────────────────────────────────────────────────
+
+/**
+ * Aggregate per-model step timings from generated_pages.
+ * Returns separate breakdowns for call-1 (routing) and call-2 (fill).
+ */
+export async function handleAdminMetricsTiming(request, env) {
+  if (!await checkCookieAuth(request, env) && !checkBasicAuth(request, env)) return unauthorized();
+  if (!env.SESSIONS_DB) {
+    return new Response(JSON.stringify({ error: 'SESSIONS_DB not configured' }), {
+      status: 503, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+    });
+  }
+
+  const url = new URL(request.url);
+  const since = url.searchParams.get('since') || null;
+  const whereClause = since ? `WHERE created_at >= ${Number(since)}` : '';
+
+  const [routing, fill] = await Promise.all([
+    env.SESSIONS_DB.prepare(`
+      SELECT
+        routing_provider AS provider,
+        routing_model AS model,
+        COUNT(*) AS n,
+        ROUND(AVG(routing_duration_ms)) AS avg_ms,
+        MIN(routing_duration_ms) AS min_ms,
+        MAX(routing_duration_ms) AS max_ms
+      FROM generated_pages
+      ${whereClause}
+      WHERE routing_model IS NOT NULL
+      GROUP BY routing_provider, routing_model
+      ORDER BY avg_ms ASC
+    `).all(),
+    env.SESSIONS_DB.prepare(`
+      SELECT
+        llm_provider AS provider,
+        llm_model AS model,
+        COUNT(*) AS n,
+        ROUND(AVG(llm_duration_ms)) AS avg_ms,
+        MIN(llm_duration_ms) AS min_ms,
+        MAX(llm_duration_ms) AS max_ms,
+        ROUND(AVG(llm_ttft_ms)) AS avg_ttft_ms,
+        MIN(llm_ttft_ms) AS min_ttft_ms,
+        MAX(llm_ttft_ms) AS max_ttft_ms,
+        ROUND(AVG(input_tokens)) AS avg_input_tokens,
+        ROUND(AVG(output_tokens)) AS avg_output_tokens
+      FROM generated_pages
+      ${whereClause}
+      WHERE llm_model IS NOT NULL AND llm_duration_ms IS NOT NULL
+      GROUP BY llm_provider, llm_model
+      ORDER BY avg_ms ASC
+    `).all(),
+  ]);
+
+  return new Response(JSON.stringify({
+    routing: routing.results || [],
+    fill: fill.results || [],
+  }), {
+    headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+  });
+}
+
 // ─── Admin SPA HTML ───────────────────────────────────────────────────────────
 
 export async function handleAdminUI(request, env) {

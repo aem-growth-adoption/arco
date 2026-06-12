@@ -143,6 +143,7 @@ function parseRoute() {
   const hash = window.location.hash.replace(/^#/, '') || '/';
   if (hash === '/' || hash === '/sessions') return { view: 'sessions' };
   if (hash === '/llm-config') return { view: 'llm-config' };
+  if (hash === '/metrics') return { view: 'metrics' };
 
   const sessionMatch = hash.match(/^\/sessions\/([^/]+)$/);
   if (sessionMatch) return { view: 'session', id: sessionMatch[1] };
@@ -3735,6 +3736,75 @@ async function renderFeedbackTab(panel, pageData) {
   panel.innerHTML = sections || '<p class="admin-empty">No feedback collected on this page yet.</p>';
 }
 
+async function renderMetrics(root) {
+  root.innerHTML = '<p class="admin-loading">Loading timing metrics…</p>';
+  let data;
+  try {
+    data = await api('/api/admin/metrics/timing');
+  } catch (err) {
+    root.innerHTML = `<p class="admin-error">${esc(err.message)}</p>`;
+    return;
+  }
+
+  const fmt = (ms) => (ms != null ? `${ms.toLocaleString()} ms` : '—');
+
+  function modelTable(rows, columns) {
+    if (!rows.length) return '<p class="admin-empty">No data yet — run some queries first.</p>';
+    const headers = columns.map(([label]) => `<th>${esc(label)}</th>`).join('');
+    const body = rows.map((r) => `<tr>${columns.map(([, key, formatter]) => {
+      const val = r[key];
+      let display;
+      if (formatter) display = formatter(val);
+      else if (val != null) display = String(val);
+      else display = '—';
+      return `<td>${esc(display)}</td>`;
+    }).join('')}</tr>`).join('');
+    return `<table class="admin-table">
+      <thead><tr>${headers}</tr></thead>
+      <tbody>${body}</tbody>
+    </table>`;
+  }
+
+  root.innerHTML = `
+    <nav class="admin-crumbs"><a href="#/">← Sessions</a></nav>
+    <div class="admin-toolbar">
+      <h2>Performance Metrics</h2>
+      <p class="admin-muted">Per-model timing breakdown across all recorded pipeline runs.</p>
+    </div>
+
+    <section class="admin-card">
+      <h3>Call-1 — Template routing</h3>
+      <p class="admin-muted">LLM duration for the template-select step (prompt → template name). Excludes KV read and validation overhead.</p>
+      ${modelTable(data.routing || [], [
+    ['Provider', 'provider'],
+    ['Model', 'model'],
+    ['Runs', 'n'],
+    ['Avg', 'avg_ms', fmt],
+    ['Min', 'min_ms', fmt],
+    ['Max', 'max_ms', fmt],
+  ])}
+    </section>
+
+    <section class="admin-card">
+      <h3>Call-2 — Content fill</h3>
+      <p class="admin-muted">LLM-only duration for the template-fill step. Excludes RAG retrieval, prompt build, block rendering, and DA upload.</p>
+      ${modelTable(data.fill || [], [
+    ['Provider', 'provider'],
+    ['Model', 'model'],
+    ['Runs', 'n'],
+    ['Avg LLM', 'avg_ms', fmt],
+    ['Min LLM', 'min_ms', fmt],
+    ['Max LLM', 'max_ms', fmt],
+    ['Avg TTFT', 'avg_ttft_ms', fmt],
+    ['Min TTFT', 'min_ttft_ms', fmt],
+    ['Max TTFT', 'max_ttft_ms', fmt],
+    ['Avg In tok', 'avg_input_tokens'],
+    ['Avg Out tok', 'avg_output_tokens'],
+  ])}
+    </section>
+  `;
+}
+
 function renderInsightsStub(root) {
   root.innerHTML = `
     <div class="admin-toolbar">
@@ -3764,6 +3834,7 @@ function syncHeaderNav(route) {
   const isEval = route.view === 'evaluations' || route.view === 'evaluation' || route.view === 'evaluation-new';
   const isFb = route.view === 'feedback' || route.view === 'feedback-run';
   const isInsights = route.view === 'insights';
+  const isMetrics = route.view === 'metrics';
   nav.querySelectorAll('a[data-nav]').forEach((a) => {
     const key = a.dataset.nav;
     let active = false;
@@ -3773,7 +3844,10 @@ function syncHeaderNav(route) {
     else if (key === 'evaluations') active = isEval;
     else if (key === 'feedback') active = isFb;
     else if (key === 'insights') active = isInsights;
-    else if (key === 'sessions') active = !isVec && !isLlm && !isExp && !isEval && !isFb && !isInsights;
+    else if (key === 'metrics') active = isMetrics;
+    else if (key === 'sessions') {
+      active = !isVec && !isLlm && !isExp && !isEval && !isFb && !isInsights && !isMetrics;
+    }
     a.classList.toggle('is-active', active);
   });
 }
@@ -3811,6 +3885,8 @@ async function render(root) {
     await renderFeedbackRun(root, route.id);
   } else if (route.view === 'insights') {
     renderInsightsStub(root);
+  } else if (route.view === 'metrics') {
+    await renderMetrics(root);
   } else {
     await renderSessions(root);
   }
@@ -3831,6 +3907,7 @@ export default async function decorate(block) {
       <a href="#/evaluations" data-nav="evaluations">LLM Evaluation</a>
       <a href="#/feedback" data-nav="feedback">Feedback</a>
       <a href="#/insights" data-nav="insights">Insights</a>
+      <a href="#/metrics" data-nav="metrics">Metrics</a>
       <a href="#/llm-config" data-nav="llm-config">Model Settings</a>
       <a href="#/vectorize" data-nav="vectorize">Vectorize</a>
     </nav>
