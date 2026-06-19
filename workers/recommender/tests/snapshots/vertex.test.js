@@ -89,7 +89,7 @@ test('vertex — builds correct endpoint URL with default location', async () =>
   let url;
   globalThis.fetch = async (u) => { url = String(u); return makeSse([CHUNK_DONE]); };
   await collect(vertex.stream({ env: BASE_ENV, ...BASE_ARGS, model: 'gemma-4-26b-diffusion' }));
-  assert.equal(url, 'https://us-central1-aiplatform.googleapis.com/v1/projects/test-proj/locations/us-central1/publishers/google/models/gemma-4-26b-diffusion:streamGenerateContent');
+  assert.equal(url, 'https://us-central1-aiplatform.googleapis.com/v1/projects/test-proj/locations/us-central1/publishers/google/models/gemma-4-26b-diffusion:streamGenerateContent?alt=sse');
 });
 
 test('vertex — respects VERTEX_AI_LOCATION override', async () => {
@@ -98,6 +98,7 @@ test('vertex — respects VERTEX_AI_LOCATION override', async () => {
   await collect(vertex.stream({ env: { ...BASE_ENV, VERTEX_AI_LOCATION: 'europe-west4' }, ...BASE_ARGS }));
   assert.match(url, /europe-west4-aiplatform\.googleapis\.com/);
   assert.match(url, /locations\/europe-west4\//);
+  assert.match(url, /\?alt=sse$/);
 });
 
 test('vertex — yields delta chunks then usage frame', async () => {

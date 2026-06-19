@@ -15,7 +15,7 @@ const DEFAULT_LOCATION = 'us-central1';
 function resolveEndpoint(env, model) {
   const project = env.VERTEX_AI_PROJECT;
   const location = env.VERTEX_AI_LOCATION || DEFAULT_LOCATION;
-  return `https://${location}-aiplatform.googleapis.com/v1/projects/${project}/locations/${location}/publishers/google/models/${model}:streamGenerateContent`;
+  return `https://${location}-aiplatform.googleapis.com/v1/projects/${project}/locations/${location}/publishers/google/models/${model}:streamGenerateContent?alt=sse`;
 }
 
 function convertMessages(messages) {
@@ -91,6 +91,7 @@ async function* stream({
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'Accept': 'text/event-stream',
       'X-goog-api-key': env.VERTEX_AI_API_KEY,
     },
     body: JSON.stringify(body),

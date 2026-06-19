@@ -30,8 +30,10 @@ API key is sent as `X-goog-api-key` header (not as a query parameter, to avoid i
 ## API Endpoint
 
 ```
-POST https://{LOCATION}-aiplatform.googleapis.com/v1/projects/{PROJECT}/locations/{LOCATION}/publishers/google/models/{MODEL}:streamGenerateContent
+POST https://{LOCATION}-aiplatform.googleapis.com/v1/projects/{PROJECT}/locations/{LOCATION}/publishers/google/models/{MODEL}:streamGenerateContent?alt=sse
 ```
+
+The `?alt=sse` query parameter instructs Vertex AI to stream Server-Sent Events (SSE) format. Without it, the endpoint defaults to a streamed JSON array format which is incompatible with SSE parsing.
 
 ## Request Body Format
 
@@ -59,7 +61,7 @@ Full request body:
 
 ## SSE Response Parsing
 
-Vertex AI streams Server-Sent Events where each `data:` frame is a complete JSON object:
+Vertex AI streams Server-Sent Events (when `?alt=sse` is specified) where each `data:` frame is a complete JSON object:
 
 ```
 data: {"candidates":[{"content":{"role":"model","parts":[{"text":"Hello"}]},"finishReason":null}]}
