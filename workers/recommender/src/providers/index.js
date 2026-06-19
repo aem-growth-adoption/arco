@@ -443,9 +443,10 @@ async function fetchOllamaModels(env) {
 
 async function fetchVertexModels(env) {
   if (!env.VERTEX_AI_ENDPOINT || !env.VERTEX_AI_TOKEN) return null;
-  const base = env.VERTEX_AI_ENDPOINT.replace(/\/+$/, '');
-  const modelsUrl = base.endsWith('/v1') ? `${base}/models` : `${base}/v1/models`;
-  const data = await fetchJson(modelsUrl, {
+  // Strip trailing slash and /chat/completions suffix (if caller already appended it),
+  // then append /models — the OpenAI-compatible sibling of /chat/completions.
+  const base = env.VERTEX_AI_ENDPOINT.replace(/\/+$/, '').replace(/\/chat\/completions$/, '');
+  const data = await fetchJson(`${base}/models`, {
     headers: { Authorization: `Bearer ${env.VERTEX_AI_TOKEN}` },
   });
   if (!data) return null;

@@ -1,6 +1,7 @@
 import { test, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
 import vertex from '../../src/providers/vertex.js';
+import { getCatalog } from '../../src/providers/index.js';
 
 const realFetch = globalThis.fetch;
 afterEach(() => { globalThis.fetch = realFetch; });
@@ -143,4 +144,29 @@ test('vertex — DiffusionGemma: single large chunk still yields delta + usage',
   assert.equal(items[0].text, 'entire response in one shot');
   assert.equal(items[1].type, 'usage');
   assert.equal(items[1].usage.completion_tokens, 500);
+});
+
+test('getCatalog — vertex: queries /models sibling of /chat/completions', async () => {
+  let capturedUrl;
+  globalThis.fetch = async (url) => {
+    capturedUrl = String(url);
+    return new Response(JSON.stringify({ data: [{ id: '2930507450790445056' }] }), {
+      status: 200, headers: { 'Content-Type': 'application/json' },
+    });
+  };
+  const env = {
+    VERTEX_AI_TOKEN: 'tok',
+    VERTEX_AI_ENDPOINT: 'https://mg-endpoint.example.com/v1/projects/proj/locations/us-central1/endpoints/ep',
+  };
+  const catalog = await getCatalog(env);
+  assert.equal(capturedUrl, 'https://mg-endpoint.example.com/v1/projects/proj/locations/us-central1/endpoints/ep/models');
+  assert.ok(catalog.some((e) => e.provider === 'vertex' && e.model === '2930507450790445056'));
+  assert.ok(!catalog.some((e) => e.provider === 'vertex' && e.model === 'deployed-model'), 'placeholder removed');
+});
+
+test('getCatalog — vertex: falls back to placeholder when endpoint unreachable', async () => {
+  globalThis.fetch = async () => { throw new Error('connection refused'); };
+  const env = { VERTEX_AI_TOKEN: 'tok', VERTEX_AI_ENDPOINT: 'https://mg-endpoint.example.com/v1/projects/proj/locations/us-central1/endpoints/ep' };
+  const catalog = await getCatalog(env);
+  assert.ok(catalog.some((e) => e.provider === 'vertex' && e.model === 'deployed-model'));
 });

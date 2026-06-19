@@ -84,7 +84,10 @@ async function* stream({
 
   if (!response.ok) {
     const body = await response.text().catch(() => '');
-    const err = new Error(`Vertex AI request failed (${response.status}): ${body.slice(0, 200)}`);
+    const hint = response.status === 401
+      ? ' Token may be expired — refresh: wrangler secret put VERTEX_AI_TOKEN $(gcloud auth print-access-token)'
+      : '';
+    const err = new Error(`Vertex AI request failed (${response.status}): ${body.slice(0, 200)}${hint}`);
     err.status = response.status;
     throw err;
   }
