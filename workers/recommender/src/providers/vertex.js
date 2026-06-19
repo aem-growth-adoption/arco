@@ -1,38 +1,20 @@
 /**
- * Vertex AI provider — calls streamGenerateContent for Gemma and
- * DiffusionGemma models hosted on Google Cloud Vertex AI.
+ * Vertex AI provider — calls OpenAI-compatible /chat/completions on a
+ * Model Garden vLLM dedicated endpoint.
  *
- * Auth: X-goog-api-key header (VERTEX_AI_API_KEY secret).
- * Endpoint: https://{LOCATION}-aiplatform.googleapis.com/v1/projects/{PROJECT}/
- *           locations/{LOCATION}/publishers/google/models/{MODEL}:streamGenerateContent
+ * Auth: Authorization: Bearer {VERTEX_AI_TOKEN} (gcloud bearer token, 1h expiry).
+ * Endpoint: dedicated DNS like
+ *   https://mg-endpoint-ID.REGION-PROJECT.prediction.vertexai.goog/v1/projects/...
+ * The model field is the numeric deployed-model ID (e.g. "2930507450790445056").
  *
- * DiffusionGemma generates all tokens in one shot (non-autoregressive), so it
- * emits a single large delta chunk. TTFT will equal total LLM wall-clock time.
+ * Refresh the token hourly:
+ *   wrangler secret put VERTEX_AI_TOKEN $(gcloud auth print-access-token)
  */
 
-const DEFAULT_LOCATION = 'us-central1';
-
-function resolveEndpoint(env, model) {
-  const project = env.VERTEX_AI_PROJECT;
-  const location = env.VERTEX_AI_LOCATION || DEFAULT_LOCATION;
-  return `https://${location}-aiplatform.googleapis.com/v1/projects/${project}/locations/${location}/publishers/google/models/${model}:streamGenerateContent?alt=sse`;
-}
-
-function convertMessages(messages) {
-  let systemInstruction = null;
-  const contents = [];
-  // eslint-disable-next-line no-restricted-syntax
-  for (const msg of messages) {
-    if (msg.role === 'system') {
-      systemInstruction = { parts: [{ text: msg.content }] };
-    } else {
-      contents.push({
-        role: msg.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: msg.content }],
-      });
-    }
-  }
-  return { systemInstruction, contents };
+function resolveEndpoint(env) {
+  const base = (env.VERTEX_AI_ENDPOINT || '').replace(/\/+$/, '');
+  if (base.endsWith('/chat/completions')) return base;
+  return `${base}/chat/completions`;
 }
 
 async function* iterateSse(response, signal) {
@@ -53,7 +35,7 @@ async function* iterateSse(response, signal) {
         const line = frame.split('\n').find((l) => l.startsWith('data:'));
         if (!line) continue; // eslint-disable-line no-continue
         const data = line.slice(5).trim();
-        if (!data) continue; // eslint-disable-line no-continue
+        if (!data || data === '[DONE]') continue; // eslint-disable-line no-continue
         try {
           yield JSON.parse(data);
         } catch {
@@ -69,67 +51,62 @@ async function* iterateSse(response, signal) {
 async function* stream({
   env, model, messages, temperature, maxTokens, signal,
 }) {
-  if (!env.VERTEX_AI_API_KEY) {
-    const err = new Error('Vertex AI API key is not configured (set VERTEX_AI_API_KEY).');
+  if (!env.VERTEX_AI_TOKEN) {
+    const err = new Error(
+      'Vertex AI bearer token not configured. Refresh hourly: `wrangler secret put VERTEX_AI_TOKEN $(gcloud auth print-access-token)`',
+    );
     err.status = 401;
     throw err;
   }
-  if (!env.VERTEX_AI_PROJECT) {
-    const err = new Error('Vertex AI project ID is not configured (set VERTEX_AI_PROJECT).');
+  if (!env.VERTEX_AI_ENDPOINT) {
+    const err = new Error('Vertex AI endpoint is not configured (set VERTEX_AI_ENDPOINT).');
     err.status = 401;
     throw err;
   }
 
-  const { systemInstruction, contents } = convertMessages(messages);
-  const body = {
-    contents,
-    generationConfig: { temperature, maxOutputTokens: maxTokens },
-  };
-  if (systemInstruction) body.system_instruction = systemInstruction;
-
-  const response = await fetch(resolveEndpoint(env, model), {
+  const response = await fetch(resolveEndpoint(env), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Accept': 'text/event-stream',
-      'X-goog-api-key': env.VERTEX_AI_API_KEY,
+      Authorization: `Bearer ${env.VERTEX_AI_TOKEN}`,
+      Accept: 'text/event-stream',
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify({
+      model,
+      messages,
+      max_tokens: maxTokens,
+      temperature,
+      stream: true,
+      stream_options: { include_usage: true },
+    }),
     signal,
   });
 
   if (!response.ok) {
-    const errBody = await response.text().catch(() => '');
-    const err = new Error(`Vertex AI request failed (${response.status}): ${errBody.slice(0, 200)}`);
+    const body = await response.text().catch(() => '');
+    const err = new Error(`Vertex AI request failed (${response.status}): ${body.slice(0, 200)}`);
     err.status = response.status;
     throw err;
   }
 
-  let usageMetadata = null;
-  let finishReason = null;
-  let modelVersion = null;
-
+  let usage = null;
+  const iter = iterateSse(response, signal);
   // eslint-disable-next-line no-restricted-syntax
-  for await (const evt of iterateSse(response, signal)) {
-    if (signal?.aborted) break;
-    const text = evt.candidates?.[0]?.content?.parts?.[0]?.text;
+  for await (const evt of iter) {
+    const text = evt.choices?.[0]?.delta?.content;
     if (text) yield { type: 'delta', text };
-    if (evt.candidates?.[0]?.finishReason) finishReason = evt.candidates[0].finishReason;
-    if (evt.usageMetadata) usageMetadata = evt.usageMetadata;
-    if (evt.modelVersion) modelVersion = evt.modelVersion;
+    if (evt.usage) usage = evt.usage;
   }
 
-  if (usageMetadata) {
+  if (usage) {
     yield {
       type: 'usage',
       usage: {
-        prompt_tokens: usageMetadata.promptTokenCount ?? null,
-        completion_tokens: usageMetadata.candidatesTokenCount ?? null,
-        total_tokens: usageMetadata.totalTokenCount ?? null,
-        cache_read_tokens: usageMetadata.cachedContentTokenCount ?? 0,
-        cache_write_tokens: 0,
-        done_reason: finishReason ?? null,
-        model_version: modelVersion ?? null,
+        prompt_tokens: usage.prompt_tokens ?? null,
+        completion_tokens: usage.completion_tokens ?? null,
+        total_tokens: usage.total_tokens ?? null,
+        cache_read_tokens: usage.cache_read_tokens ?? 0,
+        cache_write_tokens: usage.cache_write_tokens ?? 0,
       },
     };
   }

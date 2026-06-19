@@ -48,8 +48,7 @@ OLLAMA_NUM_CTX=32768
 # leaving DA tokens unset keeps the page-caching /api/persist path from touching
 # the production content store.
 
-# Google Vertex AI (cloud — works in both wrangler dev and deployed).
-# Set via `wrangler secret put VERTEX_AI_API_KEY` and `wrangler secret put VERTEX_AI_PROJECT`.
-# VERTEX_AI_API_KEY=your-gcp-api-key
-# VERTEX_AI_PROJECT=your-gcp-project-id
-# VERTEX_AI_LOCATION=us-central1        # optional, default us-central1
+# Google Vertex AI Model Garden (vLLM dedicated endpoint — works in both wrangler dev and deployed).
+# Token expires in 1h — refresh with: wrangler secret put VERTEX_AI_TOKEN $(gcloud auth print-access-token)
+# VERTEX_AI_TOKEN=your-gcloud-bearer-token    # `gcloud auth print-access-token`
+# VERTEX_AI_ENDPOINT=https://mg-endpoint-ID.REGION-PROJECT.prediction.vertexai.goog/v1/projects/PROJECT/locations/REGION/endpoints/ENDPOINT_ID

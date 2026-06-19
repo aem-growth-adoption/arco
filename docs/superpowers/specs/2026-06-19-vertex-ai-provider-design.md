@@ -2,131 +2,113 @@
 
 **Date:** 2026-06-19  
 **Branch:** vertex-ai-support  
-**Status:** Approved
+**Status:** Updated — OpenAI-compatible Model Garden vLLM endpoint
 
 ## Goal
 
-Add Google Vertex AI as a first-class LLM provider in the recommender worker so that `gemma-4-26b-a4b-it` and `gemma-4-26b-diffusion` (DiffusionGemma) can be selected in Model Settings and used in evals.
+Add Google Vertex AI as a first-class LLM provider in the recommender worker so that models deployed on Vertex AI Model Garden (via a dedicated vLLM endpoint) can be selected in Model Settings and used in evals.
 
 ## Scope
 
-- New provider file `workers/recommender/src/providers/vertex.js`
-- Registration in `workers/recommender/src/providers/index.js` (catalog + availability)
+- Provider file `workers/recommender/src/providers/vertex.js`
+- Registration in `workers/recommender/src/providers/index.js` (catalog + availability + auto-discovery)
 - `.dev.vars.example` documentation
 - Comment update in `wrangler.jsonc`
 
 No changes to the pipeline, storage, admin UI, or eval runner — all existing machinery already consumes the normalized `{type:'delta'}` / `{type:'usage'}` contract.
 
+## Actual Deployment Architecture
+
+The Vertex AI deployment is a **Model Garden vLLM dedicated endpoint** — not the native `streamGenerateContent` API. It exposes an OpenAI-compatible `/chat/completions` endpoint at a dedicated DNS name.
+
+**Endpoint pattern:**
+```
+https://mg-endpoint-{ID}.{REGION}-{PROJECT_NUMBER}.prediction.vertexai.goog/v1/projects/{PROJECT}/locations/{REGION}/endpoints/{ENDPOINT_ID}
+```
+
+**Model field:** numeric deployed-model ID (e.g. `2930507450790445056`), not a friendly name.
+
 ## Environment Variables
 
-| Var | Required | Default | Notes |
-|-----|----------|---------|-------|
-| `VERTEX_AI_API_KEY` | ✓ | — | GCP API key (set via `wrangler secret put VERTEX_AI_API_KEY`) |
-| `VERTEX_AI_PROJECT` | ✓ | — | GCP project ID (set via `wrangler secret put VERTEX_AI_PROJECT`) |
-| `VERTEX_AI_LOCATION` | optional | `us-central1` | Vertex AI region (var, not secret) |
+| Var | Required | Notes |
+|-----|----------|-------|
+| `VERTEX_AI_TOKEN` | ✓ | gcloud bearer token — set via `wrangler secret put VERTEX_AI_TOKEN $(gcloud auth print-access-token)`. Expires in 1h — must be refreshed. |
+| `VERTEX_AI_ENDPOINT` | ✓ | Base URL of the dedicated endpoint (without `/chat/completions`). Set via `wrangler secret put VERTEX_AI_ENDPOINT`. |
 
-API key is sent as `X-goog-api-key` header (not as a query parameter, to avoid it appearing in logs).
+**Token expiry note:** unlike static API keys, the gcloud bearer token expires every hour. Before running evals or switching to the vertex provider, refresh it:
+```bash
+wrangler secret put VERTEX_AI_TOKEN $(gcloud auth print-access-token)
+```
 
 ## API Endpoint
 
+The provider appends `/chat/completions` to `VERTEX_AI_ENDPOINT` (stripping a trailing slash). If `VERTEX_AI_ENDPOINT` already ends with `/chat/completions`, it is used as-is.
+
 ```
-POST https://{LOCATION}-aiplatform.googleapis.com/v1/projects/{PROJECT}/locations/{LOCATION}/publishers/google/models/{MODEL}:streamGenerateContent?alt=sse
+POST {VERTEX_AI_ENDPOINT}/chat/completions
 ```
 
-The `?alt=sse` query parameter instructs Vertex AI to stream Server-Sent Events (SSE) format. Without it, the endpoint defaults to a streamed JSON array format which is incompatible with SSE parsing.
+Auth header:
+```
+Authorization: Bearer {VERTEX_AI_TOKEN}
+```
 
 ## Request Body Format
 
-Vertex AI uses `contents`/`parts` rather than OpenAI `messages`. The provider converts:
+OpenAI-compatible — messages are passed through as-is (no `contents`/`parts` conversion needed):
 
-| OpenAI format | Vertex AI format |
-|---------------|-----------------|
-| `{ role: 'system', content }` | Top-level `system_instruction: { parts: [{ text: content }] }` |
-| `{ role: 'user', content }` | `{ role: 'user', parts: [{ text: content }] }` |
-| `{ role: 'assistant', content }` | `{ role: 'model', parts: [{ text: content }] }` |
-
-Full request body:
 ```json
 {
-  "system_instruction": { "parts": [{ "text": "..." }] },
-  "contents": [
-    { "role": "user", "parts": [{ "text": "..." }] }
+  "model": "2930507450790445056",
+  "messages": [
+    { "role": "system", "content": "..." },
+    { "role": "user", "content": "..." }
   ],
-  "generationConfig": {
-    "temperature": 0.7,
-    "maxOutputTokens": 8192
-  }
+  "temperature": 0.7,
+  "max_tokens": 8192,
+  "stream": true,
+  "stream_options": { "include_usage": true }
 }
 ```
 
 ## SSE Response Parsing
 
-Vertex AI streams Server-Sent Events (when `?alt=sse` is specified) where each `data:` frame is a complete JSON object:
+Same OpenAI SSE format as SambaNova and vLLM — `choices[0].delta.content` for text deltas, `usage` on the final frame (from `stream_options: { include_usage: true }`). The `[DONE]` sentinel is handled (skipped).
 
 ```
-data: {"candidates":[{"content":{"role":"model","parts":[{"text":"Hello"}]},"finishReason":null}]}
-data: {"candidates":[{"content":{"role":"model","parts":[{"text":" world"}]},"finishReason":"STOP"}],"usageMetadata":{"promptTokenCount":10,"candidatesTokenCount":2,"totalTokenCount":12},"modelVersion":"gemma-4-26b-a4b-it"}
+data: {"choices":[{"delta":{"content":"Hello"},"finish_reason":null}]}
+data: {"choices":[{"delta":{"content":" world"},"finish_reason":"stop"}],"usage":{"prompt_tokens":10,"completion_tokens":2,"total_tokens":12}}
+data: [DONE]
 ```
-
-Content is extracted from `candidates[0].content.parts[0].text`.  
-Usage is extracted from `usageMetadata` on the final frame.  
-Finish reason is from `candidates[0].finishReason` when non-null.
-
-**No `[DONE]` sentinel** — the stream ends when the SSE connection closes.
 
 ## Normalized Usage Frame
 
-The `{type: 'usage'}` frame yielded by the provider:
-
 ```js
 {
-  prompt_tokens:      usageMetadata.promptTokenCount,
-  completion_tokens:  usageMetadata.candidatesTokenCount,
-  total_tokens:       usageMetadata.totalTokenCount,
-  cache_read_tokens:  usageMetadata.cachedContentTokenCount ?? 0,
-  cache_write_tokens: 0,   // Vertex does not report write cost separately
-  done_reason:        candidates[0].finishReason ?? null,
-  model_version:      response.modelVersion ?? null,  // surfaced in debug snapshot
+  prompt_tokens:      usage.prompt_tokens,
+  completion_tokens:  usage.completion_tokens,
+  total_tokens:       usage.total_tokens,
+  cache_read_tokens:  usage.cache_read_tokens ?? 0,
+  cache_write_tokens: usage.cache_write_tokens ?? 0,
 }
 ```
 
-All fields map to existing downstream consumers in `llm-generate.js` and `storage.js` without changes.
+## Model Auto-Discovery
+
+`getCatalog(env)` calls `fetchVertexModels(env)` alongside `fetchVllmModels` and `fetchOllamaModels`. When `VERTEX_AI_ENDPOINT` and `VERTEX_AI_TOKEN` are set and reachable, it queries `{base}/v1/models` and replaces the placeholder catalog row with one entry per discovered model ID. Falls back to the static placeholder on any failure.
+
+`findCatalogEntry` also has a synthesize path for vertex — any `{provider: 'vertex', model: id}` pair is valid without a catalog edit.
 
 ## TTFT and Throughput
 
-TTFT and tokens/s are computed wall-clock by `llm-generate.js` from the timing of first/last delta arrivals — no provider-side work needed.
+TTFT and tokens/s are computed wall-clock by `llm-generate.js` — no provider-side work needed.
 
-**DiffusionGemma behaviour:** `gemma-4-26b-diffusion` generates all tokens simultaneously (diffusion, not autoregressive) and emits a single large delta chunk. As a result:
-- TTFT ≈ total LLM wall-clock time
-- `llmStreaming` interval ≈ 0 ms
-- Tokens/s is still meaningful as total_tokens / total_llm_ms
-
-This is a useful differentiator in the eval matrix vs the autoregressive `gemma-4-26b-a4b-it`.
-
-## Catalog Entries
-
-Added to `MODEL_CATALOG` in `providers/index.js`:
-
-```js
-{
-  provider: 'vertex',
-  model: 'gemma-4-26b-a4b-it',
-  label: 'Vertex AI · Gemma 4 26B IT',
-  requires: ['VERTEX_AI_API_KEY', 'VERTEX_AI_PROJECT'],
-},
-{
-  provider: 'vertex',
-  model: 'gemma-4-26b-diffusion',
-  label: 'Vertex AI · Gemma 4 26B Diffusion',
-  requires: ['VERTEX_AI_API_KEY', 'VERTEX_AI_PROJECT'],
-},
-```
-
-`PROVIDER_BASE_REQUIREMENTS` gets a `vertex` entry checking for both required vars.
+**DiffusionGemma behaviour (if deployed):** generates all tokens simultaneously and emits a single large delta chunk. TTFT ≈ total LLM wall-clock time.
 
 ## Error Handling
 
-- Missing `VERTEX_AI_API_KEY` or `VERTEX_AI_PROJECT` → `err.status = 401`
+- Missing `VERTEX_AI_TOKEN` → `err.status = 401`, message includes refresh instructions
+- Missing `VERTEX_AI_ENDPOINT` → `err.status = 401`
 - Non-2xx HTTP response → `err.status = response.status`, message includes first 200 chars of body
 - Malformed SSE frames are silently skipped (same pattern as sambanova/vllm)
 
@@ -134,7 +116,8 @@ Added to `MODEL_CATALOG` in `providers/index.js`:
 
 | File | Change |
 |------|--------|
-| `workers/recommender/src/providers/vertex.js` | New file (~100 lines) |
-| `workers/recommender/src/providers/index.js` | Import vertex, add to PROVIDERS, add 2 catalog entries, add base requirements check |
-| `workers/recommender/.dev.vars.example` | Document `VERTEX_AI_API_KEY`, `VERTEX_AI_PROJECT`, `VERTEX_AI_LOCATION` |
-| `workers/recommender/wrangler.jsonc` | Add comment noting `VERTEX_AI_API_KEY` and `VERTEX_AI_PROJECT` secrets |
+| `workers/recommender/src/providers/vertex.js` | Complete rewrite — OpenAI-compatible endpoint, bearer token auth, no message conversion |
+| `workers/recommender/src/providers/index.js` | Single placeholder catalog entry, updated base requirements, `fetchVertexModels`, vertex in `getCatalog` + `findCatalogEntry` synthesize path |
+| `workers/recommender/tests/snapshots/vertex.test.js` | Complete rewrite — new BASE_ENV, 11 tests covering auth, headers, endpoint resolution, body shape, streaming, DiffusionGemma |
+| `workers/recommender/.dev.vars.example` | Updated Vertex AI block — `VERTEX_AI_TOKEN` + `VERTEX_AI_ENDPOINT`, token refresh note |
+| `workers/recommender/wrangler.jsonc` | Updated comment to reflect new env vars |

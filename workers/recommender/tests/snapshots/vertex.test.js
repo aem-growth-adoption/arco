@@ -5,8 +5,16 @@ import vertex from '../../src/providers/vertex.js';
 const realFetch = globalThis.fetch;
 afterEach(() => { globalThis.fetch = realFetch; });
 
-const BASE_ENV = { VERTEX_AI_API_KEY: 'test-key', VERTEX_AI_PROJECT: 'test-proj' };
-const BASE_ARGS = { model: 'gemma-4-26b-a4b-it', messages: [{ role: 'user', content: 'hi' }], temperature: 0.7, maxTokens: 512 };
+const BASE_ENV = {
+  VERTEX_AI_TOKEN: 'test-token',
+  VERTEX_AI_ENDPOINT: 'https://mg-endpoint.example.com/v1/projects/proj/locations/us-central1/endpoints/ep',
+};
+const BASE_ARGS = {
+  model: '2930507450790445056',
+  messages: [{ role: 'user', content: 'hi' }],
+  temperature: 0.7,
+  maxTokens: 512,
+};
 
 async function collect(gen) {
   const items = [];
@@ -19,23 +27,22 @@ function makeSse(chunks, status = 200) {
   return new Response(body, { status, headers: { 'Content-Type': 'text/event-stream' } });
 }
 
-const CHUNK_HELLO = { candidates: [{ content: { parts: [{ text: 'Hello' }] }, finishReason: null }] };
+const CHUNK_HELLO = { choices: [{ delta: { content: 'Hello' }, finish_reason: null }] };
 const CHUNK_DONE = {
-  candidates: [{ content: { parts: [{ text: ' world' }] }, finishReason: 'STOP' }],
-  usageMetadata: { promptTokenCount: 10, candidatesTokenCount: 2, totalTokenCount: 12 },
-  modelVersion: 'gemma-4-26b-a4b-it',
+  choices: [{ delta: { content: ' world' }, finish_reason: 'stop' }],
+  usage: { prompt_tokens: 10, completion_tokens: 2, total_tokens: 12 },
 };
 
-test('vertex — throws 401 when VERTEX_AI_API_KEY missing', async () => {
+test('vertex — throws 401 when VERTEX_AI_TOKEN missing', async () => {
   await assert.rejects(
-    collect(vertex.stream({ env: { VERTEX_AI_PROJECT: 'p' }, ...BASE_ARGS })),
+    collect(vertex.stream({ env: { VERTEX_AI_ENDPOINT: BASE_ENV.VERTEX_AI_ENDPOINT }, ...BASE_ARGS })),
     (err) => { assert.equal(err.status, 401); return true; },
   );
 });
 
-test('vertex — throws 401 when VERTEX_AI_PROJECT missing', async () => {
+test('vertex — throws 401 when VERTEX_AI_ENDPOINT missing', async () => {
   await assert.rejects(
-    collect(vertex.stream({ env: { VERTEX_AI_API_KEY: 'k' }, ...BASE_ARGS })),
+    collect(vertex.stream({ env: { VERTEX_AI_TOKEN: 'tok' }, ...BASE_ARGS })),
     (err) => { assert.equal(err.status, 401); return true; },
   );
 });
@@ -48,57 +55,63 @@ test('vertex — throws on non-2xx response', async () => {
   );
 });
 
-test('vertex — converts system message to system_instruction', async () => {
-  let body;
-  globalThis.fetch = async (_, opts) => { body = JSON.parse(opts.body); return makeSse([CHUNK_DONE]); };
-  const messages = [{ role: 'system', content: 'Be helpful.' }, { role: 'user', content: 'Hi' }];
-  await collect(vertex.stream({ env: BASE_ENV, ...BASE_ARGS, messages }));
-  assert.deepEqual(body.system_instruction, { parts: [{ text: 'Be helpful.' }] });
-  assert.deepEqual(body.contents, [{ role: 'user', parts: [{ text: 'Hi' }] }]);
+test('vertex — sends Authorization: Bearer header', async () => {
+  let hdrs;
+  globalThis.fetch = async (_, opts) => { hdrs = opts.headers; return makeSse([CHUNK_DONE]); };
+  await collect(vertex.stream({ env: { ...BASE_ENV, VERTEX_AI_TOKEN: 'secret-456' }, ...BASE_ARGS }));
+  assert.equal(hdrs.Authorization, 'Bearer secret-456');
 });
 
-test('vertex — maps assistant role to model', async () => {
+test('vertex — sends Accept: text/event-stream header', async () => {
+  let hdrs;
+  globalThis.fetch = async (_, opts) => { hdrs = opts.headers; return makeSse([CHUNK_DONE]); };
+  await collect(vertex.stream({ env: BASE_ENV, ...BASE_ARGS }));
+  assert.equal(hdrs.Accept, 'text/event-stream');
+});
+
+test('vertex — appends /chat/completions to endpoint base URL', async () => {
+  let url;
+  globalThis.fetch = async (u) => { url = String(u); return makeSse([CHUNK_DONE]); };
+  await collect(vertex.stream({ env: BASE_ENV, ...BASE_ARGS }));
+  assert.equal(url, `${BASE_ENV.VERTEX_AI_ENDPOINT}/chat/completions`);
+});
+
+test('vertex — does NOT append /chat/completions if base URL already ends with it', async () => {
+  let url;
+  globalThis.fetch = async (u) => { url = String(u); return makeSse([CHUNK_DONE]); };
+  const endpoint = `${BASE_ENV.VERTEX_AI_ENDPOINT}/chat/completions`;
+  await collect(vertex.stream({ env: { ...BASE_ENV, VERTEX_AI_ENDPOINT: endpoint }, ...BASE_ARGS }));
+  assert.equal(url, endpoint);
+  assert.ok(!url.endsWith('/chat/completions/chat/completions'));
+});
+
+test('vertex — passes messages as-is (no conversion)', async () => {
   let body;
   globalThis.fetch = async (_, opts) => { body = JSON.parse(opts.body); return makeSse([CHUNK_DONE]); };
   const messages = [
-    { role: 'user', content: 'Hello' },
-    { role: 'assistant', content: 'Hi' },
+    { role: 'system', content: 'Be helpful.' },
+    { role: 'user', content: 'Hi' },
+    { role: 'assistant', content: 'Hello' },
     { role: 'user', content: 'Next' },
   ];
   await collect(vertex.stream({ env: BASE_ENV, ...BASE_ARGS, messages }));
-  assert.equal(body.contents[1].role, 'model');
-  assert.equal(body.contents[2].role, 'user');
+  assert.deepEqual(body.messages, messages);
 });
 
-test('vertex — passes temperature and maxOutputTokens in generationConfig', async () => {
+test('vertex — passes temperature and max_tokens', async () => {
   let body;
   globalThis.fetch = async (_, opts) => { body = JSON.parse(opts.body); return makeSse([CHUNK_DONE]); };
   await collect(vertex.stream({ env: BASE_ENV, ...BASE_ARGS, temperature: 0.3, maxTokens: 2048 }));
-  assert.equal(body.generationConfig.temperature, 0.3);
-  assert.equal(body.generationConfig.maxOutputTokens, 2048);
+  assert.equal(body.temperature, 0.3);
+  assert.equal(body.max_tokens, 2048);
 });
 
-test('vertex — sends X-goog-api-key header', async () => {
-  let hdrs;
-  globalThis.fetch = async (_, opts) => { hdrs = opts.headers; return makeSse([CHUNK_DONE]); };
-  await collect(vertex.stream({ env: { ...BASE_ENV, VERTEX_AI_API_KEY: 'secret-123' }, ...BASE_ARGS }));
-  assert.equal(hdrs['X-goog-api-key'], 'secret-123');
-});
-
-test('vertex — builds correct endpoint URL with default location', async () => {
-  let url;
-  globalThis.fetch = async (u) => { url = String(u); return makeSse([CHUNK_DONE]); };
-  await collect(vertex.stream({ env: BASE_ENV, ...BASE_ARGS, model: 'gemma-4-26b-diffusion' }));
-  assert.equal(url, 'https://us-central1-aiplatform.googleapis.com/v1/projects/test-proj/locations/us-central1/publishers/google/models/gemma-4-26b-diffusion:streamGenerateContent?alt=sse');
-});
-
-test('vertex — respects VERTEX_AI_LOCATION override', async () => {
-  let url;
-  globalThis.fetch = async (u) => { url = String(u); return makeSse([CHUNK_DONE]); };
-  await collect(vertex.stream({ env: { ...BASE_ENV, VERTEX_AI_LOCATION: 'europe-west4' }, ...BASE_ARGS }));
-  assert.match(url, /europe-west4-aiplatform\.googleapis\.com/);
-  assert.match(url, /locations\/europe-west4\//);
-  assert.match(url, /\?alt=sse$/);
+test('vertex — includes stream: true and stream_options: { include_usage: true } in body', async () => {
+  let body;
+  globalThis.fetch = async (_, opts) => { body = JSON.parse(opts.body); return makeSse([CHUNK_DONE]); };
+  await collect(vertex.stream({ env: BASE_ENV, ...BASE_ARGS }));
+  assert.equal(body.stream, true);
+  assert.deepEqual(body.stream_options, { include_usage: true });
 });
 
 test('vertex — yields delta chunks then usage frame', async () => {
@@ -114,29 +127,14 @@ test('vertex — yields delta chunks then usage frame', async () => {
       total_tokens: 12,
       cache_read_tokens: 0,
       cache_write_tokens: 0,
-      done_reason: 'STOP',
-      model_version: 'gemma-4-26b-a4b-it',
     },
   });
 });
 
-test('vertex — maps cachedContentTokenCount to cache_read_tokens', async () => {
-  const chunk = {
-    candidates: [{ content: { parts: [{ text: 'ok' }] }, finishReason: 'STOP' }],
-    usageMetadata: { promptTokenCount: 20, candidatesTokenCount: 5, totalTokenCount: 25, cachedContentTokenCount: 8 },
-    modelVersion: 'gemma-4-26b-a4b-it',
-  };
-  globalThis.fetch = async () => makeSse([chunk]);
-  const items = await collect(vertex.stream({ env: BASE_ENV, ...BASE_ARGS }));
-  const usage = items.find((i) => i.type === 'usage');
-  assert.equal(usage.usage.cache_read_tokens, 8);
-});
-
 test('vertex — DiffusionGemma: single large chunk still yields delta + usage', async () => {
   const bigChunk = {
-    candidates: [{ content: { parts: [{ text: 'entire response in one shot' }] }, finishReason: 'STOP' }],
-    usageMetadata: { promptTokenCount: 100, candidatesTokenCount: 500, totalTokenCount: 600 },
-    modelVersion: 'gemma-4-26b-diffusion',
+    choices: [{ delta: { content: 'entire response in one shot' }, finish_reason: 'stop' }],
+    usage: { prompt_tokens: 100, completion_tokens: 500, total_tokens: 600 },
   };
   globalThis.fetch = async () => makeSse([bigChunk]);
   const items = await collect(vertex.stream({ env: BASE_ENV, ...BASE_ARGS, model: 'gemma-4-26b-diffusion' }));

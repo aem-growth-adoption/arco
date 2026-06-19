@@ -126,18 +126,12 @@ export const MODEL_CATALOG = [
     label: 'Cloudflare · Alibaba Qwen 3.5 397B A17B',
     requires: ['AI_GATEWAY_ID', 'DASHSCOPE_API_KEY'],
   },
-  // Google Vertex AI
+  // Google Vertex AI (Model Garden vLLM — set VERTEX_AI_ENDPOINT + VERTEX_AI_TOKEN)
   {
     provider: 'vertex',
-    model: 'gemma-4-26b-a4b-it',
-    label: 'Vertex AI · Gemma 4 26B IT',
-    requires: ['VERTEX_AI_API_KEY', 'VERTEX_AI_PROJECT'],
-  },
-  {
-    provider: 'vertex',
-    model: 'gemma-4-26b-diffusion',
-    label: 'Vertex AI · Gemma 4 26B Diffusion',
-    requires: ['VERTEX_AI_API_KEY', 'VERTEX_AI_PROJECT'],
+    model: 'deployed-model',
+    label: 'Vertex AI · deployed model (set VERTEX_AI_ENDPOINT)',
+    requires: ['VERTEX_AI_TOKEN', 'VERTEX_AI_ENDPOINT'],
   },
   // Anthropic on Bedrock — Claude 4.x uses cross-region inference profiles (us.* prefix)
   {
@@ -360,12 +354,15 @@ export const DEFAULT_CATALOG_ENTRY = MODEL_CATALOG[0];
 export function findCatalogEntry(provider, model) {
   const found = MODEL_CATALOG.find((e) => e.provider === provider && e.model === model);
   if (found) return found;
-  // Ollama and vLLM run arbitrary served models; synthesize an entry for any
-  // model string so env-driven selection and admin Model Settings both validate
-  // without a catalog edit per model.
+  // Ollama, vLLM, and Vertex AI run arbitrary served models; synthesize an entry
+  // for any model string so env-driven selection and admin Model Settings both
+  // validate without a catalog edit per model.
   if ((provider === 'ollama' || provider === 'vllm') && model) {
     const label = provider === 'ollama' ? `Ollama · ${model}` : `vLLM · ${model}`;
     return { provider, model, label };
+  }
+  if (provider === 'vertex' && model) {
+    return { provider, model, label: `Vertex AI · ${model}` };
   }
   return null;
 }
@@ -390,8 +387,8 @@ const PROVIDER_BASE_REQUIREMENTS = {
   vllm: (env) => (env.VLLM_BASE_URL ? [] : ['VLLM_BASE_URL']),
   vertex: (env) => {
     const missing = [];
-    if (!env.VERTEX_AI_API_KEY) missing.push('VERTEX_AI_API_KEY');
-    if (!env.VERTEX_AI_PROJECT) missing.push('VERTEX_AI_PROJECT');
+    if (!env.VERTEX_AI_TOKEN) missing.push('VERTEX_AI_TOKEN');
+    if (!env.VERTEX_AI_ENDPOINT) missing.push('VERTEX_AI_ENDPOINT');
     return missing;
   },
 };
@@ -444,6 +441,17 @@ async function fetchOllamaModels(env) {
   return (data.models || []).map((m) => m.name).filter(Boolean);
 }
 
+async function fetchVertexModels(env) {
+  if (!env.VERTEX_AI_ENDPOINT || !env.VERTEX_AI_TOKEN) return null;
+  const base = env.VERTEX_AI_ENDPOINT.replace(/\/+$/, '');
+  const modelsUrl = base.endsWith('/v1') ? `${base}/models` : `${base}/v1/models`;
+  const data = await fetchJson(modelsUrl, {
+    headers: { Authorization: `Bearer ${env.VERTEX_AI_TOKEN}` },
+  });
+  if (!data) return null;
+  return (data.data || []).map((m) => m.id).filter(Boolean);
+}
+
 /**
  * Build the selectable catalog for the admin picker. Starts from MODEL_CATALOG,
  * then for any local provider that is configured AND reachable, replaces its
@@ -451,15 +459,17 @@ async function fetchOllamaModels(env) {
  * static placeholder when the server can't be reached.
  */
 export async function getCatalog(env = {}) {
-  const [vllmModels, ollamaModels] = await Promise.all([
+  const [vllmModels, ollamaModels, vertexModels] = await Promise.all([
     fetchVllmModels(env),
     fetchOllamaModels(env),
+    fetchVertexModels(env),
   ]);
 
   // Drop placeholder rows for providers we have live data for.
   const entries = MODEL_CATALOG.filter((e) => {
     if (e.provider === 'vllm' && vllmModels) return false;
     if (e.provider === 'ollama' && ollamaModels) return false;
+    if (e.provider === 'vertex' && vertexModels) return false;
     return true;
   });
 
@@ -468,6 +478,9 @@ export async function getCatalog(env = {}) {
   });
   (ollamaModels || []).forEach((name) => {
     entries.push({ provider: 'ollama', model: name, label: `Ollama · ${name}` });
+  });
+  (vertexModels || []).forEach((id) => {
+    entries.push({ provider: 'vertex', model: id, label: `Vertex AI · ${id}` });
   });
 
   return entries;
