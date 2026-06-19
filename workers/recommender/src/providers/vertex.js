@@ -64,6 +64,22 @@ async function* stream({
     throw err;
   }
 
+  const body = {
+    model,
+    messages,
+    max_tokens: maxTokens,
+    temperature,
+    stream: true,
+    stream_options: { include_usage: true },
+  };
+
+  // DiffusionGemma: fewer steps = faster generation (fewer refinement passes).
+  // Model default is typically 64–128; 16–32 is a good speed/quality trade-off.
+  const diffusionSteps = env.VERTEX_AI_DIFFUSION_STEPS ? Number(env.VERTEX_AI_DIFFUSION_STEPS) : null;
+  if (diffusionSteps !== null && !Number.isNaN(diffusionSteps)) {
+    body.num_diffusion_steps = diffusionSteps;
+  }
+
   const response = await fetch(resolveEndpoint(env), {
     method: 'POST',
     headers: {
@@ -71,14 +87,7 @@ async function* stream({
       Authorization: `Bearer ${env.VERTEX_AI_TOKEN}`,
       Accept: 'text/event-stream',
     },
-    body: JSON.stringify({
-      model,
-      messages,
-      max_tokens: maxTokens,
-      temperature,
-      stream: true,
-      stream_options: { include_usage: true },
-    }),
+    body: JSON.stringify(body),
     signal,
   });
 

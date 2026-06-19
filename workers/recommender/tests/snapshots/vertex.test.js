@@ -146,6 +146,20 @@ test('vertex — DiffusionGemma: single large chunk still yields delta + usage',
   assert.equal(items[1].usage.completion_tokens, 500);
 });
 
+test('vertex — VERTEX_AI_DIFFUSION_STEPS sets num_diffusion_steps in request body', async () => {
+  let body;
+  globalThis.fetch = async (_, opts) => { body = JSON.parse(opts.body); return makeSse([CHUNK_DONE]); };
+  await collect(vertex.stream({ env: { ...BASE_ENV, VERTEX_AI_DIFFUSION_STEPS: '32' }, ...BASE_ARGS }));
+  assert.equal(body.num_diffusion_steps, 32);
+});
+
+test('vertex — omits num_diffusion_steps when VERTEX_AI_DIFFUSION_STEPS not set', async () => {
+  let body;
+  globalThis.fetch = async (_, opts) => { body = JSON.parse(opts.body); return makeSse([CHUNK_DONE]); };
+  await collect(vertex.stream({ env: BASE_ENV, ...BASE_ARGS }));
+  assert.ok(!('num_diffusion_steps' in body));
+});
+
 test('getCatalog — vertex: queries /models sibling of /chat/completions', async () => {
   let capturedUrl;
   globalThis.fetch = async (url) => {
