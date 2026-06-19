@@ -13,6 +13,7 @@ import cloudflare from './cloudflare.js';
 import sambanova from './sambanova.js';
 import ollama from './ollama.js';
 import vllm from './vllm.js';
+import vertex from './vertex.js';
 
 const PROVIDERS = {
   bedrock,
@@ -21,6 +22,7 @@ const PROVIDERS = {
   sambanova,
   ollama,
   vllm,
+  vertex,
 };
 
 /**
@@ -123,6 +125,19 @@ export const MODEL_CATALOG = [
     model: 'alibaba/qwen3.5-397b-a17b',
     label: 'Cloudflare · Alibaba Qwen 3.5 397B A17B',
     requires: ['AI_GATEWAY_ID', 'DASHSCOPE_API_KEY'],
+  },
+  // Google Vertex AI
+  {
+    provider: 'vertex',
+    model: 'gemma-4-26b-a4b-it',
+    label: 'Vertex AI · Gemma 4 26B IT',
+    requires: ['VERTEX_AI_API_KEY', 'VERTEX_AI_PROJECT'],
+  },
+  {
+    provider: 'vertex',
+    model: 'gemma-4-26b-diffusion',
+    label: 'Vertex AI · Gemma 4 26B Diffusion',
+    requires: ['VERTEX_AI_API_KEY', 'VERTEX_AI_PROJECT'],
   },
   // Anthropic on Bedrock — Claude 4.x uses cross-region inference profiles (us.* prefix)
   {
@@ -373,6 +388,12 @@ const PROVIDER_BASE_REQUIREMENTS = {
   cloudflare: (env) => (env.AI ? [] : ['AI (binding)']),
   ollama: (env) => (env.OLLAMA_BASE_URL ? [] : ['OLLAMA_BASE_URL']),
   vllm: (env) => (env.VLLM_BASE_URL ? [] : ['VLLM_BASE_URL']),
+  vertex: (env) => {
+    const missing = [];
+    if (!env.VERTEX_AI_API_KEY) missing.push('VERTEX_AI_API_KEY');
+    if (!env.VERTEX_AI_PROJECT) missing.push('VERTEX_AI_PROJECT');
+    return missing;
+  },
 };
 
 /**
