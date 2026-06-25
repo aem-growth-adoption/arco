@@ -13,6 +13,7 @@ import cloudflare from './cloudflare.js';
 import sambanova from './sambanova.js';
 import ollama from './ollama.js';
 import vllm from './vllm.js';
+import taalas from './taalas.js';
 
 const PROVIDERS = {
   bedrock,
@@ -21,6 +22,7 @@ const PROVIDERS = {
   sambanova,
   ollama,
   vllm,
+  taalas,
 };
 
 /**
@@ -338,6 +340,15 @@ export const MODEL_CATALOG = [
     model: 'served-model',
     label: 'vLLM · served model (set VLLM_BASE_URL)',
   },
+  // Taalas (official API with API key authentication).
+  // Uses api.taalas.com/v1/completions (text completion, not chat).
+  // Set TAALAS_API_KEY in secrets. Context limit: 15k+ tokens (full RAG prompt supported).
+  {
+    provider: 'taalas',
+    model: 'llama3.1-8B',
+    label: 'Taalas · Llama 3.1 8B (HC1 hardware, 15k+ ctx)',
+    requires: ['TAALAS_API_KEY'],
+  },
 ];
 
 export const DEFAULT_CATALOG_ENTRY = MODEL_CATALOG[0];
@@ -373,6 +384,7 @@ const PROVIDER_BASE_REQUIREMENTS = {
   cloudflare: (env) => (env.AI ? [] : ['AI (binding)']),
   ollama: (env) => (env.OLLAMA_BASE_URL ? [] : ['OLLAMA_BASE_URL']),
   vllm: (env) => (env.VLLM_BASE_URL ? [] : ['VLLM_BASE_URL']),
+  taalas: (env) => (env.TAALAS_API_KEY ? [] : ['TAALAS_API_KEY']),
 };
 
 /**
