@@ -363,10 +363,16 @@ export function setHeroResult(result) {
 }
 
 function resolveHeroImageToken() {
-  if (currentHeroResult) {
+  // Use the selected hero only when it is a publicly servable URL. The
+  // hero-image-catalog entries point at the DA authoring origin
+  // (content.da.live), which is auth-gated (401) and not public — those would
+  // render broken, so skip them and fall back to the default hero image, which
+  // lives on the delivery host and resolves fine. Product-image heroes
+  // ({{product-image:ID}}) go through resolveProductImageToken and are
+  // unaffected.
+  if (currentHeroResult?.url && !currentHeroResult.url.includes('content.da.live')) {
     return `<picture><img src="${currentHeroResult.url}" alt="${currentHeroResult.alt}"></picture>`;
   }
-  // Fallback: use the default hero image
   const image = absoluteImageUrl(HERO_MAIN_IMAGE);
   if (!image) return '<!-- hero-image:main unavailable -->';
   return `<picture><img src="${image}" alt="Arco espresso machine brewing a perfect shot on a sunlit kitchen counter"></picture>`;
