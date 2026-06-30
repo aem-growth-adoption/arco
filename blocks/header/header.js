@@ -264,6 +264,20 @@ export default async function decorate(block) {
     paper.title = 'Explore more about Audience of One experiences in our white paper.';
     paper.addEventListener('click', () => window.open('https://of1.live', '_blank', 'noopener'));
     wrapper.appendChild(paper);
+
+    const debugBtn = document.createElement('button');
+    debugBtn.className = 'nav-debug-toggle';
+    debugBtn.type = 'button';
+    debugBtn.title = 'Toggle debug mode for recommender';
+    const debugActive = localStorage.getItem('arco-debug') === 'true';
+    debugBtn.setAttribute('aria-pressed', debugActive ? 'true' : 'false');
+    debugBtn.textContent = 'Debug';
+    debugBtn.addEventListener('click', () => {
+      const on = localStorage.getItem('arco-debug') === 'true';
+      localStorage.setItem('arco-debug', on ? 'false' : 'true');
+      debugBtn.setAttribute('aria-pressed', on ? 'false' : 'true');
+    });
+    wrapper.appendChild(debugBtn);
   }
 
   // Inject "For You" personalized link
