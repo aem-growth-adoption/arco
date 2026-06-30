@@ -363,10 +363,11 @@ export function setHeroResult(result) {
 }
 
 function resolveHeroImageToken() {
-  if (currentHeroResult) {
-    return `<picture><img src="${currentHeroResult.url}" alt="${currentHeroResult.alt}"></picture>`;
+  if (currentHeroResult?.url && !currentHeroResult.url.includes('content.da.live')) {
+    const src = absoluteImageUrl(currentHeroResult.url);
+    return `<picture><img src="${src}" alt="${currentHeroResult.alt}"></picture>`;
   }
-  // Fallback: use the default hero image
+  // Fallback: DA authoring origin URLs are auth-gated (401)
   const image = absoluteImageUrl(HERO_MAIN_IMAGE);
   if (!image) return '<!-- hero-image:main unavailable -->';
   return `<picture><img src="${image}" alt="Arco espresso machine brewing a perfect shot on a sunlit kitchen counter"></picture>`;
@@ -389,6 +390,7 @@ accessories.forEach((a) => {
 knownImageUrls.add(absoluteImageUrl(HERO_MAIN_IMAGE));
 // Register all hero catalog image URLs so they pass the known-image check
 catalogData.images.forEach((img) => {
+  if (img.publishUrl) knownImageUrls.add(absoluteImageUrl(img.publishUrl));
   if (img.url) knownImageUrls.add(img.url);
 });
 

@@ -132,7 +132,8 @@ export function selectHeroImage({
       .filter((s) => s.score >= 10);
     if (productScored.length > 0) {
       productScored.sort((a, b) => b.score - a.score || Math.random() - 0.5);
-      return { url: productScored[0].image.url, alt: productScored[0].image.alt };
+      const img = productScored[0].image;
+      return { url: img.publishUrl || img.url, alt: img.alt };
     }
   }
 
@@ -141,7 +142,7 @@ export function selectHeroImage({
   // If the top match clears the threshold, use it — no keyword inflation risk.
   const topVector = vectorMatches[0];
   if (topVector?.score >= VECTOR_CONFIDENCE_THRESHOLD && topVector.url) {
-    return { url: topVector.url, alt: topVector.alt };
+    return { url: topVector.publishUrl || topVector.url, alt: topVector.alt };
   }
 
   // ── 3. Hybrid scoring: keyword + vector boost ──────────────────────────────
@@ -176,5 +177,5 @@ export function selectHeroImage({
   const topTier = scored.filter((s) => s.score === scored[0].score);
   const selected = topTier[Math.floor(Math.random() * topTier.length)].image;
 
-  return { url: selected.url, alt: selected.alt };
+  return { url: selected.publishUrl || selected.url, alt: selected.alt };
 }
