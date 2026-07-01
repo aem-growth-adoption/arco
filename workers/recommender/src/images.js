@@ -15,7 +15,7 @@ import experiencesData from '../../../content/experiences-index.json';
 import catalogData from '../../../content/hero-image-catalog.json';
 /* eslint-enable import/extensions, import/no-relative-packages */
 
-const ARCO_BASE = 'https://main--arco--froesef.aem.live';
+const ARCO_BASE = 'https://main--arco--aem-growth-adoption.aem.page';
 
 // Default hero image — used when no specific product is featured
 const HERO_MAIN_IMAGE = '/media_1f7e12f4bd38e8ecf4fdc73dc84ebd9a5fd516521.jpg';
