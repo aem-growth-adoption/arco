@@ -28,7 +28,7 @@ const PROJECT_DIR = join(__dirname, '..');
 const CATALOG_PATH = join(PROJECT_DIR, 'content/hero-image-catalog.json');
 const DA_TOKEN_PATH = join(PROJECT_DIR, '.da-token');
 
-const DA_ORG = 'froesef';
+const DA_ORG = 'aem-growth-adoption';
 const DA_REPO = 'arco';
 const PREVIEW_HOST = `https://main--${DA_REPO}--${DA_ORG}.aem.page`;
 const DA_ADMIN_HOST = 'https://admin.da.live';
@@ -161,8 +161,7 @@ async function main() {
       // 4. Map them back to catalog entries
       if (hashes.length === batch.length) {
         for (let i = 0; i < batch.length; i++) {
-          const publishUrl = `${PREVIEW_HOST}${hashes[i]}`;
-          batch[i].publishUrl = publishUrl;
+          batch[i].publishUrl = hashes[i];
           resolved++;
         }
       } else {
