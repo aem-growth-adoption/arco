@@ -202,6 +202,25 @@ On `GET /generate`, the server checks `DAClient.exists(path)` before starting th
 
 Key files for caching: `scripts/scripts.js` (deterministic `generateSlug`, `cache-hit` handler), `workers/recommender/src/index.js` (cache check in `/api/generate`).
 
+### TV (10-foot) Mode
+
+The Google TV app (`google-tv/`) is a WebView shell that loads the live Arco site and forwards voice queries / deep links as `?q=...&tv=1` searches (`google-tv/app/src/main/java/com/arco/tv/ui/DiscoveryActivity.kt`; it also appends an `ArcoTV/1.0` user-agent). On a TV, the recommender renders **just a single 3-product comparison** — no hero, no intro, no follow-up chips, no feedback widget — a lean-back experience navigable by remote.
+
+**Detection** (either signal triggers TV mode):
+- URL param `?tv=1` or `?tv=true` (also testable in any desktop browser)
+- `ArcoTV` in the user-agent
+
+The client detects it in `scripts/scripts.js → isTvMode()`; the worker re-detects it from the body flag, the UA, and the request `?tv=` param in `createContext` (`workers/recommender/src/pipeline/context.js`) so the constraint holds even if the client omits the flag.
+
+**Flow:**
+1. `isTvMode()` (client) adds `body.arco-tv-mode`, sends `{ tv: true }` in the `/api/generate` body (`scripts/recommender-stream.js`), skips `initKeepExploring()`, and suppresses the feedback widget.
+2. `createContext` sets `ctx.tv`. `handleGenerate` resolves the **`tv-comparison`** flow (`workers/recommender/src/pipeline/flows.js`) — identical RAG steps to the default recommender so the table stays grounded in real catalog products.
+3. The prompt uses the **`tv-comparison`** scenario (`pickScenario` in `recommender-prompt.js`, branch in `prompts/recommender.yaml`) instructing the LLM to emit exactly one `tv-products` block (3 products; 2 only when fewer genuinely qualify) with `"data": {"recommended": "<best pick>"}` and no other blocks/suggestions.
+4. `llm-generate.js` enforces this server-side as defense-in-depth: in TV mode it drops any non-`tv-products` section, never injects the fallback hero, and clears suggestions.
+5. CSS (`styles/lazy-styles.css`) hides `.follow-up-container` / `.feedback-widget` under `.arco-tv-mode`.
+
+Snapshot fixture: `workers/recommender/tests/fixtures/tv-comparison.json` (sets `options.tv: true`).
+
 ### LLM Providers & Model Switching
 
 The recommender's one LLM call (`llm-generate` step) is vendor-agnostic. Six providers ship today:
