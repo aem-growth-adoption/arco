@@ -227,6 +227,21 @@ function isArcoRecommenderRequest() {
 }
 
 /**
+ * Detect the 10-foot TV experience. True when the page is opened with a
+ * `tv` flag (?tv=1 / ?tv=true) — appended by the Google TV WebView shell —
+ * or when the WebView's user-agent carries the `ArcoTV` marker.
+ *
+ * TV mode constrains the recommender output to a single 3-product
+ * comparison and suppresses the follow-up chips and feedback widget
+ * (see styles/lazy-styles.css and the worker `tv-comparison` scenario).
+ */
+function isTvMode() {
+  const tv = new URLSearchParams(window.location.search).get('tv');
+  if (tv === '1' || tv === 'true') return true;
+  return /ArcoTV/i.test(navigator.userAgent || '');
+}
+
+/**
  * Render pre-collected blocks from a quiz prefetch into the DOM.
  * @param {Object} prefetchData Parsed prefetch data from sessionStorage
  * @param {string} query The query string
@@ -448,8 +463,12 @@ async function renderArcoRecommenderPage(explicitQuery) {
   const loadingState = main.querySelector('.generating-container');
   const content = main.querySelector('#generation-content');
 
+  const tvMode = isTvMode();
+  if (tvMode) document.body.classList.add('arco-tv-mode');
+
   try {
     await streamAndAppendContent(query, content, {
+      tv: tvMode,
       onFirstSection: () => loadingState.classList.add('done'),
       onError: (msg) => {
         loadingState.innerHTML = `
@@ -476,8 +495,9 @@ async function renderArcoRecommenderPage(explicitQuery) {
     `;
   }
 
-  // Initialize keep-exploring event listener
-  initKeepExploring();
+  // Initialize keep-exploring event listener — skipped on TV, which is a
+  // lean-back single-comparison experience with no follow-up chips.
+  if (!tvMode) initKeepExploring();
 }
 
 /**
@@ -503,6 +523,13 @@ async function transitionToRecommender(query) {
   // Enter recommender mode
   document.body.classList.add('arco-recommender-mode');
   window.scrollTo(0, 0);
+
+  // On TV, ignore any speculative/prefetched buffers (generated without the
+  // TV flag, so full-page shaped) and stream a fresh TV-shaped comparison.
+  if (isTvMode()) {
+    await renderArcoRecommenderPage(query);
+    return;
+  }
 
   try {
     // Check speculative engine for in-memory result
@@ -573,13 +600,28 @@ window.arcoTransitionToRecommender = transitionToRecommender;
 async function loadPage() {
   // Check if this is an Arco Recommender request (?q= or ?query=)
   if (isArcoRecommenderRequest()) {
+    const tvMode = isTvMode();
     document.documentElement.lang = 'en';
     decorateTemplateAndTheme();
     document.body.classList.add('appear', 'arco-recommender-mode');
+    if (tvMode) {
+      document.body.classList.add('arco-tv-mode');
+      // Force layout width == visible width. The TV WebView's *visual* viewport
+      // can be narrower than a custom layout width (e.g. it renders a 1280px
+      // layout but only ~960px is on-screen, clipping the right edge). Pinning
+      // to device-width keeps the laid-out width equal to what's visible, so all
+      // three cards fit. Sizes below scale to the viewport, so the exact CSS px
+      // (≈960 on a 4K/dpr-4 panel) don't matter.
+      const vp = document.querySelector('meta[name="viewport"]');
+      if (vp) vp.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
+    }
     loadCSS(`${window.hlx.codeBasePath}/styles/lazy-styles.css`);
     loadFonts();
-    loadHeader(document.querySelector('header'));
-    loadFooter(document.querySelector('footer'));
+    // TV is a chrome-free 10-foot experience — skip the site header/footer.
+    if (!tvMode) {
+      loadHeader(document.querySelector('header'));
+      loadFooter(document.querySelector('footer'));
+    }
     await renderArcoRecommenderPage();
     return;
   }

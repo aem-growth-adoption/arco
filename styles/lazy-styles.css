@@ -199,6 +199,17 @@ img[data-gen-image].loaded {
   padding-top: 0;
 }
 
+/* TV (10-foot) mode — chrome-free single 3-product comparison. The site
+   header/footer aren't loaded on TV (see loadPage), and follow-up chips /
+   feedback widget aren't initialized; these rules hide the leftover shells
+   as defense-in-depth. */
+.arco-tv-mode header,
+.arco-tv-mode footer,
+.arco-tv-mode .follow-up-container,
+.arco-tv-mode .feedback-widget {
+  display: none;
+}
+
 #generation-content {
   max-width: 1200px;
   margin: 0 auto;
@@ -212,6 +223,27 @@ img[data-gen-image].loaded {
 
 #generation-content > .section:last-child {
   margin-bottom: 0;
+}
+
+/* TV uses the full screen — drop the 1200px reading-width cap and center the
+   single showcase section within the viewport so it fills the whole panel
+   instead of hugging the top-left. */
+.arco-tv-mode #generation-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 100vh;
+  max-width: none;
+  padding: 3vh 3vw;
+}
+
+.arco-tv-mode #generation-content > .section {
+  margin-bottom: 0;
+}
+
+.arco-tv-mode #generation-content > .section.tv-products-container {
+  width: 100%;
 }
 
 @media (width >= 900px) {
