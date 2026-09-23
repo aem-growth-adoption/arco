@@ -13,6 +13,12 @@
  * page, we stash that run id in sessionStorage. Any product_view or
  * add_to_cart within ATTRIBUTION_WINDOW_MS credits that run. Last touch wins.
  * The server re-validates the id against generated_pages before trusting it.
+ *
+ * Campaign tracking: utm_source/utm_medium/utm_campaign are captured off the
+ * landing URL and stashed in sessionStorage (captureUtm/getUtm below) so they
+ * ride along on every event for the rest of the session, not just the first
+ * page view. Unlike the 30-minute attribution window, this persists for the
+ * whole session — a visitor may browse for a while before converting.
  */
 
 import { ARCO_ANALYTICS_URL } from './api-config.js';
@@ -20,6 +26,7 @@ import { SessionContextManager } from './session-context.js';
 
 const ATTRIBUTION_KEY = 'arco-attribution';
 const ATTRIBUTION_WINDOW_MS = 30 * 60 * 1000; // 30 minutes
+const UTM_KEY = 'arco-utm';
 const FLUSH_AT = 10;
 const FLUSH_INTERVAL_MS = 15000;
 
@@ -76,6 +83,46 @@ function currentRunId() {
 }
 
 /* ========================================================================== */
+/*  Campaign tracking (UTM parameters)                                        */
+/* ========================================================================== */
+
+/**
+ * Read utm_source / utm_medium / utm_campaign off the current URL and, if
+ * present, persist them for the rest of the session — so a campaign landing
+ * on the homepage still gets credited once the visitor navigates deeper into
+ * the site. Last campaign link clicked wins (overwrites any prior campaign).
+ */
+function captureUtm() {
+  const params = new URLSearchParams(window.location.search);
+  const source = params.get('utm_source');
+  const medium = params.get('utm_medium');
+  const campaign = params.get('utm_campaign');
+  if (!source && !medium && !campaign) return;
+
+  try {
+    window.sessionStorage.setItem(UTM_KEY, JSON.stringify({
+      utmSource: source || null,
+      utmMedium: medium || null,
+      utmCampaign: campaign || null,
+    }));
+  } catch { /* sessionStorage unavailable — campaign attribution degrades to none */ }
+}
+
+/**
+ * The campaign that brought this session in, if any was captured this session.
+ * @returns {{utmSource: string|null, utmMedium: string|null, utmCampaign: string|null}}
+ */
+function getUtm() {
+  try {
+    const raw = window.sessionStorage.getItem(UTM_KEY);
+    if (!raw) return {};
+    return JSON.parse(raw) || {};
+  } catch {
+    return {};
+  }
+}
+
+/* ========================================================================== */
 /*  Queue + transport                                                          */
 /* ========================================================================== */
 
@@ -128,6 +175,7 @@ export function track(eventType, payload = {}) {
 
   const attribution = getAttribution();
   const runId = currentRunId();
+  const utm = getUtm();
 
   queue.push({
     eventType,
@@ -136,6 +184,9 @@ export function track(eventType, payload = {}) {
     runId,
     // A generated page attributes to itself; downstream pages use the stash.
     attributedRunId: runId || attribution?.runId || null,
+    utmSource: utm.utmSource || null,
+    utmMedium: utm.utmMedium || null,
+    utmCampaign: utm.utmCampaign || null,
     path: window.location.pathname,
     referrerPath: document.referrer
       ? (() => {
@@ -261,6 +312,8 @@ export function initEventTracking() {
   if (listenersBound) return;
   listenersBound = true;
   pageLoadTime = Date.now();
+
+  captureUtm();
 
   const path = window.location.pathname;
   const slug = productSlugFromPath(path);

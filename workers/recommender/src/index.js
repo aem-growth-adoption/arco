@@ -32,6 +32,7 @@ import {
   handleTrack,
   handleInsightsSummary,
   handleInsightsFunnel,
+  handleInsightsCampaigns,
   handleInsightsModels,
   handleInsightsSegments,
   handleInsightsTimeseries,
@@ -552,6 +553,9 @@ export default {
       }
       if (url.pathname === '/api/admin/insights/funnel' && request.method === 'GET') {
         return handleInsightsFunnel(request, env);
+      }
+      if (url.pathname === '/api/admin/insights/campaigns' && request.method === 'GET') {
+        return handleInsightsCampaigns(request, env);
       }
       if (url.pathname === '/api/admin/insights/models' && request.method === 'GET') {
         return handleInsightsModels(request, env);

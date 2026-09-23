@@ -3852,6 +3852,35 @@ function renderModelsTable(models) {
     </table>`;
 }
 
+function renderCampaignsTable(campaigns) {
+  if (!campaigns.length) {
+    return '<p class="admin-empty">No traffic in this window.</p>';
+  }
+  return `
+    <table class="admin-table admin-insight-table">
+      <thead>
+        <tr>
+          <th>Source</th><th>Medium</th><th>Campaign</th>
+          <th>Sessions</th><th>Page views</th><th>Carts</th>
+          <th>Conv. rate</th><th>Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${campaigns.map((c) => `
+          <tr>
+            <td>${esc(c.utmSource)}</td>
+            <td>${esc(c.utmMedium)}</td>
+            <td>${esc(c.utmCampaign)}</td>
+            <td>${c.sessions.toLocaleString()}</td>
+            <td>${c.pageViews.toLocaleString()}</td>
+            <td>${c.carts.toLocaleString()}</td>
+            <td>${pctFmt(c.conversionRate)}</td>
+            <td>${usd(c.cartValueUsd)}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
 function renderSegmentTable(title, rows) {
   if (!rows.length) return '';
   return `
@@ -3916,11 +3945,12 @@ async function renderInsights(root) {
   const body = root.querySelector('[data-role="body"]');
   const q = `?days=${days}`;
 
-  let summary; let funnel; let models; let segments; let series;
+  let summary; let funnel; let campaigns; let models; let segments; let series;
   try {
-    [summary, funnel, models, segments, series] = await Promise.all([
+    [summary, funnel, campaigns, models, segments, series] = await Promise.all([
       api(`/api/admin/insights/summary${q}`),
       api(`/api/admin/insights/funnel${q}`),
+      api(`/api/admin/insights/campaigns${q}`),
       api(`/api/admin/insights/models${q}`),
       api(`/api/admin/insights/segments${q}`),
       api(`/api/admin/insights/timeseries${q}`),
@@ -3949,6 +3979,12 @@ async function renderInsights(root) {
     <section class="admin-card">
       <h3>Conversion funnel</h3>
       ${renderFunnel(funnel.funnel)}
+    </section>
+
+    <section class="admin-card">
+      <h3>By campaign</h3>
+      <p class="admin-muted">Traffic and conversion attributed to utm_source / utm_medium / utm_campaign.</p>
+      ${renderCampaignsTable(campaigns.campaigns)}
     </section>
 
     <section class="admin-card">
