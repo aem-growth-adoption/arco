@@ -107,6 +107,9 @@ function normaliseEvent(raw, ctx) {
     dwellMs: clampInt(raw.dwellMs, 0, 24 * 60 * 60 * 1000),
     scrollPct: clampInt(raw.scrollPct, 0, 100),
     referrerPath: clean(raw.referrerPath, 512),
+    utmSource: clean(raw.utmSource, 120),
+    utmMedium: clean(raw.utmMedium, 120),
+    utmCampaign: clean(raw.utmCampaign, 160),
     createdAt: clampInt(raw.timestamp, 0, Date.now() + 60_000)
       ? Math.floor(clampInt(raw.timestamp, 0, Date.now() + 60_000) / 1000)
       : ctx.now,
@@ -221,8 +224,9 @@ async function persistEvents(env, request, events) {
       INSERT INTO page_events
         (id, session_id, page_id, run_id, attributed_run_id, attribution, event_type,
          path, page_type, product_slug, value_cents, dwell_ms, scroll_pct,
-         referrer_path, created_at, ip_hash, user_agent)
-      VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17)
+         referrer_path, created_at, ip_hash, user_agent,
+         utm_source, utm_medium, utm_campaign)
+      VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19,?20)
     `).bind(
       e.id,
       e.sessionId,
@@ -241,6 +245,9 @@ async function persistEvents(env, request, events) {
       e.createdAt,
       ipHashed,
       ua,
+      e.utmSource,
+      e.utmMedium,
+      e.utmCampaign,
     ));
 
     const convType = CONVERSION_TYPES.get(e.eventType);
@@ -428,6 +435,57 @@ export async function handleInsightsFunnel(request, env) {
   });
 
   return jsonResponse({ days, funnel });
+}
+
+/**
+ * GET /api/admin/insights/campaigns — traffic + conversion by UTM campaign.
+ *
+ * Grouped from page_events directly (not the run-attribution CTE below): a
+ * campaign attributes to whichever utm_source/medium/campaign rode along on
+ * the session's events, independent of whether the visitor ever saw a
+ * generated page. Rows with no UTM params at all are bucketed as '(direct /
+ * none)' so the totals always foot to the funnel's overall session count.
+ */
+export async function handleInsightsCampaigns(request, env) {
+  if (!env.SESSIONS_DB) return jsonResponse({ error: 'Storage unavailable' }, { status: 503 });
+  const db = env.SESSIONS_DB;
+  const { since, days } = sinceFrom(new URL(request.url));
+
+  const { results } = await db.prepare(`
+    SELECT COALESCE(pe.utm_source, '(direct / none)')   AS utm_source,
+           COALESCE(pe.utm_medium, '(none)')             AS utm_medium,
+           COALESCE(pe.utm_campaign, '(none)')            AS utm_campaign,
+           COUNT(DISTINCT pe.session_id)                  AS sessions,
+           SUM(CASE WHEN pe.event_type = 'page_view' THEN 1 ELSE 0 END) AS page_views,
+           COUNT(DISTINCT CASE WHEN pe.event_type = 'page_view' AND pe.path = '/'
+                               THEN pe.session_id END)     AS homepage_sessions,
+           COUNT(DISTINCT c.id)                           AS carts,
+           COALESCE(SUM(c.value_cents), 0)                AS cart_value_cents
+    FROM page_events pe
+    LEFT JOIN conversions c
+      ON c.event_id = pe.id AND c.conversion_type = 'add_to_cart'
+    WHERE pe.created_at >= ?1
+    GROUP BY utm_source, utm_medium, utm_campaign
+    ORDER BY sessions DESC
+  `).bind(since).all();
+
+  const campaigns = (results || []).map((r) => {
+    const sessions = Number(r.sessions) || 0;
+    const carts = Number(r.carts) || 0;
+    return {
+      utmSource: r.utm_source,
+      utmMedium: r.utm_medium,
+      utmCampaign: r.utm_campaign,
+      sessions,
+      pageViews: Number(r.page_views) || 0,
+      homepageSessions: Number(r.homepage_sessions) || 0,
+      carts,
+      conversionRate: sessions ? carts / sessions : 0,
+      cartValueUsd: (Number(r.cart_value_cents) || 0) / 100,
+    };
+  });
+
+  return jsonResponse({ days, campaigns });
 }
 
 /**
