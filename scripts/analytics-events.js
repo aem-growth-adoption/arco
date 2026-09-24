@@ -92,7 +92,7 @@ function currentRunId() {
  * on the homepage still gets credited once the visitor navigates deeper into
  * the site. Last campaign link clicked wins (overwrites any prior campaign).
  */
-function captureUtm() {
+export function captureUtm() {
   const params = new URLSearchParams(window.location.search);
   const source = params.get('utm_source');
   const medium = params.get('utm_medium');
@@ -112,7 +112,7 @@ function captureUtm() {
  * The campaign that brought this session in, if any was captured this session.
  * @returns {{utmSource: string|null, utmMedium: string|null, utmCampaign: string|null}}
  */
-function getUtm() {
+export function getUtm() {
   try {
     const raw = window.sessionStorage.getItem(UTM_KEY);
     if (!raw) return {};
