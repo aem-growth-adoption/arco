@@ -1,0 +1,184 @@
+/* TV Products — 10-foot product showcase. Sized for viewing across a room:
+   large imagery, big type, generous spacing, highlighted recommendation. */
+
+.tv-products {
+  margin: 0 auto;
+  max-width: 1600px;
+}
+
+.tv-products .tv-products-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--tv-cols, 3), 1fr);
+  gap: 32px;
+  align-items: stretch;
+}
+
+.tv-products .tv-products-grid[data-count="2"] {
+  --tv-cols: 2;
+
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.tv-products .tv-products-grid[data-count="1"] {
+  --tv-cols: 1;
+
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.tv-products .tv-products-card {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--light-color);
+  border: 2px solid var(--border-color);
+  border-radius: 20px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tv-products .tv-products-media {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background-color: rgb(0 0 0 / 3%);
+}
+
+.tv-products .tv-products-media picture,
+.tv-products .tv-products-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.tv-products .tv-products-badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  padding: 8px 18px;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--light-color);
+  background-color: var(--accent-color);
+  border-radius: 100px;
+}
+
+.tv-products .tv-products-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 28px 32px 36px;
+}
+
+.tv-products .tv-products-body h1,
+.tv-products .tv-products-body h2,
+.tv-products .tv-products-body h3,
+.tv-products .tv-products-body h4 {
+  margin: 0;
+  font-family: var(--heading-font-family);
+  font-size: 40px;
+  line-height: 1.1;
+}
+
+.tv-products .tv-products-body p {
+  margin: 0;
+  font-size: 26px;
+  line-height: 1.3;
+  color: var(--muted-color);
+}
+
+/* First paragraph after the heading reads as the price — emphasize it. */
+.tv-products .tv-products-body h1 + p,
+.tv-products .tv-products-body h2 + p,
+.tv-products .tv-products-body h3 + p,
+.tv-products .tv-products-body h4 + p {
+  font-weight: 700;
+  color: var(--text-color);
+}
+
+/* Recommended card stands out from the row. */
+.tv-products .tv-products-recommended {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 4px rgb(181 101 29 / 18%);
+  transform: scale(1.03);
+}
+
+/* On small screens stack the cards — but ONLY when NOT on a TV. A TV WebView
+   can report a narrow CSS viewport (high-DPI 720/1080p panels), yet the cards
+   must always sit side-by-side there. The :not(.arco-tv-mode) guard keeps the
+   stack behavior for ordinary phone/desktop browser testing only. */
+@media (width < 900px) {
+  body:not(.arco-tv-mode) .tv-products .tv-products-grid,
+  body:not(.arco-tv-mode) .tv-products .tv-products-grid[data-count="2"] {
+    grid-template-columns: 1fr;
+  }
+
+  body:not(.arco-tv-mode) .tv-products .tv-products-recommended {
+    transform: none;
+  }
+
+  body:not(.arco-tv-mode) .tv-products .tv-products-body h1,
+  body:not(.arco-tv-mode) .tv-products .tv-products-body h2,
+  body:not(.arco-tv-mode) .tv-products .tv-products-body h3,
+  body:not(.arco-tv-mode) .tv-products .tv-products-body h4 {
+    font-size: 30px;
+  }
+
+  body:not(.arco-tv-mode) .tv-products .tv-products-body p {
+    font-size: 20px;
+  }
+}
+
+/* ── TV: 2–3 cards fill one 16:9 screen, centered, no scrolling ──────────────
+   The row fills the full width (no reading-width cap) and is centered in the
+   viewport height, so the cards occupy the whole panel instead of hugging the
+   top-left. Card images grow to take up the vertical slack. */
+.arco-tv-mode .tv-products {
+  width: 100%;
+  max-width: none;
+}
+
+.arco-tv-mode .tv-products .tv-products-grid,
+.arco-tv-mode .tv-products .tv-products-grid[data-count="2"],
+.arco-tv-mode .tv-products .tv-products-grid[data-count="1"] {
+  gap: 2vw;
+  max-width: none;
+  align-items: stretch;
+}
+
+/* Image is a fixed proportion of card width — NOT flex:1, which would grow it
+   to fill the viewport and push the name/price below the screen. The image
+   height tracks column width, so 3 cards always leave room for the text. */
+.arco-tv-mode .tv-products .tv-products-media {
+  flex: 0 0 auto;
+  aspect-ratio: 4 / 3;
+  min-height: 0;
+}
+
+.arco-tv-mode .tv-products .tv-products-body {
+  flex: 1;
+  padding: 2vh 1.8vw;
+  gap: 1vh;
+}
+
+.arco-tv-mode .tv-products .tv-products-body h1,
+.arco-tv-mode .tv-products .tv-products-body h2,
+.arco-tv-mode .tv-products .tv-products-body h3,
+.arco-tv-mode .tv-products .tv-products-body h4 {
+  font-size: 3.4vw;
+}
+
+.arco-tv-mode .tv-products .tv-products-body p {
+  font-size: 2.1vw;
+}
+
+/* Bump the recommended badge for 10-foot legibility. */
+.arco-tv-mode .tv-products .tv-products-badge {
+  top: 2vh;
+  left: 1.4vw;
+  font-size: 2vw;
+  padding: 0.8vh 1.6vw;
+}

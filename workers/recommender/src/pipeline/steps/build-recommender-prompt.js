@@ -37,6 +37,7 @@ export async function buildRecommenderPrompt(ctx, config = {}, env = {}) {
     ctx.request.shownContent,
     ctx.intent,
     contextData,
+    { tv: ctx.tv === true },
   );
 
   // Jev fast-path hint (see select-layout.js) — advisory only, appended as
