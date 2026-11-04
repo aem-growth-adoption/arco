@@ -39,6 +39,19 @@
   --of1-transition: 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
+/* Neutralize the site's global pill-button styles (margin, padding,
+   uppercase, shadow, hover lift) on the block's own controls. */
+.of1 button,
+.generative-suggestions button {
+  margin: 0;
+  max-width: none;
+  text-transform: none;
+  letter-spacing: normal;
+  white-space: normal;
+  box-shadow: none;
+  overflow: visible;
+}
+
 /* ─── Container & Layout ──────────────────────────────────── */
 
 .section.of1-container {
@@ -149,6 +162,7 @@
   border-radius: 50%;
   width: 44px;
   height: 44px;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -157,8 +171,10 @@
   transition: background var(--of1-transition), transform var(--of1-transition);
 }
 
-.of1-submit:hover {
+.of1-submit:hover,
+.of1-submit:focus {
   background: var(--primary-hover);
+  box-shadow: none;
   transform: translateY(-50%) scale(1.05);
 }
 
@@ -196,11 +212,13 @@
     transform var(--of1-transition);
 }
 
-.of1-chip:hover {
+.of1-chip:hover,
+.of1-chip:focus {
   background: var(--surface-raised);
   border-color: var(--primary);
   color: var(--primary);
   transform: translateY(-1px);
+  box-shadow: var(--shadow-card);
 }
 
 .of1-chip:focus-visible {
@@ -358,6 +376,7 @@
   border-radius: 50%;
   width: 40px;
   height: 40px;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -365,8 +384,11 @@
   transition: background var(--of1-transition);
 }
 
-.suggestion-submit:hover {
+.suggestion-submit:hover,
+.suggestion-submit:focus {
   background: var(--primary-hover);
+  transform: translateY(-50%);
+  box-shadow: none;
 }
 
 .suggestion-submit svg {
@@ -403,9 +425,13 @@
     color var(--of1-transition);
 }
 
-.suggestion-btn:hover {
+.suggestion-btn:hover,
+.suggestion-btn:focus {
+  background: var(--surface-raised);
   border-color: var(--primary);
   color: var(--primary);
+  transform: none;
+  box-shadow: none;
 }
 
 .suggestion-btn:focus-visible {
@@ -430,7 +456,11 @@
   transition: color var(--of1-transition);
 }
 
-.suggestion-restart:hover {
+.suggestion-restart:hover,
+.suggestion-restart:focus {
+  background: none;
+  box-shadow: none;
+  transform: none;
   color: var(--primary);
 }
 
