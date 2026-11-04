@@ -1,0 +1,459 @@
+/* ============================================================
+   OF1 Generative Block — Arco
+
+   Styles the OF1 block's OWN UI — the search landing (title, input,
+   chips), loading skeleton, and the follow-up suggestion controls —
+   plus brand tokens and the entrance animation on each generated
+   section. Generated section internals are styled by each block's own
+   stylesheet; do NOT style them here.
+
+   Brand: Arco — copper #B5651D, cream #F5F0E8, slate #1C2B35, Inter,
+   pill buttons, 12px card radius (stardust/current/DESIGN.json).
+   ============================================================ */
+
+/* ─── Brand Token Mapping ─────────────────────────────────── */
+
+.of1,
+.generated-section,
+.generative-suggestions,
+.generative-breadcrumb {
+  --primary: var(--accent-color, #B5651D);
+  --primary-hover: var(--link-hover-color, #8E4E14);
+  --text: var(--text-color, #1C2B35);
+  --text-secondary: var(--muted-color, #5C6B73);
+  --surface: var(--background-color, #F5F0E8);
+  --surface-raised: var(--light-color, #FFF);
+  --surface-muted: #EDE6DA;
+  --surface-dark: #1C2B35;
+  --accent: var(--accent-secondary, #D4883A);
+  --border: var(--border-color, #D4CFC5);
+  --radius: 4px;
+  --radius-card: var(--card-radius, 12px);
+  --radius-pill: 100px;
+  --font-heading: var(--heading-font-family, 'Inter', sans-serif);
+  --font-body: var(--body-font-family, 'Inter', sans-serif);
+  --font-mono: 'SF Mono', 'Fira Code', monospace;
+  --shadow-card: var(--shadow-sm, 0 1px 3px rgb(28 43 53 / 6%));
+  --shadow-lift: var(--shadow-md, 0 4px 20px rgb(28 43 53 / 8%));
+  --focus-ring: 0 0 0 3px rgb(181 101 29 / 18%);
+  --of1-transition: 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ─── Container & Layout ──────────────────────────────────── */
+
+.section.of1-container {
+  padding: 0;
+}
+
+.of1-wrapper {
+  max-width: 100% !important;
+  margin: 0;
+  padding: 0 !important;
+}
+
+/* ─── Search Landing UI ────────────────────────────────────── */
+
+.of1-search-ui {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - var(--nav-height, 72px));
+  padding: 80px 24px 64px;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgb(212 136 58 / 12%), transparent 60%),
+    var(--surface);
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.of1-search-ui::before {
+  content: 'Ask Arco';
+  display: inline-block;
+  margin-bottom: 24px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.of1-title {
+  font-family: var(--font-heading);
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 0 auto 16px;
+  max-width: 900px;
+  text-align: center;
+  width: 100%;
+}
+
+.of1-subtitle {
+  font-family: var(--font-body);
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  margin: 0 auto 40px;
+  max-width: 560px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+/* ─── Input & Submit ──────────────────────────────────────── */
+
+.of1-input-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.of1-input {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--text);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 18px 64px 18px 28px;
+  line-height: 1.4;
+  box-shadow: var(--shadow-card);
+  transition: border-color var(--of1-transition), box-shadow var(--of1-transition);
+}
+
+.of1-input::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.75;
+}
+
+.of1-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: var(--focus-ring), var(--shadow-lift);
+}
+
+.of1-submit {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--primary);
+  color: #FFF;
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background var(--of1-transition), transform var(--of1-transition);
+}
+
+.of1-submit:hover {
+  background: var(--primary-hover);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.of1-submit:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* ─── Quick Suggestion Chips ──────────────────────────────── */
+
+.of1-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 32px;
+  max-width: 760px;
+}
+
+.of1-chip {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--text);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 10px 20px;
+  cursor: pointer;
+  transition:
+    background var(--of1-transition),
+    border-color var(--of1-transition),
+    color var(--of1-transition),
+    transform var(--of1-transition);
+}
+
+.of1-chip:hover {
+  background: var(--surface-raised);
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.of1-chip:focus-visible {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: var(--focus-ring);
+}
+
+/* ─── Loading Skeleton ────────────────────────────────────── */
+
+.of1-skeleton-wrap {
+  padding: 48px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.of1-skeleton {
+  background: linear-gradient(90deg, var(--surface-muted) 0%, #F9F5EE 50%, var(--surface-muted) 100%);
+  background-size: 200% 100%;
+  border-radius: var(--radius-card);
+  animation: of1-shimmer 1.6s ease-in-out infinite;
+}
+
+.of1-skeleton-hero {
+  width: 100%;
+  height: 360px;
+  border-radius: var(--radius-card);
+  margin-bottom: 32px;
+}
+
+.of1-skeleton-heading {
+  width: 60%;
+  height: 32px;
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+}
+
+.of1-skeleton-text {
+  width: 90%;
+  height: 16px;
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+}
+
+.of1-skeleton-text.short {
+  width: 45%;
+}
+
+.of1-skeleton-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 32px;
+}
+
+.of1-skeleton-card {
+  height: 240px;
+  border-radius: var(--radius-card);
+}
+
+@keyframes of1-shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+/* ─── Generated Sections (container + fade-in only) ───────── */
+
+.generated-section {
+  animation: of1-fade-in 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+@keyframes of1-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─── Follow-up Suggestions ───────────────────────────────── */
+
+.generative-suggestions {
+  padding: 56px 24px 64px;
+  text-align: center;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  transition: opacity var(--of1-transition);
+}
+
+.generative-suggestions.dimmed {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.suggestion-input-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.suggestions-header {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.suggestion-custom {
+  position: relative;
+  width: 640px;
+  max-width: 100%;
+}
+
+.suggestion-input {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--text);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 16px 60px 16px 24px;
+  line-height: 1.4;
+  outline: none;
+  appearance: none;
+  transition: border-color var(--of1-transition), box-shadow var(--of1-transition);
+}
+
+.suggestion-input::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.75;
+}
+
+.suggestion-input:focus {
+  border-color: var(--primary);
+  box-shadow: var(--focus-ring);
+}
+
+.suggestion-submit {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--primary);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background var(--of1-transition);
+}
+
+.suggestion-submit:hover {
+  background: var(--primary-hover);
+}
+
+.suggestion-submit svg {
+  width: 16px;
+  height: 16px;
+  stroke: #FFF;
+}
+
+.suggestions-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  max-width: 800px;
+}
+
+.suggestion-btn {
+  display: inline-flex;
+  align-items: center;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+  padding: 10px 20px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition:
+    background var(--of1-transition),
+    border-color var(--of1-transition),
+    color var(--of1-transition);
+}
+
+.suggestion-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.suggestion-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.suggestion-restart {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 12px;
+  transition: color var(--of1-transition);
+}
+
+.suggestion-restart:hover {
+  color: var(--primary);
+}
+
+/* ─── Responsive ──────────────────────────────────────────── */
+
+@media (width < 768px) {
+  .of1-search-ui {
+    padding: 56px 16px 48px;
+  }
+
+  .of1-title {
+    font-size: 2.5rem;
+  }
+
+  .of1-subtitle {
+    font-size: 16px;
+  }
+
+  .of1-skeleton-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .of1-skeleton-hero {
+    height: 200px;
+  }
+}
