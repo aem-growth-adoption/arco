@@ -1,0 +1,3302 @@
+{
+  "_provenance": {
+    "writtenBy": "stardust:extract",
+    "writtenAt": "2026-11-04T15:17:52.688Z",
+    "script": "style-census.mjs",
+    "readArtifacts": [
+      "https://main--arco--aem-growth-adoption.aem.page/",
+      "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines/primo",
+      "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines"
+    ],
+    "widths": [
+      1440
+    ],
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+    "synthesizedInputs": [],
+    "failed": []
+  },
+  "pages": {
+    "https://main--arco--aem-growth-adoption.aem.page/": {
+      "1440": {
+        "title": "Precision Brewing, Beautiful Design",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "elements": {
+          "total": 318,
+          "visible": 243
+        },
+        "occluders": [
+          {
+            "tag": "div",
+            "id": null,
+            "class": "coach-scrim active",
+            "coverage": 1,
+            "backgroundColor": "rgba(28, 43, 53, 0.08)"
+          }
+        ],
+        "headings": [
+          {
+            "tag": "h1",
+            "text": "Precision Brewing, Beautiful Design",
+            "selector": "#precision-brewing-beautiful-design",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "80px",
+            "fontWeight": "700",
+            "lineHeight": "84px",
+            "letterSpacing": "-1.6px",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "h2",
+            "text": "Featured Products",
+            "selector": "#featured-products",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "36px",
+            "fontWeight": "600",
+            "lineHeight": "41.4px",
+            "letterSpacing": "-0.36px",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "h3",
+            "text": "Primo",
+            "selector": "#primo",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "27px",
+            "fontWeight": "600",
+            "lineHeight": "31.05px",
+            "letterSpacing": "-0.27px",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "h3",
+            "text": "Doppio",
+            "selector": "#doppio",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "27px",
+            "fontWeight": "600",
+            "lineHeight": "31.05px",
+            "letterSpacing": "-0.27px",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "h3",
+            "text": "Macinino",
+            "selector": "#macinino",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "27px",
+            "fontWeight": "600",
+            "lineHeight": "31.05px",
+            "letterSpacing": "-0.27px",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "h3",
+            "text": "Studio Pro",
+            "selector": "#studio-pro",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "27px",
+            "fontWeight": "600",
+            "lineHeight": "31.05px",
+            "letterSpacing": "-0.27px",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "h3",
+            "text": "Macinino Pro",
+            "selector": "#macinino-pro",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "27px",
+            "fontWeight": "600",
+            "lineHeight": "31.05px",
+            "letterSpacing": "-0.27px",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "h2",
+            "text": "What's Your Brew Style?",
+            "selector": "#whats-your-brew-style",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "36px",
+            "fontWeight": "600",
+            "lineHeight": "41.4px",
+            "letterSpacing": "-0.36px",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "h3",
+            "text": "How do you start your morning?",
+            "selector": "#quiz-question-0",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "36px",
+            "fontWeight": "600",
+            "lineHeight": "43.2px",
+            "letterSpacing": "-0.36px",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "h2",
+            "text": "Latest Stories",
+            "selector": "#latest-stories",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "36px",
+            "fontWeight": "600",
+            "lineHeight": "41.4px",
+            "letterSpacing": "-0.36px",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "h3",
+            "text": "Water Chemistry and Espresso",
+            "selector": "#water-chemistry-and-espresso",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "27px",
+            "fontWeight": "600",
+            "lineHeight": "31.05px",
+            "letterSpacing": "-0.27px",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "h3",
+            "text": "Morning Routines of Home Baristas",
+            "selector": "#morning-routines-of-home-baristas",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "27px",
+            "fontWeight": "600",
+            "lineHeight": "31.05px",
+            "letterSpacing": "-0.27px",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "h3",
+            "text": "Flat vs. Conical Burrs",
+            "selector": "#flat-vs-conical-burrs",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "27px",
+            "fontWeight": "600",
+            "lineHeight": "31.05px",
+            "letterSpacing": "-0.27px",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "h2",
+            "text": "What Our Customers Say",
+            "selector": "#what-our-customers-say",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "36px",
+            "fontWeight": "600",
+            "lineHeight": "41.4px",
+            "letterSpacing": "-0.36px",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "h2",
+            "text": "Built to Last, Designed to Repair",
+            "selector": "#built-to-last-designed-to-repair",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "36px",
+            "fontWeight": "600",
+            "lineHeight": "41.4px",
+            "letterSpacing": "-0.36px",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          }
+        ],
+        "text": [
+          {
+            "tag": "p",
+            "text": "Arco crafts espresso machines and grind…",
+            "selector": "main > div:nth-of-type(1) > div > div > div > div > p:nth-of-type(2)",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "18px",
+            "fontWeight": "400",
+            "lineHeight": "31.5px",
+            "letterSpacing": "normal",
+            "textTransform": "none",
+            "color": "rgb(92, 107, 115)"
+          },
+          {
+            "tag": "p",
+            "text": "Explore MachinesFind Your Brew Style",
+            "selector": "main > div:nth-of-type(1) > div > div > div > div > p:nth-of-type(3)",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "18px",
+            "fontWeight": "400",
+            "lineHeight": "31.5px",
+            "letterSpacing": "normal",
+            "textTransform": "none",
+            "color": "rgb(92, 107, 115)"
+          },
+          {
+            "tag": "li",
+            "text": "Primo Our signature single-boiler machi…",
+            "selector": "main > div:nth-of-type(2) > div:nth-of-type(2) > div > ul > li:nth-of-type(1)",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "18px",
+            "fontWeight": "400",
+            "lineHeight": "31.5px",
+            "letterSpacing": "normal",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "p",
+            "text": "Our signature single-boiler machine for…",
+            "selector": "main > div:nth-of-type(2) > div:nth-of-type(2) > div > ul > li:nth-of-type(1) > div:nth-of-type(2) > p:nth-of-type(1)",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "lineHeight": "27.2px",
+            "letterSpacing": "normal",
+            "textTransform": "none",
+            "color": "rgb(92, 107, 115)"
+          },
+          {
+            "tag": "li",
+            "text": "Doppio Dual-boiler performance. Steam a…",
+            "selector": "main > div:nth-of-type(2) > div:nth-of-type(2) > div > ul > li:nth-of-type(2)",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "18px",
+            "fontWeight": "400",
+            "lineHeight": "31.5px",
+            "letterSpacing": "normal",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "p",
+            "text": "Dual-boiler performance. Steam and brew…",
+            "selector": "main > div:nth-of-type(2) > div:nth-of-type(2) > div > ul > li:nth-of-type(2) > div:nth-of-type(2) > p:nth-of-type(1)",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "lineHeight": "27.2px",
+            "letterSpacing": "normal",
+            "textTransform": "none",
+            "color": "rgb(92, 107, 115)"
+          },
+          {
+            "tag": "li",
+            "text": "Macinino 64mm flat burrs. Stepless adju…",
+            "selector": "main > div:nth-of-type(2) > div:nth-of-type(2) > div > ul > li:nth-of-type(3)",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "18px",
+            "fontWeight": "400",
+            "lineHeight": "31.5px",
+            "letterSpacing": "normal",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "p",
+            "text": "64mm flat burrs. Stepless adjustment. T…",
+            "selector": "main > div:nth-of-type(2) > div:nth-of-type(2) > div > ul > li:nth-of-type(3) > div:nth-of-type(2) > p:nth-of-type(1)",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "lineHeight": "27.2px",
+            "letterSpacing": "normal",
+            "textTransform": "none",
+            "color": "rgb(92, 107, 115)"
+          },
+          {
+            "tag": "li",
+            "text": "Studio Pro Commercial DNA in a home-fri…",
+            "selector": "main > div:nth-of-type(2) > div:nth-of-type(2) > div > ul > li:nth-of-type(4)",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "18px",
+            "fontWeight": "400",
+            "lineHeight": "31.5px",
+            "letterSpacing": "normal",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "p",
+            "text": "Commercial DNA in a home-friendly footp…",
+            "selector": "main > div:nth-of-type(2) > div:nth-of-type(2) > div > ul > li:nth-of-type(4) > div:nth-of-type(2) > p:nth-of-type(1)",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "lineHeight": "27.2px",
+            "letterSpacing": "normal",
+            "textTransform": "none",
+            "color": "rgb(92, 107, 115)"
+          },
+          {
+            "tag": "li",
+            "text": "Macinino Pro 83mm flat burrs. Digital d…",
+            "selector": "main > div:nth-of-type(2) > div:nth-of-type(2) > div > ul > li:nth-of-type(5)",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "18px",
+            "fontWeight": "400",
+            "lineHeight": "31.5px",
+            "letterSpacing": "normal",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "p",
+            "text": "83mm flat burrs. Digital display. The g…",
+            "selector": "main > div:nth-of-type(2) > div:nth-of-type(2) > div > ul > li:nth-of-type(5) > div:nth-of-type(2) > p:nth-of-type(1)",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "lineHeight": "27.2px",
+            "letterSpacing": "normal",
+            "textTransform": "none",
+            "color": "rgb(92, 107, 115)"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "White paper",
+            "selector": "#nav > div:nth-of-type(4) > div > button:nth-of-type(1)",
+            "count": 2,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(92, 107, 115)",
+            "borderRadius": "100px",
+            "padding": "6px 14px",
+            "border": "1px solid rgb(212, 207, 197)",
+            "borderColor": "rgb(212, 207, 197)",
+            "boxShadow": "rgba(28, 43, 53, 0.08) 0px 4px 20px 0px",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "11px",
+            "fontWeight": "500",
+            "textTransform": "uppercase",
+            "letterSpacing": "0.11px",
+            "hover": null
+          },
+          {
+            "text": "From $899",
+            "selector": "div:nth-of-type(2) > div > ul > li:nth-of-type(1) > div:nth-of-type(2) > p:nth-of-type(2) > strong > a",
+            "count": 9,
+            "backgroundColor": "rgb(181, 101, 29)",
+            "color": "rgb(255, 255, 255)",
+            "borderRadius": "100px",
+            "padding": "9.8px 30.8px",
+            "border": "1px solid rgb(181, 101, 29)",
+            "borderColor": "rgb(181, 101, 29)",
+            "boxShadow": "rgba(28, 43, 53, 0.08) 0px 4px 20px 0px",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "14px",
+            "fontWeight": "500",
+            "textTransform": "uppercase",
+            "letterSpacing": "1.4px",
+            "hover": null
+          },
+          {
+            "text": "Quick espresso and out the door",
+            "selector": "main > div:nth-of-type(3) > div:nth-of-type(2) > div > div > div > div:nth-of-type(2) > button:nth-of-type(1)",
+            "count": 4,
+            "backgroundColor": "rgb(255, 255, 255)",
+            "color": "rgb(28, 43, 53)",
+            "borderRadius": "12px",
+            "padding": "18px 28px",
+            "border": "1px solid rgb(212, 207, 197)",
+            "borderColor": "rgb(212, 207, 197)",
+            "boxShadow": "rgba(28, 43, 53, 0.06) 0px 1px 3px 0px",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "18px",
+            "fontWeight": "500",
+            "textTransform": "none",
+            "letterSpacing": "normal",
+            "hover": null
+          }
+        ],
+        "links": [
+          {
+            "text": "Explore Machines",
+            "selector": "div:nth-of-type(1) > div > div > div > div > p:nth-of-type(3) > strong > a",
+            "count": 1,
+            "color": "rgb(181, 101, 29)",
+            "textDecoration": "none",
+            "fontWeight": "700",
+            "hover": null
+          },
+          {
+            "text": "Find Your Brew Style",
+            "selector": "div:nth-of-type(1) > div > div > div > div > p:nth-of-type(3) > em > a",
+            "count": 1,
+            "color": "rgb(181, 101, 29)",
+            "textDecoration": "none",
+            "fontWeight": "400",
+            "hover": null
+          }
+        ],
+        "surfaces": [
+          {
+            "matched": "header",
+            "selector": "header",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "w": 1440,
+              "h": 80
+            },
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 43, 53)",
+            "padding": "0px",
+            "maxWidth": "none",
+            "borderRadius": "0px",
+            "boxShadow": "none",
+            "position": "static",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "18px"
+          },
+          {
+            "matched": "nav",
+            "selector": "#nav",
+            "rect": {
+              "x": 88,
+              "y": 0,
+              "w": 1264,
+              "h": 80
+            },
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 43, 53)",
+            "padding": "0px 32px",
+            "maxWidth": "1264px",
+            "borderRadius": "0px",
+            "boxShadow": "none",
+            "position": "static",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "18px"
+          },
+          {
+            "matched": "main",
+            "selector": "main",
+            "rect": {
+              "x": 0,
+              "y": 80,
+              "w": 1440,
+              "h": 4285
+            },
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 43, 53)",
+            "padding": "0px",
+            "maxWidth": "none",
+            "borderRadius": "0px",
+            "boxShadow": "none",
+            "position": "static",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "18px"
+          },
+          {
+            "matched": "footer",
+            "selector": "footer",
+            "rect": {
+              "x": 0,
+              "y": 4387,
+              "w": 1440,
+              "h": 120
+            },
+            "backgroundColor": "rgb(28, 43, 53)",
+            "color": "rgb(28, 43, 53)",
+            "padding": "0px",
+            "maxWidth": "none",
+            "borderRadius": "0px",
+            "boxShadow": "none",
+            "position": "static",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "14px"
+          },
+          {
+            "matched": "main > *",
+            "selector": "main > div:nth-of-type(1)",
+            "rect": {
+              "x": 0,
+              "y": 80,
+              "w": 1440,
+              "h": 1140
+            },
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 43, 53)",
+            "padding": "0px",
+            "maxWidth": "none",
+            "borderRadius": "0px",
+            "boxShadow": "none",
+            "position": "static",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "18px"
+          },
+          {
+            "matched": "main > *",
+            "selector": "main > div:nth-of-type(2)",
+            "rect": {
+              "x": 0,
+              "y": 1256,
+              "w": 1440,
+              "h": 1175
+            },
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 43, 53)",
+            "padding": "0px",
+            "maxWidth": "none",
+            "borderRadius": "0px",
+            "boxShadow": "none",
+            "position": "static",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "18px"
+          },
+          {
+            "matched": "main > *",
+            "selector": "main > div:nth-of-type(3)",
+            "rect": {
+              "x": 0,
+              "y": 2467,
+              "w": 1440,
+              "h": 468
+            },
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 43, 53)",
+            "padding": "0px",
+            "maxWidth": "none",
+            "borderRadius": "0px",
+            "boxShadow": "none",
+            "position": "static",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "18px"
+          },
+          {
+            "matched": "main > *",
+            "selector": "main > div:nth-of-type(4)",
+            "rect": {
+              "x": 0,
+              "y": 2971,
+              "w": 1440,
+              "h": 602
+            },
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 43, 53)",
+            "padding": "0px",
+            "maxWidth": "none",
+            "borderRadius": "0px",
+            "boxShadow": "none",
+            "position": "static",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "18px"
+          }
+        ],
+        "radii": [
+          {
+            "value": "12px",
+            "count": 17,
+            "area": 2438197,
+            "sources": [
+              "main > div:nth-of-type(2) > div:nth-of-type(2) > div > ul > li:nth-of-type(1)",
+              "main > div:nth-of-type(2) > div:nth-of-type(2) > div > ul > li:nth-of-type(2)",
+              "main > div:nth-of-type(2) > div:nth-of-type(2) > div > ul > li:nth-of-type(3)"
+            ]
+          },
+          {
+            "value": "100px",
+            "count": 15,
+            "area": 79012,
+            "sources": [
+              "#nav > div:nth-of-type(4) > div > button:nth-of-type(1)",
+              "#nav > div:nth-of-type(4) > div > button:nth-of-type(2)",
+              "div:nth-of-type(2) > div > ul > li:nth-of-type(1) > div:nth-of-type(2) > p:nth-of-type(2) > strong > a"
+            ]
+          },
+          {
+            "value": "50%",
+            "count": 12,
+            "area": 20160,
+            "sources": [
+              "#nav > div:nth-of-type(4) > div > form > button",
+              "main > div:nth-of-type(5) > div:nth-of-type(2) > div > ul > li:nth-of-type(1) > div:nth-of-type(1) > picture",
+              "div:nth-of-type(5) > div:nth-of-type(2) > div > ul > li:nth-of-type(1) > div:nth-of-type(1) > picture > img"
+            ]
+          },
+          {
+            "value": "2px",
+            "count": 2,
+            "area": 3535,
+            "sources": [
+              "main > div:nth-of-type(3) > div:nth-of-type(2) > div > div > div > div:nth-of-type(1) > div",
+              "div:nth-of-type(3) > div:nth-of-type(2) > div > div > div > div:nth-of-type(1) > div > div"
+            ]
+          },
+          {
+            "value": "999px",
+            "count": 1,
+            "area": 17516,
+            "sources": [
+              "#nav > div:nth-of-type(4) > div > form"
+            ]
+          }
+        ],
+        "shadows": [
+          {
+            "value": "rgba(28, 43, 53, 0.06) 0px 1px 3px 0px",
+            "count": 15,
+            "sources": [
+              "main > div:nth-of-type(2) > div:nth-of-type(2) > div > ul > li:nth-of-type(1)",
+              "main > div:nth-of-type(2) > div:nth-of-type(2) > div > ul > li:nth-of-type(2)",
+              "main > div:nth-of-type(2) > div:nth-of-type(2) > div > ul > li:nth-of-type(3)"
+            ]
+          },
+          {
+            "value": "rgba(28, 43, 53, 0.08) 0px 4px 20px 0px",
+            "count": 15,
+            "sources": [
+              "#nav > div:nth-of-type(4) > div > button:nth-of-type(1)",
+              "#nav > div:nth-of-type(4) > div > button:nth-of-type(2)",
+              "div:nth-of-type(2) > div > ul > li:nth-of-type(1) > div:nth-of-type(2) > p:nth-of-type(2) > strong > a"
+            ]
+          },
+          {
+            "value": "rgba(28, 43, 53, 0.12) 0px 12px 40px 0px",
+            "count": 1,
+            "sources": [
+              "main > div:nth-of-type(6) > div > div > div > div:nth-of-type(1) > picture > img"
+            ]
+          },
+          {
+            "value": "rgba(28, 43, 53, 0.14) 0px 20px 60px 0px",
+            "count": 1,
+            "sources": [
+              "body > div:nth-of-type(3)"
+            ]
+          }
+        ],
+        "gradients": [
+          {
+            "value": "linear-gradient(90deg, rgb(181, 101, 29), rgb(212, 136, 58))",
+            "count": 2,
+            "area": 1800,
+            "sources": [
+              "body > div:nth-of-type(3) > div:nth-of-type(1)",
+              "body > div:nth-of-type(5) > div:nth-of-type(1)"
+            ]
+          }
+        ],
+        "bgColors": [
+          {
+            "value": "rgb(255, 255, 255)",
+            "count": 16,
+            "area": 2257234,
+            "sources": [
+              "main > div:nth-of-type(2) > div:nth-of-type(2) > div > ul > li:nth-of-type(1)",
+              "main > div:nth-of-type(2) > div:nth-of-type(2) > div > ul > li:nth-of-type(2)",
+              "main > div:nth-of-type(2) > div:nth-of-type(2) > div > ul > li:nth-of-type(3)"
+            ]
+          },
+          {
+            "value": "rgb(181, 101, 29)",
+            "count": 13,
+            "area": 64507,
+            "sources": [
+              "div:nth-of-type(2) > div > ul > li:nth-of-type(1) > div:nth-of-type(2) > p:nth-of-type(2) > strong > a",
+              "div:nth-of-type(2) > div > ul > li:nth-of-type(2) > div:nth-of-type(2) > p:nth-of-type(2) > strong > a",
+              "div:nth-of-type(2) > div > ul > li:nth-of-type(3) > div:nth-of-type(2) > p:nth-of-type(2) > strong > a"
+            ]
+          },
+          {
+            "value": "rgb(212, 207, 197)",
+            "count": 3,
+            "area": 2723,
+            "sources": [
+              "main > div:nth-of-type(3) > div:nth-of-type(2) > div > div > div > div:nth-of-type(1) > div",
+              "body > div:nth-of-type(3) > div:nth-of-type(3) > div > span:nth-of-type(2)",
+              "body > div:nth-of-type(5) > div:nth-of-type(3) > div > span:nth-of-type(1)"
+            ]
+          },
+          {
+            "value": "rgb(245, 240, 232)",
+            "count": 1,
+            "area": 6489990,
+            "sources": [
+              "body"
+            ]
+          },
+          {
+            "value": "rgb(28, 43, 53)",
+            "count": 1,
+            "area": 172800,
+            "sources": [
+              "footer"
+            ]
+          },
+          {
+            "value": "rgba(245, 240, 232, 0.9)",
+            "count": 1,
+            "area": 116640,
+            "sources": [
+              "header > div > div"
+            ]
+          }
+        ],
+        "textColors": [
+          {
+            "value": "rgb(28, 43, 53)",
+            "count": 29,
+            "sources": [
+              "#nav > div:nth-of-type(3) > div > ul > li:nth-of-type(1) > p > a",
+              "#nav > div:nth-of-type(3) > div > ul > li:nth-of-type(2) > p > a",
+              "#nav > div:nth-of-type(3) > div > ul > li:nth-of-type(3) > p > a"
+            ]
+          },
+          {
+            "value": "rgb(181, 101, 29)",
+            "count": 21,
+            "sources": [
+              "div:nth-of-type(1) > div > div > div > div > p:nth-of-type(3) > strong > a",
+              "div:nth-of-type(1) > div > div > div > div > p:nth-of-type(3) > em > a",
+              "main > div:nth-of-type(5) > div:nth-of-type(2) > div > ul > li:nth-of-type(1) > div:nth-of-type(2) > span:nth-of-type(1)"
+            ]
+          },
+          {
+            "value": "rgb(92, 107, 115)",
+            "count": 20,
+            "sources": [
+              "#nav > div:nth-of-type(4) > div > button:nth-of-type(1)",
+              "#nav > div:nth-of-type(4) > div > button:nth-of-type(2)",
+              "main > div:nth-of-type(1) > div > div > div > div > p:nth-of-type(2)"
+            ]
+          },
+          {
+            "value": "rgb(255, 255, 255)",
+            "count": 9,
+            "sources": [
+              "div:nth-of-type(2) > div > ul > li:nth-of-type(1) > div:nth-of-type(2) > p:nth-of-type(2) > strong > a",
+              "div:nth-of-type(2) > div > ul > li:nth-of-type(2) > div:nth-of-type(2) > p:nth-of-type(2) > strong > a",
+              "div:nth-of-type(2) > div > ul > li:nth-of-type(3) > div:nth-of-type(2) > p:nth-of-type(2) > strong > a"
+            ]
+          }
+        ],
+        "borderColors": [
+          {
+            "value": "rgb(181, 101, 29)",
+            "count": 11,
+            "sources": [
+              "main > div:nth-of-type(1) > div > div > div > div > p:nth-of-type(2)",
+              "main > div:nth-of-type(1) > div > div > div > div > p:nth-of-type(3)",
+              "div:nth-of-type(2) > div > ul > li:nth-of-type(1) > div:nth-of-type(2) > p:nth-of-type(2) > strong > a"
+            ]
+          },
+          {
+            "value": "rgb(212, 207, 197)",
+            "count": 10,
+            "sources": [
+              "header > div > div",
+              "#nav > div:nth-of-type(4) > div > form",
+              "#nav > div:nth-of-type(4) > div > button:nth-of-type(1)"
+            ]
+          }
+        ],
+        "customProps": {
+          "--background-color": {
+            "declared": "#F5F0E8",
+            "computed": "#F5F0E8"
+          },
+          "--light-color": {
+            "declared": "#FFF",
+            "computed": "#FFF"
+          },
+          "--dark-color": {
+            "declared": "#5C6B73",
+            "computed": "#5C6B73"
+          },
+          "--text-color": {
+            "declared": "#1C2B35",
+            "computed": "#1C2B35"
+          },
+          "--link-color": {
+            "declared": "#B5651D",
+            "computed": "#B5651D"
+          },
+          "--link-hover-color": {
+            "declared": "#8E4E14",
+            "computed": "#8E4E14"
+          },
+          "--border-color": {
+            "declared": "#D4CFC5",
+            "computed": "#D4CFC5"
+          },
+          "--muted-color": {
+            "declared": "#5C6B73",
+            "computed": "#5C6B73"
+          },
+          "--accent-color": {
+            "declared": "#B5651D",
+            "computed": "#B5651D"
+          },
+          "--accent-secondary": {
+            "declared": "#D4883A",
+            "computed": "#D4883A"
+          },
+          "--body-font-family": {
+            "declared": "'Inter', sans-serif",
+            "computed": "'Inter', sans-serif"
+          },
+          "--heading-font-family": {
+            "declared": "'Inter', sans-serif",
+            "computed": "'Inter', sans-serif"
+          },
+          "--body-font-size-m": {
+            "declared": "18px",
+            "computed": "18px"
+          },
+          "--body-font-size-s": {
+            "declared": "16px",
+            "computed": "16px"
+          },
+          "--body-font-size-xs": {
+            "declared": "14px",
+            "computed": "14px"
+          },
+          "--heading-font-size-xxl": {
+            "declared": "44px",
+            "computed": "44px"
+          },
+          "--heading-font-size-xl": {
+            "declared": "36px",
+            "computed": "36px"
+          },
+          "--heading-font-size-l": {
+            "declared": "27px",
+            "computed": "27px"
+          },
+          "--heading-font-size-m": {
+            "declared": "22px",
+            "computed": "22px"
+          },
+          "--heading-font-size-s": {
+            "declared": "19px",
+            "computed": "19px"
+          },
+          "--heading-font-size-xs": {
+            "declared": "16px",
+            "computed": "16px"
+          },
+          "--border-radius": {
+            "declared": "12px",
+            "computed": "12px"
+          },
+          "--card-radius": {
+            "declared": "12px",
+            "computed": "12px"
+          },
+          "--shadow-sm": {
+            "declared": "0 1px 3px rgb(28 43 53 / 6%)",
+            "computed": "0 1px 3px rgb(28 43 53 / 6%)"
+          },
+          "--shadow-md": {
+            "declared": "0 4px 20px rgb(28 43 53 / 8%)",
+            "computed": "0 4px 20px rgb(28 43 53 / 8%)"
+          },
+          "--shadow-lg": {
+            "declared": "0 12px 40px rgb(28 43 53 / 12%)",
+            "computed": "0 12px 40px rgb(28 43 53 / 12%)"
+          },
+          "--shadow-xl": {
+            "declared": "0 20px 60px rgb(28 43 53 / 14%)",
+            "computed": "0 20px 60px rgb(28 43 53 / 14%)"
+          },
+          "--transition": {
+            "declared": "0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+            "computed": "0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+          },
+          "--nav-height": {
+            "declared": "80px",
+            "computed": "80px"
+          }
+        },
+        "fonts": [
+          {
+            "family": "Inter",
+            "weight": "400",
+            "style": "normal",
+            "status": "unloaded"
+          },
+          {
+            "family": "Inter",
+            "weight": "400",
+            "style": "normal",
+            "status": "loaded"
+          },
+          {
+            "family": "Inter",
+            "weight": "500",
+            "style": "normal",
+            "status": "unloaded"
+          },
+          {
+            "family": "Inter",
+            "weight": "500",
+            "style": "normal",
+            "status": "loaded"
+          },
+          {
+            "family": "Inter",
+            "weight": "600",
+            "style": "normal",
+            "status": "unloaded"
+          },
+          {
+            "family": "Inter",
+            "weight": "600",
+            "style": "normal",
+            "status": "loaded"
+          },
+          {
+            "family": "Inter",
+            "weight": "700",
+            "style": "normal",
+            "status": "unloaded"
+          },
+          {
+            "family": "Inter",
+            "weight": "700",
+            "style": "normal",
+            "status": "loaded"
+          },
+          {
+            "family": "Inter",
+            "weight": "800",
+            "style": "normal",
+            "status": "unloaded"
+          }
+        ],
+        "logoCandidates": [
+          {
+            "tag": "img",
+            "selector": "#nav > div:nth-of-type(2) > div > p > a > img",
+            "src": "https://main--arco--aem-growth-adoption.aem.page/icons/arco-logo.png",
+            "inlineSvg": false,
+            "alt": "Arco",
+            "ariaLabel": null,
+            "class": "",
+            "id": null,
+            "href": "/",
+            "inHomeLink": true,
+            "rect": {
+              "x": 120,
+              "y": 9,
+              "w": 128,
+              "h": 60
+            }
+          },
+          {
+            "tag": "svg",
+            "selector": "#nav > div:nth-of-type(4) > div > form > button > svg",
+            "src": null,
+            "inlineSvg": true,
+            "hasText": false,
+            "viewBox": "0 0 24 24",
+            "ariaLabel": null,
+            "class": "",
+            "id": null,
+            "href": null,
+            "inHomeLink": false,
+            "rect": {
+              "x": 1182,
+              "y": 30,
+              "w": 20,
+              "h": 20
+            }
+          }
+        ],
+        "iconFont": null,
+        "consent": {
+          "dismissed": null
+        },
+        "finalUrl": "https://main--arco--aem-growth-adoption.aem.page/"
+      }
+    },
+    "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines/primo": {
+      "1440": {
+        "title": "Primo",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "elements": {
+          "total": 167,
+          "visible": 111
+        },
+        "occluders": [
+          {
+            "tag": "div",
+            "id": null,
+            "class": "coach-scrim active",
+            "coverage": 1,
+            "backgroundColor": "rgba(28, 43, 53, 0.08)"
+          }
+        ],
+        "headings": [
+          {
+            "tag": "h1",
+            "text": "Primo",
+            "selector": "#primo",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "44px",
+            "fontWeight": "600",
+            "lineHeight": "50.6px",
+            "letterSpacing": "-0.44px",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "h1",
+            "text": "Primo",
+            "selector": "main > div:nth-of-type(2) > div > div > div:nth-of-type(2) > h1",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "44px",
+            "fontWeight": "700",
+            "lineHeight": "48.4px",
+            "letterSpacing": "-0.88px",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "h3",
+            "text": "Specifications",
+            "selector": "main > div:nth-of-type(2) > div > div > div:nth-of-type(2) > div:nth-of-type(3) > h3",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "19px",
+            "fontWeight": "600",
+            "lineHeight": "21.85px",
+            "letterSpacing": "-0.19px",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          }
+        ],
+        "text": [
+          {
+            "tag": "p",
+            "text": "The Arco Primo is our signature entry i…",
+            "selector": "main > div:nth-of-type(2) > div > div > div:nth-of-type(2) > p:nth-of-type(2)",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "lineHeight": "28px",
+            "letterSpacing": "normal",
+            "textTransform": "none",
+            "color": "rgb(92, 107, 115)"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "White paper",
+            "selector": "#nav > div:nth-of-type(4) > div > button:nth-of-type(1)",
+            "count": 2,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(92, 107, 115)",
+            "borderRadius": "100px",
+            "padding": "6px 14px",
+            "border": "1px solid rgb(212, 207, 197)",
+            "borderColor": "rgb(212, 207, 197)",
+            "boxShadow": "rgba(28, 43, 53, 0.08) 0px 4px 20px 0px",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "11px",
+            "fontWeight": "500",
+            "textTransform": "uppercase",
+            "letterSpacing": "0.11px",
+            "hover": null
+          },
+          {
+            "text": "Add to cart",
+            "selector": "main > div:nth-of-type(2) > div > div > div:nth-of-type(2) > div:nth-of-type(1) > button",
+            "count": 1,
+            "backgroundColor": "rgb(28, 43, 53)",
+            "color": "rgb(245, 240, 232)",
+            "borderRadius": "4px",
+            "padding": "14px 32px",
+            "border": "1px solid rgb(28, 43, 53)",
+            "borderColor": "rgb(28, 43, 53)",
+            "boxShadow": "rgba(28, 43, 53, 0.08) 0px 4px 20px 0px",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "16px",
+            "fontWeight": "600",
+            "textTransform": "uppercase",
+            "letterSpacing": "0.32px",
+            "hover": null
+          },
+          {
+            "text": "Matte Black",
+            "selector": "main > div:nth-of-type(2) > div > div > div:nth-of-type(2) > div:nth-of-type(2) > div > button:nth-of-type(1)",
+            "count": 1,
+            "backgroundColor": "rgb(181, 101, 29)",
+            "color": "rgb(255, 255, 255)",
+            "borderRadius": "100px",
+            "padding": "7px 19.6px",
+            "border": "1px solid rgb(181, 101, 29)",
+            "borderColor": "rgb(181, 101, 29)",
+            "boxShadow": "none",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "14px",
+            "fontWeight": "500",
+            "textTransform": "none",
+            "letterSpacing": "normal",
+            "hover": null
+          },
+          {
+            "text": "Brushed Steel",
+            "selector": "main > div:nth-of-type(2) > div > div > div:nth-of-type(2) > div:nth-of-type(2) > div > button:nth-of-type(2)",
+            "count": 2,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 43, 53)",
+            "borderRadius": "100px",
+            "padding": "7px 19.6px",
+            "border": "1px solid rgb(212, 207, 197)",
+            "borderColor": "rgb(212, 207, 197)",
+            "boxShadow": "none",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "14px",
+            "fontWeight": "500",
+            "textTransform": "none",
+            "letterSpacing": "normal",
+            "hover": null
+          }
+        ],
+        "links": [],
+        "surfaces": [
+          {
+            "matched": "header",
+            "selector": "header",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "w": 1440,
+              "h": 80
+            },
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 43, 53)",
+            "padding": "0px",
+            "maxWidth": "none",
+            "borderRadius": "0px",
+            "boxShadow": "none",
+            "position": "static",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "18px"
+          },
+          {
+            "matched": "nav",
+            "selector": "#nav",
+            "rect": {
+              "x": 88,
+              "y": 0,
+              "w": 1264,
+              "h": 80
+            },
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 43, 53)",
+            "padding": "0px 32px",
+            "maxWidth": "1264px",
+            "borderRadius": "0px",
+            "boxShadow": "none",
+            "position": "static",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "18px"
+          },
+          {
+            "matched": "main",
+            "selector": "main",
+            "rect": {
+              "x": 0,
+              "y": 124,
+              "w": 1440,
+              "h": 1060
+            },
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 43, 53)",
+            "padding": "0px",
+            "maxWidth": "none",
+            "borderRadius": "0px",
+            "boxShadow": "none",
+            "position": "static",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "18px"
+          },
+          {
+            "matched": "footer",
+            "selector": "footer",
+            "rect": {
+              "x": 0,
+              "y": 1206,
+              "w": 1440,
+              "h": 120
+            },
+            "backgroundColor": "rgb(28, 43, 53)",
+            "color": "rgb(28, 43, 53)",
+            "padding": "0px",
+            "maxWidth": "none",
+            "borderRadius": "0px",
+            "boxShadow": "none",
+            "position": "static",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "14px"
+          },
+          {
+            "matched": "main > *",
+            "selector": "main > div:nth-of-type(1)",
+            "rect": {
+              "x": 0,
+              "y": 124,
+              "w": 1440,
+              "h": 51
+            },
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 43, 53)",
+            "padding": "0px",
+            "maxWidth": "none",
+            "borderRadius": "0px",
+            "boxShadow": "none",
+            "position": "static",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "18px"
+          },
+          {
+            "matched": "main > *",
+            "selector": "main > div:nth-of-type(2)",
+            "rect": {
+              "x": 0,
+              "y": 207,
+              "w": 1440,
+              "h": 977
+            },
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 43, 53)",
+            "padding": "0px",
+            "maxWidth": "none",
+            "borderRadius": "0px",
+            "boxShadow": "none",
+            "position": "static",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "18px"
+          }
+        ],
+        "radii": [
+          {
+            "value": "100px",
+            "count": 9,
+            "area": 28284,
+            "sources": [
+              "#nav > div:nth-of-type(4) > div > button:nth-of-type(1)",
+              "#nav > div:nth-of-type(4) > div > button:nth-of-type(2)",
+              "main > div:nth-of-type(2) > div > div > div:nth-of-type(2) > div:nth-of-type(2) > div > button:nth-of-type(1)"
+            ]
+          },
+          {
+            "value": "50%",
+            "count": 6,
+            "area": 1344,
+            "sources": [
+              "#nav > div:nth-of-type(4) > div > form > button",
+              "body > div:nth-of-type(2)",
+              "body > div:nth-of-type(3) > div:nth-of-type(3) > div > span:nth-of-type(1)"
+            ]
+          },
+          {
+            "value": "12px",
+            "count": 3,
+            "area": 847017,
+            "sources": [
+              "main > div:nth-of-type(2) > div > div > div:nth-of-type(1) > div",
+              "main > div:nth-of-type(2) > div > div > div:nth-of-type(1) > div > picture > img",
+              "body > div:nth-of-type(3)"
+            ]
+          },
+          {
+            "value": "999px",
+            "count": 1,
+            "area": 17516,
+            "sources": [
+              "#nav > div:nth-of-type(4) > div > form"
+            ]
+          },
+          {
+            "value": "4px",
+            "count": 1,
+            "area": 8937,
+            "sources": [
+              "main > div:nth-of-type(2) > div > div > div:nth-of-type(2) > div:nth-of-type(1) > button"
+            ]
+          }
+        ],
+        "shadows": [
+          {
+            "value": "rgba(28, 43, 53, 0.08) 0px 4px 20px 0px",
+            "count": 7,
+            "sources": [
+              "#nav > div:nth-of-type(4) > div > button:nth-of-type(1)",
+              "#nav > div:nth-of-type(4) > div > button:nth-of-type(2)",
+              "main > div:nth-of-type(2) > div > div > div:nth-of-type(2) > div:nth-of-type(1) > button"
+            ]
+          },
+          {
+            "value": "rgba(28, 43, 53, 0.06) 0px 1px 3px 0px",
+            "count": 1,
+            "sources": [
+              "main > div:nth-of-type(2) > div > div > div:nth-of-type(1) > div"
+            ]
+          },
+          {
+            "value": "rgba(28, 43, 53, 0.14) 0px 20px 60px 0px",
+            "count": 1,
+            "sources": [
+              "body > div:nth-of-type(3)"
+            ]
+          }
+        ],
+        "gradients": [
+          {
+            "value": "linear-gradient(90deg, rgb(181, 101, 29), rgb(212, 136, 58))",
+            "count": 2,
+            "area": 1800,
+            "sources": [
+              "body > div:nth-of-type(3) > div:nth-of-type(1)",
+              "body > div:nth-of-type(5) > div:nth-of-type(1)"
+            ]
+          }
+        ],
+        "bgColors": [
+          {
+            "value": "rgb(181, 101, 29)",
+            "count": 4,
+            "area": 4261,
+            "sources": [
+              "main > div:nth-of-type(2) > div > div > div:nth-of-type(2) > div:nth-of-type(2) > div > button:nth-of-type(1)",
+              "body > div:nth-of-type(2)",
+              "body > div:nth-of-type(3) > div:nth-of-type(3) > div > span:nth-of-type(1)"
+            ]
+          },
+          {
+            "value": "rgba(226, 213, 197, 0.15)",
+            "count": 3,
+            "area": 64152,
+            "sources": [
+              "div:nth-of-type(2) > div > div > div:nth-of-type(2) > div:nth-of-type(3) > table > tbody > tr:nth-of-type(2)",
+              "div:nth-of-type(2) > div > div > div:nth-of-type(2) > div:nth-of-type(3) > table > tbody > tr:nth-of-type(4)",
+              "div:nth-of-type(2) > div > div > div:nth-of-type(2) > div:nth-of-type(3) > table > tbody > tr:nth-of-type(6)"
+            ]
+          },
+          {
+            "value": "rgb(255, 255, 255)",
+            "count": 2,
+            "area": 458217,
+            "sources": [
+              "main > div:nth-of-type(2) > div > div > div:nth-of-type(1) > div",
+              "body > div:nth-of-type(3)"
+            ]
+          },
+          {
+            "value": "rgb(28, 43, 53)",
+            "count": 2,
+            "area": 181737,
+            "sources": [
+              "main > div:nth-of-type(2) > div > div > div:nth-of-type(2) > div:nth-of-type(1) > button",
+              "footer"
+            ]
+          },
+          {
+            "value": "rgb(212, 207, 197)",
+            "count": 2,
+            "area": 72,
+            "sources": [
+              "body > div:nth-of-type(3) > div:nth-of-type(3) > div > span:nth-of-type(2)",
+              "body > div:nth-of-type(5) > div:nth-of-type(3) > div > span:nth-of-type(1)"
+            ]
+          },
+          {
+            "value": "rgb(245, 240, 232)",
+            "count": 1,
+            "area": 1909553,
+            "sources": [
+              "body"
+            ]
+          },
+          {
+            "value": "rgba(245, 240, 232, 0.9)",
+            "count": 1,
+            "area": 116640,
+            "sources": [
+              "header > div > div"
+            ]
+          }
+        ],
+        "textColors": [
+          {
+            "value": "rgb(28, 43, 53)",
+            "count": 19,
+            "sources": [
+              "#nav > div:nth-of-type(3) > div > ul > li:nth-of-type(1) > p > a",
+              "#nav > div:nth-of-type(3) > div > ul > li:nth-of-type(2) > p > a",
+              "#nav > div:nth-of-type(3) > div > ul > li:nth-of-type(3) > p > a"
+            ]
+          },
+          {
+            "value": "rgb(92, 107, 115)",
+            "count": 15,
+            "sources": [
+              "#nav > div:nth-of-type(4) > div > button:nth-of-type(1)",
+              "#nav > div:nth-of-type(4) > div > button:nth-of-type(2)",
+              "main > div:nth-of-type(2) > div > div > div:nth-of-type(2) > span"
+            ]
+          },
+          {
+            "value": "rgb(181, 101, 29)",
+            "count": 5,
+            "sources": [
+              "main > div:nth-of-type(2) > div > div > div:nth-of-type(2) > p:nth-of-type(1)",
+              "body > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(1)",
+              "body > div:nth-of-type(3) > div:nth-of-type(3) > button:nth-of-type(2)"
+            ]
+          },
+          {
+            "value": "rgb(245, 240, 232)",
+            "count": 1,
+            "sources": [
+              "main > div:nth-of-type(2) > div > div > div:nth-of-type(2) > div:nth-of-type(1) > button"
+            ]
+          },
+          {
+            "value": "rgb(255, 255, 255)",
+            "count": 1,
+            "sources": [
+              "main > div:nth-of-type(2) > div > div > div:nth-of-type(2) > div:nth-of-type(2) > div > button:nth-of-type(1)"
+            ]
+          }
+        ],
+        "borderColors": [
+          {
+            "value": "rgb(212, 207, 197)",
+            "count": 15,
+            "sources": [
+              "header > div > div",
+              "#nav > div:nth-of-type(4) > div > form",
+              "#nav > div:nth-of-type(4) > div > button:nth-of-type(1)"
+            ]
+          },
+          {
+            "value": "rgb(181, 101, 29)",
+            "count": 1,
+            "sources": [
+              "main > div:nth-of-type(2) > div > div > div:nth-of-type(2) > div:nth-of-type(2) > div > button:nth-of-type(1)"
+            ]
+          },
+          {
+            "value": "rgb(28, 43, 53)",
+            "count": 1,
+            "sources": [
+              "main > div:nth-of-type(2) > div > div > div:nth-of-type(2) > div:nth-of-type(1) > button"
+            ]
+          }
+        ],
+        "customProps": {
+          "--background-color": {
+            "declared": "#F5F0E8",
+            "computed": "#F5F0E8"
+          },
+          "--light-color": {
+            "declared": "#FFF",
+            "computed": "#FFF"
+          },
+          "--dark-color": {
+            "declared": "#5C6B73",
+            "computed": "#5C6B73"
+          },
+          "--text-color": {
+            "declared": "#1C2B35",
+            "computed": "#1C2B35"
+          },
+          "--link-color": {
+            "declared": "#B5651D",
+            "computed": "#B5651D"
+          },
+          "--link-hover-color": {
+            "declared": "#8E4E14",
+            "computed": "#8E4E14"
+          },
+          "--border-color": {
+            "declared": "#D4CFC5",
+            "computed": "#D4CFC5"
+          },
+          "--muted-color": {
+            "declared": "#5C6B73",
+            "computed": "#5C6B73"
+          },
+          "--accent-color": {
+            "declared": "#B5651D",
+            "computed": "#B5651D"
+          },
+          "--accent-secondary": {
+            "declared": "#D4883A",
+            "computed": "#D4883A"
+          },
+          "--body-font-family": {
+            "declared": "'Inter', sans-serif",
+            "computed": "'Inter', sans-serif"
+          },
+          "--heading-font-family": {
+            "declared": "'Inter', sans-serif",
+            "computed": "'Inter', sans-serif"
+          },
+          "--body-font-size-m": {
+            "declared": "18px",
+            "computed": "18px"
+          },
+          "--body-font-size-s": {
+            "declared": "16px",
+            "computed": "16px"
+          },
+          "--body-font-size-xs": {
+            "declared": "14px",
+            "computed": "14px"
+          },
+          "--heading-font-size-xxl": {
+            "declared": "44px",
+            "computed": "44px"
+          },
+          "--heading-font-size-xl": {
+            "declared": "36px",
+            "computed": "36px"
+          },
+          "--heading-font-size-l": {
+            "declared": "27px",
+            "computed": "27px"
+          },
+          "--heading-font-size-m": {
+            "declared": "22px",
+            "computed": "22px"
+          },
+          "--heading-font-size-s": {
+            "declared": "19px",
+            "computed": "19px"
+          },
+          "--heading-font-size-xs": {
+            "declared": "16px",
+            "computed": "16px"
+          },
+          "--border-radius": {
+            "declared": "12px",
+            "computed": "12px"
+          },
+          "--card-radius": {
+            "declared": "12px",
+            "computed": "12px"
+          },
+          "--shadow-sm": {
+            "declared": "0 1px 3px rgb(28 43 53 / 6%)",
+            "computed": "0 1px 3px rgb(28 43 53 / 6%)"
+          },
+          "--shadow-md": {
+            "declared": "0 4px 20px rgb(28 43 53 / 8%)",
+            "computed": "0 4px 20px rgb(28 43 53 / 8%)"
+          },
+          "--shadow-lg": {
+            "declared": "0 12px 40px rgb(28 43 53 / 12%)",
+            "computed": "0 12px 40px rgb(28 43 53 / 12%)"
+          },
+          "--shadow-xl": {
+            "declared": "0 20px 60px rgb(28 43 53 / 14%)",
+            "computed": "0 20px 60px rgb(28 43 53 / 14%)"
+          },
+          "--transition": {
+            "declared": "0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+            "computed": "0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+          },
+          "--nav-height": {
+            "declared": "80px",
+            "computed": "80px"
+          }
+        },
+        "fonts": [
+          {
+            "family": "Inter",
+            "weight": "400",
+            "style": "normal",
+            "status": "unloaded"
+          },
+          {
+            "family": "Inter",
+            "weight": "400",
+            "style": "normal",
+            "status": "loaded"
+          },
+          {
+            "family": "Inter",
+            "weight": "500",
+            "style": "normal",
+            "status": "unloaded"
+          },
+          {
+            "family": "Inter",
+            "weight": "500",
+            "style": "normal",
+            "status": "loaded"
+          },
+          {
+            "family": "Inter",
+            "weight": "600",
+            "style": "normal",
+            "status": "unloaded"
+          },
+          {
+            "family": "Inter",
+            "weight": "600",
+            "style": "normal",
+            "status": "loaded"
+          },
+          {
+            "family": "Inter",
+            "weight": "700",
+            "style": "normal",
+            "status": "unloaded"
+          },
+          {
+            "family": "Inter",
+            "weight": "700",
+            "style": "normal",
+            "status": "loaded"
+          },
+          {
+            "family": "Inter",
+            "weight": "800",
+            "style": "normal",
+            "status": "unloaded"
+          }
+        ],
+        "logoCandidates": [
+          {
+            "tag": "img",
+            "selector": "#nav > div:nth-of-type(2) > div > p > a > img",
+            "src": "https://main--arco--aem-growth-adoption.aem.page/icons/arco-logo.png",
+            "inlineSvg": false,
+            "alt": "Arco",
+            "ariaLabel": null,
+            "class": "",
+            "id": null,
+            "href": "/",
+            "inHomeLink": true,
+            "rect": {
+              "x": 120,
+              "y": 9,
+              "w": 128,
+              "h": 60
+            }
+          },
+          {
+            "tag": "svg",
+            "selector": "#nav > div:nth-of-type(4) > div > form > button > svg",
+            "src": null,
+            "inlineSvg": true,
+            "hasText": false,
+            "viewBox": "0 0 24 24",
+            "ariaLabel": null,
+            "class": "",
+            "id": null,
+            "href": null,
+            "inHomeLink": false,
+            "rect": {
+              "x": 1182,
+              "y": 30,
+              "w": 20,
+              "h": 20
+            }
+          }
+        ],
+        "iconFont": null,
+        "consent": {
+          "dismissed": null
+        },
+        "finalUrl": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines/primo"
+      }
+    },
+    "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines": {
+      "1440": {
+        "title": "Espresso Machines",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "elements": {
+          "total": 229,
+          "visible": 169
+        },
+        "occluders": [
+          {
+            "tag": "div",
+            "id": null,
+            "class": "coach-scrim active",
+            "coverage": 1,
+            "backgroundColor": "rgba(28, 43, 53, 0.08)"
+          }
+        ],
+        "headings": [
+          {
+            "tag": "h1",
+            "text": "Espresso Machines",
+            "selector": "#espresso-machines",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "44px",
+            "fontWeight": "600",
+            "lineHeight": "50.6px",
+            "letterSpacing": "-0.44px",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "h3",
+            "text": "Primo",
+            "selector": "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(1) > div:nth-of-type(2) > h3",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "19px",
+            "fontWeight": "600",
+            "lineHeight": "23.75px",
+            "letterSpacing": "-0.19px",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "h3",
+            "text": "Doppio",
+            "selector": "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(2) > div:nth-of-type(2) > h3",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "19px",
+            "fontWeight": "600",
+            "lineHeight": "23.75px",
+            "letterSpacing": "-0.19px",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "h3",
+            "text": "Studio",
+            "selector": "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(3) > div:nth-of-type(2) > h3",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "19px",
+            "fontWeight": "600",
+            "lineHeight": "23.75px",
+            "letterSpacing": "-0.19px",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "h3",
+            "text": "Studio Pro",
+            "selector": "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(4) > div:nth-of-type(2) > h3",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "19px",
+            "fontWeight": "600",
+            "lineHeight": "23.75px",
+            "letterSpacing": "-0.19px",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "h3",
+            "text": "Nano",
+            "selector": "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(5) > div:nth-of-type(2) > h3",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "19px",
+            "fontWeight": "600",
+            "lineHeight": "23.75px",
+            "letterSpacing": "-0.19px",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "h3",
+            "text": "Ufficio",
+            "selector": "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(6) > div:nth-of-type(2) > h3",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "19px",
+            "fontWeight": "600",
+            "lineHeight": "23.75px",
+            "letterSpacing": "-0.19px",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "h3",
+            "text": "Viaggio",
+            "selector": "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(7) > div:nth-of-type(2) > h3",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "19px",
+            "fontWeight": "600",
+            "lineHeight": "23.75px",
+            "letterSpacing": "-0.19px",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "h3",
+            "text": "Automatico",
+            "selector": "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(8) > div:nth-of-type(2) > h3",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "19px",
+            "fontWeight": "600",
+            "lineHeight": "23.75px",
+            "letterSpacing": "-0.19px",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          }
+        ],
+        "text": [
+          {
+            "tag": "p",
+            "text": "From compact home setups to full commer…",
+            "selector": "main > div:nth-of-type(1) > div > p",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "18px",
+            "fontWeight": "400",
+            "lineHeight": "31.5px",
+            "letterSpacing": "normal",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "li",
+            "text": "Single BoilerPrimo$899View Product",
+            "selector": "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(1)",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "18px",
+            "fontWeight": "400",
+            "lineHeight": "31.5px",
+            "letterSpacing": "normal",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "li",
+            "text": "Dual BoilerDoppio$1,599View Product",
+            "selector": "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(2)",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "18px",
+            "fontWeight": "400",
+            "lineHeight": "31.5px",
+            "letterSpacing": "normal",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "li",
+            "text": "ProsumerStudio$2,299View Product",
+            "selector": "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(3)",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "18px",
+            "fontWeight": "400",
+            "lineHeight": "31.5px",
+            "letterSpacing": "normal",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "li",
+            "text": "CommercialStudio Pro$3,499View Product",
+            "selector": "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(4)",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "18px",
+            "fontWeight": "400",
+            "lineHeight": "31.5px",
+            "letterSpacing": "normal",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "li",
+            "text": "CompactNano$649View Product",
+            "selector": "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(5)",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "18px",
+            "fontWeight": "400",
+            "lineHeight": "31.5px",
+            "letterSpacing": "normal",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "li",
+            "text": "OfficeUfficio$4,299View Product",
+            "selector": "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(6)",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "18px",
+            "fontWeight": "400",
+            "lineHeight": "31.5px",
+            "letterSpacing": "normal",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "li",
+            "text": "PortableViaggio$399View Product",
+            "selector": "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(7)",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "18px",
+            "fontWeight": "400",
+            "lineHeight": "31.5px",
+            "letterSpacing": "normal",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          },
+          {
+            "tag": "li",
+            "text": "AutomaticAutomatico$1,899View Product",
+            "selector": "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(8)",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "18px",
+            "fontWeight": "400",
+            "lineHeight": "31.5px",
+            "letterSpacing": "normal",
+            "textTransform": "none",
+            "color": "rgb(28, 43, 53)"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "White paper",
+            "selector": "#nav > div:nth-of-type(4) > div > button:nth-of-type(1)",
+            "count": 2,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(92, 107, 115)",
+            "borderRadius": "100px",
+            "padding": "6px 14px",
+            "border": "1px solid rgb(212, 207, 197)",
+            "borderColor": "rgb(212, 207, 197)",
+            "boxShadow": "rgba(28, 43, 53, 0.08) 0px 4px 20px 0px",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "11px",
+            "fontWeight": "500",
+            "textTransform": "uppercase",
+            "letterSpacing": "0.11px",
+            "hover": null
+          },
+          {
+            "text": "All",
+            "selector": "main > div:nth-of-type(2) > div > div > div > button:nth-of-type(1)",
+            "count": 1,
+            "backgroundColor": "rgb(181, 101, 29)",
+            "color": "rgb(255, 255, 255)",
+            "borderRadius": "100px",
+            "padding": "7px 19.6px",
+            "border": "1px solid rgb(181, 101, 29)",
+            "borderColor": "rgb(181, 101, 29)",
+            "boxShadow": "none",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "14px",
+            "fontWeight": "500",
+            "textTransform": "uppercase",
+            "letterSpacing": "0.7px",
+            "hover": null
+          },
+          {
+            "text": "Automatic",
+            "selector": "main > div:nth-of-type(2) > div > div > div > button:nth-of-type(2)",
+            "count": 8,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 43, 53)",
+            "borderRadius": "100px",
+            "padding": "7px 19.6px",
+            "border": "1px solid rgb(212, 207, 197)",
+            "borderColor": "rgb(212, 207, 197)",
+            "boxShadow": "none",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "14px",
+            "fontWeight": "500",
+            "textTransform": "uppercase",
+            "letterSpacing": "0.7px",
+            "hover": null
+          }
+        ],
+        "links": [
+          {
+            "text": "Primo",
+            "selector": "div:nth-of-type(2) > div > div > ul > li:nth-of-type(1) > div:nth-of-type(2) > h3 > a",
+            "count": 8,
+            "color": "rgb(28, 43, 53)",
+            "textDecoration": "none",
+            "fontWeight": "600",
+            "hover": null
+          },
+          {
+            "text": "View Product",
+            "selector": "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(1) > div:nth-of-type(2) > a",
+            "count": 8,
+            "color": "rgb(181, 101, 29)",
+            "textDecoration": "none",
+            "fontWeight": "600",
+            "hover": null
+          }
+        ],
+        "surfaces": [
+          {
+            "matched": "header",
+            "selector": "header",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "w": 1440,
+              "h": 80
+            },
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 43, 53)",
+            "padding": "0px",
+            "maxWidth": "none",
+            "borderRadius": "0px",
+            "boxShadow": "none",
+            "position": "static",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "18px"
+          },
+          {
+            "matched": "nav",
+            "selector": "#nav",
+            "rect": {
+              "x": 88,
+              "y": 0,
+              "w": 1264,
+              "h": 80
+            },
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 43, 53)",
+            "padding": "0px 32px",
+            "maxWidth": "1264px",
+            "borderRadius": "0px",
+            "boxShadow": "none",
+            "position": "static",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "18px"
+          },
+          {
+            "matched": "main",
+            "selector": "main",
+            "rect": {
+              "x": 0,
+              "y": 124,
+              "w": 1440,
+              "h": 1733
+            },
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 43, 53)",
+            "padding": "0px",
+            "maxWidth": "none",
+            "borderRadius": "0px",
+            "boxShadow": "none",
+            "position": "static",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "18px"
+          },
+          {
+            "matched": "footer",
+            "selector": "footer",
+            "rect": {
+              "x": 0,
+              "y": 1879,
+              "w": 1440,
+              "h": 120
+            },
+            "backgroundColor": "rgb(28, 43, 53)",
+            "color": "rgb(28, 43, 53)",
+            "padding": "0px",
+            "maxWidth": "none",
+            "borderRadius": "0px",
+            "boxShadow": "none",
+            "position": "static",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "14px"
+          },
+          {
+            "matched": "main > *",
+            "selector": "main > div:nth-of-type(1)",
+            "rect": {
+              "x": 0,
+              "y": 124,
+              "w": 1440,
+              "h": 128
+            },
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 43, 53)",
+            "padding": "0px",
+            "maxWidth": "none",
+            "borderRadius": "0px",
+            "boxShadow": "none",
+            "position": "static",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "18px"
+          },
+          {
+            "matched": "main > *",
+            "selector": "main > div:nth-of-type(2)",
+            "rect": {
+              "x": 0,
+              "y": 284,
+              "w": 1440,
+              "h": 1573
+            },
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 43, 53)",
+            "padding": "0px",
+            "maxWidth": "none",
+            "borderRadius": "0px",
+            "boxShadow": "none",
+            "position": "static",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "18px"
+          }
+        ],
+        "radii": [
+          {
+            "value": "100px",
+            "count": 23,
+            "area": 69597,
+            "sources": [
+              "#nav > div:nth-of-type(4) > div > button:nth-of-type(1)",
+              "#nav > div:nth-of-type(4) > div > button:nth-of-type(2)",
+              "main > div:nth-of-type(2) > div > div > div > button:nth-of-type(1)"
+            ]
+          },
+          {
+            "value": "12px",
+            "count": 9,
+            "area": 1514817,
+            "sources": [
+              "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(1)",
+              "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(2)",
+              "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(3)"
+            ]
+          },
+          {
+            "value": "50%",
+            "count": 6,
+            "area": 1344,
+            "sources": [
+              "#nav > div:nth-of-type(4) > div > form > button",
+              "body > div:nth-of-type(2)",
+              "body > div:nth-of-type(3) > div:nth-of-type(3) > div > span:nth-of-type(1)"
+            ]
+          },
+          {
+            "value": "999px",
+            "count": 1,
+            "area": 17516,
+            "sources": [
+              "#nav > div:nth-of-type(4) > div > form"
+            ]
+          }
+        ],
+        "shadows": [
+          {
+            "value": "rgba(28, 43, 53, 0.06) 0px 1px 3px 0px",
+            "count": 8,
+            "sources": [
+              "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(1)",
+              "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(2)",
+              "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(3)"
+            ]
+          },
+          {
+            "value": "rgba(28, 43, 53, 0.08) 0px 4px 20px 0px",
+            "count": 6,
+            "sources": [
+              "#nav > div:nth-of-type(4) > div > button:nth-of-type(1)",
+              "#nav > div:nth-of-type(4) > div > button:nth-of-type(2)",
+              "body > div:nth-of-type(3) > div:nth-of-type(3) > button:nth-of-type(1)"
+            ]
+          },
+          {
+            "value": "rgba(28, 43, 53, 0.14) 0px 20px 60px 0px",
+            "count": 1,
+            "sources": [
+              "body > div:nth-of-type(3)"
+            ]
+          }
+        ],
+        "gradients": [
+          {
+            "value": "linear-gradient(90deg, rgb(181, 101, 29), rgb(212, 136, 58))",
+            "count": 2,
+            "area": 1800,
+            "sources": [
+              "body > div:nth-of-type(3) > div:nth-of-type(1)",
+              "body > div:nth-of-type(5) > div:nth-of-type(1)"
+            ]
+          }
+        ],
+        "bgColors": [
+          {
+            "value": "rgb(255, 255, 255)",
+            "count": 9,
+            "area": 1514817,
+            "sources": [
+              "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(1)",
+              "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(2)",
+              "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(3)"
+            ]
+          },
+          {
+            "value": "rgb(212, 136, 58)",
+            "count": 8,
+            "area": 17302,
+            "sources": [
+              "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(1) > div:nth-of-type(2) > span",
+              "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(2) > div:nth-of-type(2) > span",
+              "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(3) > div:nth-of-type(2) > span"
+            ]
+          },
+          {
+            "value": "rgb(181, 101, 29)",
+            "count": 4,
+            "area": 2561,
+            "sources": [
+              "main > div:nth-of-type(2) > div > div > div > button:nth-of-type(1)",
+              "body > div:nth-of-type(2)",
+              "body > div:nth-of-type(3) > div:nth-of-type(3) > div > span:nth-of-type(1)"
+            ]
+          },
+          {
+            "value": "rgb(212, 207, 197)",
+            "count": 2,
+            "area": 72,
+            "sources": [
+              "body > div:nth-of-type(3) > div:nth-of-type(3) > div > span:nth-of-type(2)",
+              "body > div:nth-of-type(5) > div:nth-of-type(3) > div > span:nth-of-type(1)"
+            ]
+          },
+          {
+            "value": "rgb(245, 240, 232)",
+            "count": 1,
+            "area": 2878425,
+            "sources": [
+              "body"
+            ]
+          },
+          {
+            "value": "rgb(28, 43, 53)",
+            "count": 1,
+            "area": 172800,
+            "sources": [
+              "footer"
+            ]
+          },
+          {
+            "value": "rgba(245, 240, 232, 0.9)",
+            "count": 1,
+            "area": 116640,
+            "sources": [
+              "header > div > div"
+            ]
+          }
+        ],
+        "textColors": [
+          {
+            "value": "rgb(28, 43, 53)",
+            "count": 24,
+            "sources": [
+              "#nav > div:nth-of-type(3) > div > ul > li:nth-of-type(1) > p > a",
+              "#nav > div:nth-of-type(3) > div > ul > li:nth-of-type(2) > p > a",
+              "#nav > div:nth-of-type(3) > div > ul > li:nth-of-type(3) > p > a"
+            ]
+          },
+          {
+            "value": "rgb(181, 101, 29)",
+            "count": 20,
+            "sources": [
+              "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(1) > div:nth-of-type(2) > p",
+              "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(1) > div:nth-of-type(2) > a",
+              "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(2) > div:nth-of-type(2) > p"
+            ]
+          },
+          {
+            "value": "rgb(255, 255, 255)",
+            "count": 9,
+            "sources": [
+              "main > div:nth-of-type(2) > div > div > div > button:nth-of-type(1)",
+              "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(1) > div:nth-of-type(2) > span",
+              "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(2) > div:nth-of-type(2) > span"
+            ]
+          },
+          {
+            "value": "rgb(92, 107, 115)",
+            "count": 6,
+            "sources": [
+              "#nav > div:nth-of-type(4) > div > button:nth-of-type(1)",
+              "#nav > div:nth-of-type(4) > div > button:nth-of-type(2)",
+              "body > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(3)"
+            ]
+          }
+        ],
+        "borderColors": [
+          {
+            "value": "rgb(212, 207, 197)",
+            "count": 14,
+            "sources": [
+              "header > div > div",
+              "#nav > div:nth-of-type(4) > div > form",
+              "#nav > div:nth-of-type(4) > div > button:nth-of-type(1)"
+            ]
+          },
+          {
+            "value": "rgb(181, 101, 29)",
+            "count": 1,
+            "sources": [
+              "main > div:nth-of-type(2) > div > div > div > button:nth-of-type(1)"
+            ]
+          }
+        ],
+        "customProps": {
+          "--background-color": {
+            "declared": "#F5F0E8",
+            "computed": "#F5F0E8"
+          },
+          "--light-color": {
+            "declared": "#FFF",
+            "computed": "#FFF"
+          },
+          "--dark-color": {
+            "declared": "#5C6B73",
+            "computed": "#5C6B73"
+          },
+          "--text-color": {
+            "declared": "#1C2B35",
+            "computed": "#1C2B35"
+          },
+          "--link-color": {
+            "declared": "#B5651D",
+            "computed": "#B5651D"
+          },
+          "--link-hover-color": {
+            "declared": "#8E4E14",
+            "computed": "#8E4E14"
+          },
+          "--border-color": {
+            "declared": "#D4CFC5",
+            "computed": "#D4CFC5"
+          },
+          "--muted-color": {
+            "declared": "#5C6B73",
+            "computed": "#5C6B73"
+          },
+          "--accent-color": {
+            "declared": "#B5651D",
+            "computed": "#B5651D"
+          },
+          "--accent-secondary": {
+            "declared": "#D4883A",
+            "computed": "#D4883A"
+          },
+          "--body-font-family": {
+            "declared": "'Inter', sans-serif",
+            "computed": "'Inter', sans-serif"
+          },
+          "--heading-font-family": {
+            "declared": "'Inter', sans-serif",
+            "computed": "'Inter', sans-serif"
+          },
+          "--body-font-size-m": {
+            "declared": "18px",
+            "computed": "18px"
+          },
+          "--body-font-size-s": {
+            "declared": "16px",
+            "computed": "16px"
+          },
+          "--body-font-size-xs": {
+            "declared": "14px",
+            "computed": "14px"
+          },
+          "--heading-font-size-xxl": {
+            "declared": "44px",
+            "computed": "44px"
+          },
+          "--heading-font-size-xl": {
+            "declared": "36px",
+            "computed": "36px"
+          },
+          "--heading-font-size-l": {
+            "declared": "27px",
+            "computed": "27px"
+          },
+          "--heading-font-size-m": {
+            "declared": "22px",
+            "computed": "22px"
+          },
+          "--heading-font-size-s": {
+            "declared": "19px",
+            "computed": "19px"
+          },
+          "--heading-font-size-xs": {
+            "declared": "16px",
+            "computed": "16px"
+          },
+          "--border-radius": {
+            "declared": "12px",
+            "computed": "12px"
+          },
+          "--card-radius": {
+            "declared": "12px",
+            "computed": "12px"
+          },
+          "--shadow-sm": {
+            "declared": "0 1px 3px rgb(28 43 53 / 6%)",
+            "computed": "0 1px 3px rgb(28 43 53 / 6%)"
+          },
+          "--shadow-md": {
+            "declared": "0 4px 20px rgb(28 43 53 / 8%)",
+            "computed": "0 4px 20px rgb(28 43 53 / 8%)"
+          },
+          "--shadow-lg": {
+            "declared": "0 12px 40px rgb(28 43 53 / 12%)",
+            "computed": "0 12px 40px rgb(28 43 53 / 12%)"
+          },
+          "--shadow-xl": {
+            "declared": "0 20px 60px rgb(28 43 53 / 14%)",
+            "computed": "0 20px 60px rgb(28 43 53 / 14%)"
+          },
+          "--transition": {
+            "declared": "0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+            "computed": "0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+          },
+          "--nav-height": {
+            "declared": "80px",
+            "computed": "80px"
+          }
+        },
+        "fonts": [
+          {
+            "family": "Inter",
+            "weight": "400",
+            "style": "normal",
+            "status": "unloaded"
+          },
+          {
+            "family": "Inter",
+            "weight": "400",
+            "style": "normal",
+            "status": "loaded"
+          },
+          {
+            "family": "Inter",
+            "weight": "500",
+            "style": "normal",
+            "status": "unloaded"
+          },
+          {
+            "family": "Inter",
+            "weight": "500",
+            "style": "normal",
+            "status": "loaded"
+          },
+          {
+            "family": "Inter",
+            "weight": "600",
+            "style": "normal",
+            "status": "unloaded"
+          },
+          {
+            "family": "Inter",
+            "weight": "600",
+            "style": "normal",
+            "status": "loaded"
+          },
+          {
+            "family": "Inter",
+            "weight": "700",
+            "style": "normal",
+            "status": "unloaded"
+          },
+          {
+            "family": "Inter",
+            "weight": "700",
+            "style": "normal",
+            "status": "loaded"
+          },
+          {
+            "family": "Inter",
+            "weight": "800",
+            "style": "normal",
+            "status": "unloaded"
+          }
+        ],
+        "logoCandidates": [
+          {
+            "tag": "img",
+            "selector": "#nav > div:nth-of-type(2) > div > p > a > img",
+            "src": "https://main--arco--aem-growth-adoption.aem.page/icons/arco-logo.png",
+            "inlineSvg": false,
+            "alt": "Arco",
+            "ariaLabel": null,
+            "class": "",
+            "id": null,
+            "href": "/",
+            "inHomeLink": true,
+            "rect": {
+              "x": 120,
+              "y": 9,
+              "w": 128,
+              "h": 60
+            }
+          },
+          {
+            "tag": "svg",
+            "selector": "#nav > div:nth-of-type(4) > div > form > button > svg",
+            "src": null,
+            "inlineSvg": true,
+            "hasText": false,
+            "viewBox": "0 0 24 24",
+            "ariaLabel": null,
+            "class": "",
+            "id": null,
+            "href": null,
+            "inHomeLink": false,
+            "rect": {
+              "x": 1182,
+              "y": 30,
+              "w": 20,
+              "h": 20
+            }
+          }
+        ],
+        "iconFont": null,
+        "consent": {
+          "dismissed": null
+        },
+        "finalUrl": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines"
+      }
+    }
+  },
+  "aggregate": {
+    "counts": {
+      "pages": 3,
+      "widths": [
+        1440
+      ],
+      "measurements": 3
+    },
+    "colors": [
+      {
+        "hex": "#1c2b35",
+        "values": [
+          "rgb(28, 43, 53)"
+        ],
+        "weight": 128,
+        "bgArea": 527337,
+        "by": {
+          "text": 72,
+          "button-text": 14,
+          "link": 8,
+          "background": 4,
+          "border": 1,
+          "button-background": 1,
+          "button-border": 1,
+          "heading": 27
+        },
+        "roles": [
+          "text",
+          "heading"
+        ],
+        "sources": [
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/",
+            "selector": "#nav > div:nth-of-type(3) > div > ul > li:nth-of-type(1) > p > a",
+            "prop": "text"
+          },
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines",
+            "selector": "#nav > div:nth-of-type(3) > div > ul > li:nth-of-type(1) > p > a",
+            "prop": "text"
+          },
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines/primo",
+            "selector": "#nav > div:nth-of-type(3) > div > ul > li:nth-of-type(1) > p > a",
+            "prop": "text"
+          },
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines",
+            "selector": "main > div:nth-of-type(2) > div > div > div > button:nth-of-type(2)",
+            "prop": "button-text"
+          },
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines",
+            "selector": "div:nth-of-type(2) > div > div > ul > li:nth-of-type(1) > div:nth-of-type(2) > h3 > a",
+            "prop": "link"
+          }
+        ]
+      },
+      {
+        "hex": "#b5651d",
+        "values": [
+          "rgb(181, 101, 29)"
+        ],
+        "weight": 112,
+        "bgArea": 71329,
+        "by": {
+          "text": 46,
+          "background": 21,
+          "border": 13,
+          "button-background": 11,
+          "button-border": 11,
+          "link": 10
+        },
+        "roles": [
+          "primary"
+        ],
+        "sources": [
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/",
+            "selector": "div:nth-of-type(1) > div > div > div > div > p:nth-of-type(3) > strong > a",
+            "prop": "text"
+          },
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines",
+            "selector": "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(1) > div:nth-of-type(2) > p",
+            "prop": "text"
+          },
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/",
+            "selector": "div:nth-of-type(2) > div > ul > li:nth-of-type(1) > div:nth-of-type(2) > p:nth-of-type(2) > strong > a",
+            "prop": "background"
+          },
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/",
+            "selector": "main > div:nth-of-type(1) > div > div > div > div > p:nth-of-type(2)",
+            "prop": "border"
+          },
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/",
+            "selector": "div:nth-of-type(2) > div > ul > li:nth-of-type(1) > div:nth-of-type(2) > p:nth-of-type(2) > strong > a",
+            "prop": "button-background"
+          }
+        ]
+      },
+      {
+        "hex": "#d4cfc5",
+        "values": [
+          "rgb(212, 207, 197)"
+        ],
+        "weight": 66,
+        "bgArea": 2867,
+        "by": {
+          "border": 39,
+          "button-border": 20,
+          "background": 7
+        },
+        "roles": [
+          "accent",
+          "border"
+        ],
+        "sources": [
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines/primo",
+            "selector": "header > div > div",
+            "prop": "border"
+          },
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines",
+            "selector": "header > div > div",
+            "prop": "border"
+          },
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/",
+            "selector": "header > div > div",
+            "prop": "border"
+          },
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines",
+            "selector": "main > div:nth-of-type(2) > div > div > div > button:nth-of-type(2)",
+            "prop": "button-border"
+          },
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/",
+            "selector": "main > div:nth-of-type(3) > div:nth-of-type(2) > div > div > div > div:nth-of-type(2) > button:nth-of-type(1)",
+            "prop": "button-border"
+          }
+        ]
+      },
+      {
+        "hex": "#ffffff",
+        "values": [
+          "rgb(255, 255, 255)"
+        ],
+        "weight": 61,
+        "bgArea": 4230268,
+        "by": {
+          "background": 27,
+          "button-text": 11,
+          "text": 19,
+          "button-background": 4
+        },
+        "roles": [
+          "surface",
+          "secondary"
+        ],
+        "sources": [
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/",
+            "selector": "main > div:nth-of-type(2) > div:nth-of-type(2) > div > ul > li:nth-of-type(1)",
+            "prop": "background"
+          },
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines",
+            "selector": "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(1)",
+            "prop": "background"
+          },
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/",
+            "selector": "div:nth-of-type(2) > div > ul > li:nth-of-type(1) > div:nth-of-type(2) > p:nth-of-type(2) > strong > a",
+            "prop": "button-text"
+          },
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/",
+            "selector": "div:nth-of-type(2) > div > ul > li:nth-of-type(1) > div:nth-of-type(2) > p:nth-of-type(2) > strong > a",
+            "prop": "text"
+          },
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines",
+            "selector": "main > div:nth-of-type(2) > div > div > div > button:nth-of-type(1)",
+            "prop": "text"
+          }
+        ]
+      },
+      {
+        "hex": "#f5f0e8",
+        "values": [
+          "rgb(245, 240, 232)"
+        ],
+        "weight": 5,
+        "bgArea": 11277968,
+        "by": {
+          "background": 3,
+          "button-text": 1,
+          "text": 1
+        },
+        "roles": [
+          "background"
+        ],
+        "sources": [
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/",
+            "selector": "body",
+            "prop": "background"
+          },
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines",
+            "selector": "body",
+            "prop": "background"
+          },
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines/primo",
+            "selector": "body",
+            "prop": "background"
+          },
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines/primo",
+            "selector": "main > div:nth-of-type(2) > div > div > div:nth-of-type(2) > div:nth-of-type(1) > button",
+            "prop": "button-text"
+          },
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines/primo",
+            "selector": "main > div:nth-of-type(2) > div > div > div:nth-of-type(2) > div:nth-of-type(1) > button",
+            "prop": "text"
+          }
+        ]
+      },
+      {
+        "hex": "#5c6b73",
+        "values": [
+          "rgb(92, 107, 115)"
+        ],
+        "weight": 47,
+        "by": {
+          "text": 41,
+          "button-text": 6
+        },
+        "roles": [],
+        "sources": [
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/",
+            "selector": "#nav > div:nth-of-type(4) > div > button:nth-of-type(1)",
+            "prop": "text"
+          },
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines/primo",
+            "selector": "#nav > div:nth-of-type(4) > div > button:nth-of-type(1)",
+            "prop": "text"
+          },
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines",
+            "selector": "#nav > div:nth-of-type(4) > div > button:nth-of-type(1)",
+            "prop": "text"
+          },
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/",
+            "selector": "#nav > div:nth-of-type(4) > div > button:nth-of-type(1)",
+            "prop": "button-text"
+          },
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines",
+            "selector": "#nav > div:nth-of-type(4) > div > button:nth-of-type(1)",
+            "prop": "button-text"
+          }
+        ]
+      },
+      {
+        "hex": "#d4883a",
+        "values": [
+          "rgb(212, 136, 58)"
+        ],
+        "weight": 8,
+        "bgArea": 17302,
+        "by": {
+          "background": 8
+        },
+        "roles": [],
+        "sources": [
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines",
+            "selector": "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(1) > div:nth-of-type(2) > span",
+            "prop": "background"
+          }
+        ]
+      },
+      {
+        "hex": "#e2d5c526",
+        "values": [
+          "rgba(226, 213, 197, 0.15)"
+        ],
+        "weight": 3,
+        "bgArea": 64152,
+        "by": {
+          "background": 3
+        },
+        "roles": [],
+        "sources": [
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines/primo",
+            "selector": "div:nth-of-type(2) > div > div > div:nth-of-type(2) > div:nth-of-type(3) > table > tbody > tr:nth-of-type(2)",
+            "prop": "background"
+          }
+        ]
+      },
+      {
+        "hex": "#f5f0e8e6",
+        "values": [
+          "rgba(245, 240, 232, 0.9)"
+        ],
+        "weight": 3,
+        "bgArea": 349920,
+        "by": {
+          "background": 3
+        },
+        "roles": [],
+        "sources": [
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/",
+            "selector": "header > div > div",
+            "prop": "background"
+          },
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines",
+            "selector": "header > div > div",
+            "prop": "background"
+          },
+          {
+            "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines/primo",
+            "selector": "header > div > div",
+            "prop": "background"
+          }
+        ]
+      }
+    ],
+    "type": {
+      "families": [
+        {
+          "family": "Inter",
+          "count": 81,
+          "headings": 27,
+          "text": 22,
+          "buttons": 32
+        }
+      ],
+      "headingFamily": "Inter",
+      "bodyFamily": "Inter",
+      "sizes": [
+        {
+          "px": 80,
+          "count": 1,
+          "headings": 1,
+          "text": 0,
+          "buttons": 0
+        },
+        {
+          "px": 44,
+          "count": 3,
+          "headings": 3,
+          "text": 0,
+          "buttons": 0
+        },
+        {
+          "px": 36,
+          "count": 6,
+          "headings": 6,
+          "text": 0,
+          "buttons": 0
+        },
+        {
+          "px": 27,
+          "count": 8,
+          "headings": 8,
+          "text": 0,
+          "buttons": 0
+        },
+        {
+          "px": 19,
+          "count": 9,
+          "headings": 9,
+          "text": 0,
+          "buttons": 0
+        },
+        {
+          "px": 18,
+          "count": 20,
+          "headings": 0,
+          "text": 16,
+          "buttons": 4
+        },
+        {
+          "px": 16,
+          "count": 7,
+          "headings": 0,
+          "text": 6,
+          "buttons": 1
+        },
+        {
+          "px": 14,
+          "count": 21,
+          "headings": 0,
+          "text": 0,
+          "buttons": 21
+        },
+        {
+          "px": 11,
+          "count": 6,
+          "headings": 0,
+          "text": 0,
+          "buttons": 6
+        }
+      ],
+      "weights": [
+        {
+          "weight": "500",
+          "count": 31,
+          "headings": 0,
+          "text": 0,
+          "buttons": 31
+        },
+        {
+          "weight": "600",
+          "count": 26,
+          "headings": 25,
+          "text": 0,
+          "buttons": 1
+        },
+        {
+          "weight": "400",
+          "count": 22,
+          "headings": 0,
+          "text": 22,
+          "buttons": 0
+        },
+        {
+          "weight": "700",
+          "count": 2,
+          "headings": 2,
+          "text": 0,
+          "buttons": 0
+        }
+      ],
+      "levels": {
+        "h1": {
+          "fontSize": 80,
+          "fontWeight": "700",
+          "count": 1,
+          "score": 140
+        },
+        "h2": {
+          "fontSize": 36,
+          "fontWeight": "600",
+          "count": 5,
+          "score": 120.75
+        },
+        "h3": {
+          "fontSize": 27,
+          "fontWeight": "600",
+          "count": 8,
+          "score": 114.55
+        }
+      }
+    },
+    "motifs": {
+      "radius": {
+        "mode": "12px",
+        "areaMode": "12px",
+        "pill": "100px",
+        "values": [
+          {
+            "value": "100px",
+            "count": 47,
+            "area": 176893,
+            "sources": [
+              {
+                "url": "https://main--arco--aem-growth-adoption.aem.page/",
+                "selector": "#nav > div:nth-of-type(4) > div > button:nth-of-type(1)"
+              },
+              {
+                "url": "https://main--arco--aem-growth-adoption.aem.page/",
+                "selector": "#nav > div:nth-of-type(4) > div > button:nth-of-type(2)"
+              },
+              {
+                "url": "https://main--arco--aem-growth-adoption.aem.page/",
+                "selector": "div:nth-of-type(2) > div > ul > li:nth-of-type(1) > div:nth-of-type(2) > p:nth-of-type(2) > strong > a"
+              },
+              {
+                "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines",
+                "selector": "#nav > div:nth-of-type(4) > div > button:nth-of-type(1)"
+              },
+              {
+                "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines",
+                "selector": "#nav > div:nth-of-type(4) > div > button:nth-of-type(2)"
+              }
+            ]
+          },
+          {
+            "value": "12px",
+            "count": 29,
+            "area": 4800031,
+            "sources": [
+              {
+                "url": "https://main--arco--aem-growth-adoption.aem.page/",
+                "selector": "main > div:nth-of-type(2) > div:nth-of-type(2) > div > ul > li:nth-of-type(1)"
+              },
+              {
+                "url": "https://main--arco--aem-growth-adoption.aem.page/",
+                "selector": "main > div:nth-of-type(2) > div:nth-of-type(2) > div > ul > li:nth-of-type(2)"
+              },
+              {
+                "url": "https://main--arco--aem-growth-adoption.aem.page/",
+                "selector": "main > div:nth-of-type(2) > div:nth-of-type(2) > div > ul > li:nth-of-type(3)"
+              },
+              {
+                "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines",
+                "selector": "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(1)"
+              },
+              {
+                "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines",
+                "selector": "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(2)"
+              }
+            ]
+          },
+          {
+            "value": "50%",
+            "count": 24,
+            "area": 22848,
+            "sources": [
+              {
+                "url": "https://main--arco--aem-growth-adoption.aem.page/",
+                "selector": "#nav > div:nth-of-type(4) > div > form > button"
+              },
+              {
+                "url": "https://main--arco--aem-growth-adoption.aem.page/",
+                "selector": "main > div:nth-of-type(5) > div:nth-of-type(2) > div > ul > li:nth-of-type(1) > div:nth-of-type(1) > picture"
+              },
+              {
+                "url": "https://main--arco--aem-growth-adoption.aem.page/",
+                "selector": "div:nth-of-type(5) > div:nth-of-type(2) > div > ul > li:nth-of-type(1) > div:nth-of-type(1) > picture > img"
+              },
+              {
+                "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines",
+                "selector": "#nav > div:nth-of-type(4) > div > form > button"
+              },
+              {
+                "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines",
+                "selector": "body > div:nth-of-type(2)"
+              }
+            ]
+          },
+          {
+            "value": "999px",
+            "count": 3,
+            "area": 52548,
+            "sources": [
+              {
+                "url": "https://main--arco--aem-growth-adoption.aem.page/",
+                "selector": "#nav > div:nth-of-type(4) > div > form"
+              },
+              {
+                "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines",
+                "selector": "#nav > div:nth-of-type(4) > div > form"
+              },
+              {
+                "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines/primo",
+                "selector": "#nav > div:nth-of-type(4) > div > form"
+              }
+            ]
+          },
+          {
+            "value": "2px",
+            "count": 2,
+            "area": 3535,
+            "sources": [
+              {
+                "url": "https://main--arco--aem-growth-adoption.aem.page/",
+                "selector": "main > div:nth-of-type(3) > div:nth-of-type(2) > div > div > div > div:nth-of-type(1) > div"
+              },
+              {
+                "url": "https://main--arco--aem-growth-adoption.aem.page/",
+                "selector": "div:nth-of-type(3) > div:nth-of-type(2) > div > div > div > div:nth-of-type(1) > div > div"
+              }
+            ]
+          },
+          {
+            "value": "4px",
+            "count": 1,
+            "area": 8937,
+            "sources": [
+              {
+                "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines/primo",
+                "selector": "main > div:nth-of-type(2) > div > div > div:nth-of-type(2) > div:nth-of-type(1) > button"
+              }
+            ]
+          }
+        ]
+      },
+      "shadows": [
+        {
+          "value": "rgba(28, 43, 53, 0.08) 0px 4px 20px 0px",
+          "count": 28,
+          "sources": [
+            {
+              "url": "https://main--arco--aem-growth-adoption.aem.page/",
+              "selector": "#nav > div:nth-of-type(4) > div > button:nth-of-type(1)"
+            },
+            {
+              "url": "https://main--arco--aem-growth-adoption.aem.page/",
+              "selector": "#nav > div:nth-of-type(4) > div > button:nth-of-type(2)"
+            },
+            {
+              "url": "https://main--arco--aem-growth-adoption.aem.page/",
+              "selector": "div:nth-of-type(2) > div > ul > li:nth-of-type(1) > div:nth-of-type(2) > p:nth-of-type(2) > strong > a"
+            },
+            {
+              "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines",
+              "selector": "#nav > div:nth-of-type(4) > div > button:nth-of-type(1)"
+            },
+            {
+              "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines",
+              "selector": "#nav > div:nth-of-type(4) > div > button:nth-of-type(2)"
+            }
+          ]
+        },
+        {
+          "value": "rgba(28, 43, 53, 0.06) 0px 1px 3px 0px",
+          "count": 24,
+          "sources": [
+            {
+              "url": "https://main--arco--aem-growth-adoption.aem.page/",
+              "selector": "main > div:nth-of-type(2) > div:nth-of-type(2) > div > ul > li:nth-of-type(1)"
+            },
+            {
+              "url": "https://main--arco--aem-growth-adoption.aem.page/",
+              "selector": "main > div:nth-of-type(2) > div:nth-of-type(2) > div > ul > li:nth-of-type(2)"
+            },
+            {
+              "url": "https://main--arco--aem-growth-adoption.aem.page/",
+              "selector": "main > div:nth-of-type(2) > div:nth-of-type(2) > div > ul > li:nth-of-type(3)"
+            },
+            {
+              "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines",
+              "selector": "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(1)"
+            },
+            {
+              "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines",
+              "selector": "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(2)"
+            }
+          ]
+        },
+        {
+          "value": "rgba(28, 43, 53, 0.14) 0px 20px 60px 0px",
+          "count": 3,
+          "sources": [
+            {
+              "url": "https://main--arco--aem-growth-adoption.aem.page/",
+              "selector": "body > div:nth-of-type(3)"
+            },
+            {
+              "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines",
+              "selector": "body > div:nth-of-type(3)"
+            },
+            {
+              "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines/primo",
+              "selector": "body > div:nth-of-type(3)"
+            }
+          ]
+        }
+      ],
+      "gradients": [
+        {
+          "value": "linear-gradient(90deg, rgb(181, 101, 29), rgb(212, 136, 58))",
+          "count": 6,
+          "area": 5400,
+          "sources": [
+            {
+              "url": "https://main--arco--aem-growth-adoption.aem.page/",
+              "selector": "body > div:nth-of-type(3) > div:nth-of-type(1)"
+            },
+            {
+              "url": "https://main--arco--aem-growth-adoption.aem.page/",
+              "selector": "body > div:nth-of-type(5) > div:nth-of-type(1)"
+            },
+            {
+              "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines",
+              "selector": "body > div:nth-of-type(3) > div:nth-of-type(1)"
+            },
+            {
+              "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines",
+              "selector": "body > div:nth-of-type(5) > div:nth-of-type(1)"
+            },
+            {
+              "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines/primo",
+              "selector": "body > div:nth-of-type(3) > div:nth-of-type(1)"
+            }
+          ]
+        }
+      ]
+    },
+    "hover": [],
+    "logo": {
+      "source": "img",
+      "url": "https://main--arco--aem-growth-adoption.aem.page/",
+      "width": 1440,
+      "selector": "#nav > div:nth-of-type(2) > div > p > a > img",
+      "src": "https://main--arco--aem-growth-adoption.aem.page/icons/arco-logo.png",
+      "alt": "Arco",
+      "rect": {
+        "x": 120,
+        "y": 9,
+        "w": 128,
+        "h": 60
+      },
+      "inHomeLink": true
+    },
+    "iconFont": null
+  }
+}

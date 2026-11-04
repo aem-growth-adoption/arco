@@ -1,0 +1,43 @@
+{
+  "site": {
+    "originUrl": "https://main--arco--aem-growth-adoption.aem.page",
+    "extractedAt": "2026-11-04T15:27:20.297Z",
+    "pageCap": 3,
+    "totalDiscovered": 368,
+    "crawled": 3
+  },
+  "pages": [
+    {
+      "slug": "index",
+      "url": "https://main--arco--aem-growth-adoption.aem.page/",
+      "status": "extracted",
+      "type": null,
+      "currentStatePath": "stardust/current/pages/index.json",
+      "prototypePath": "",
+      "migratedPath": ""
+    },
+    {
+      "slug": "products-espresso-machines",
+      "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines",
+      "status": "extracted",
+      "type": null,
+      "currentStatePath": "stardust/current/pages/products-espresso-machines.json",
+      "prototypePath": "",
+      "migratedPath": ""
+    },
+    {
+      "slug": "products-espresso-machines-primo",
+      "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines/primo",
+      "status": "extracted",
+      "type": null,
+      "currentStatePath": "stardust/current/pages/products-espresso-machines-primo.json",
+      "prototypePath": "",
+      "migratedPath": ""
+    }
+  ],
+  "capture": {
+    "blocked": false,
+    "degraded": false,
+    "visionCheck": "ok"
+  }
+}

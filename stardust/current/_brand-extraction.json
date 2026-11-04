@@ -1,0 +1,508 @@
+{
+  "_provenance": {
+    "writtenBy": "stardust:extract",
+    "writtenAt": "2026-11-04T15:27:20.297Z",
+    "stardustVersion": "0.36.0",
+    "synthesizedInputs": [],
+    "readArtifacts": [
+      "stardust/current/_computed-styles.json",
+      "stardust/current/pages/index.json",
+      "stardust/current/pages/products-espresso-machines.json",
+      "stardust/current/pages/products-espresso-machines-primo.json"
+    ],
+    "notes": [
+      "Radius: home mode 100px (pill buttons, 47 elements) vs area mode 12px (cards, 29 elements); cross-page signature is 12px with 100px pill.",
+      "Inter is loaded from Google Fonts (styles/fonts.css) — public font, no substitution needed.",
+      "Logo is published as PNG only; logo.svg wraps the raster for downstream tooling."
+    ]
+  },
+  "site": {
+    "name": "Arco",
+    "tagline": "Arco crafts espresso machines and grinders for people who care about every detail — from bean to cup.",
+    "originUrl": "https://main--arco--aem-growth-adoption.aem.page"
+  },
+  "origins": [
+    {
+      "origin": "https://main--arco--aem-growth-adoption.aem.page",
+      "role": "primary",
+      "pagesCaptured": 3,
+      "contributedSignals": []
+    }
+  ],
+  "logo": {
+    "source": "img",
+    "sourceSelector": "#nav > div:nth-of-type(2) > div > p > a > img",
+    "url": "https://main--arco--aem-growth-adoption.aem.page/icons/arco-logo.png",
+    "localPath": "stardust/current/assets/logo.svg",
+    "rasterPath": "stardust/current/assets/logo.png",
+    "format": "png",
+    "intrinsicWidth": 1504,
+    "intrinsicHeight": 704,
+    "synthesized": false,
+    "synthesizedBasis": null
+  },
+  "favicon": {
+    "localPath": "stardust/current/assets/favicon.ico"
+  },
+  "palette": [
+    {
+      "value": "#1c2b35",
+      "role": "text",
+      "occurrences": 128,
+      "usedAs": [
+        "text",
+        "button-text",
+        "link",
+        "background",
+        "border",
+        "button-background",
+        "button-border",
+        "heading"
+      ],
+      "sources": [
+        "https://main--arco--aem-growth-adoption.aem.page/",
+        "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines",
+        "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines/primo"
+      ],
+      "sourceSelector": "#nav > div:nth-of-type(3) > div > ul > li:nth-of-type(1) > p > a"
+    },
+    {
+      "value": "#b5651d",
+      "role": "primary",
+      "occurrences": 112,
+      "usedAs": [
+        "text",
+        "background",
+        "border",
+        "button-background",
+        "button-border",
+        "link"
+      ],
+      "sources": [
+        "https://main--arco--aem-growth-adoption.aem.page/",
+        "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines"
+      ],
+      "sourceSelector": "div:nth-of-type(1) > div > div > div > div > p:nth-of-type(3) > strong > a"
+    },
+    {
+      "value": "#d4cfc5",
+      "role": "border",
+      "occurrences": 66,
+      "usedAs": [
+        "border",
+        "button-border",
+        "background"
+      ],
+      "sources": [
+        "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines/primo",
+        "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines",
+        "https://main--arco--aem-growth-adoption.aem.page/"
+      ],
+      "sourceSelector": "header > div > div"
+    },
+    {
+      "value": "#ffffff",
+      "role": "surface",
+      "occurrences": 61,
+      "usedAs": [
+        "background",
+        "button-text",
+        "text",
+        "button-background"
+      ],
+      "sources": [
+        "https://main--arco--aem-growth-adoption.aem.page/",
+        "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines"
+      ],
+      "sourceSelector": "main > div:nth-of-type(2) > div:nth-of-type(2) > div > ul > li:nth-of-type(1)"
+    },
+    {
+      "value": "#f5f0e8",
+      "role": "background",
+      "occurrences": 5,
+      "usedAs": [
+        "background",
+        "button-text",
+        "text"
+      ],
+      "sources": [
+        "https://main--arco--aem-growth-adoption.aem.page/",
+        "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines",
+        "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines/primo"
+      ],
+      "sourceSelector": "body"
+    },
+    {
+      "value": "#5c6b73",
+      "role": "text-muted",
+      "occurrences": 47,
+      "usedAs": [
+        "text",
+        "button-text"
+      ],
+      "sources": [
+        "https://main--arco--aem-growth-adoption.aem.page/",
+        "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines/primo",
+        "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines"
+      ],
+      "sourceSelector": "#nav > div:nth-of-type(4) > div > button:nth-of-type(1)"
+    },
+    {
+      "value": "#d4883a",
+      "role": "accent-secondary",
+      "occurrences": 8,
+      "usedAs": [
+        "background"
+      ],
+      "sources": [
+        "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines"
+      ],
+      "sourceSelector": "main > div:nth-of-type(2) > div > div > ul > li:nth-of-type(1) > div:nth-of-type(2) > span"
+    }
+  ],
+  "type": {
+    "headingFamily": {
+      "family": "Inter",
+      "stack": "'Inter', sans-serif"
+    },
+    "bodyFamily": {
+      "family": "Inter",
+      "stack": "'Inter', sans-serif"
+    },
+    "sizes": [
+      {
+        "px": 80,
+        "count": 1,
+        "headings": 1,
+        "text": 0,
+        "buttons": 0
+      },
+      {
+        "px": 44,
+        "count": 3,
+        "headings": 3,
+        "text": 0,
+        "buttons": 0
+      },
+      {
+        "px": 36,
+        "count": 6,
+        "headings": 6,
+        "text": 0,
+        "buttons": 0
+      },
+      {
+        "px": 27,
+        "count": 8,
+        "headings": 8,
+        "text": 0,
+        "buttons": 0
+      },
+      {
+        "px": 19,
+        "count": 9,
+        "headings": 9,
+        "text": 0,
+        "buttons": 0
+      },
+      {
+        "px": 18,
+        "count": 20,
+        "headings": 0,
+        "text": 16,
+        "buttons": 4
+      },
+      {
+        "px": 16,
+        "count": 7,
+        "headings": 0,
+        "text": 6,
+        "buttons": 1
+      },
+      {
+        "px": 14,
+        "count": 21,
+        "headings": 0,
+        "text": 0,
+        "buttons": 21
+      },
+      {
+        "px": 11,
+        "count": 6,
+        "headings": 0,
+        "text": 0,
+        "buttons": 6
+      }
+    ],
+    "weights": [
+      {
+        "weight": "500",
+        "count": 31,
+        "headings": 0,
+        "text": 0,
+        "buttons": 31
+      },
+      {
+        "weight": "600",
+        "count": 26,
+        "headings": 25,
+        "text": 0,
+        "buttons": 1
+      },
+      {
+        "weight": "400",
+        "count": 22,
+        "headings": 0,
+        "text": 22,
+        "buttons": 0
+      },
+      {
+        "weight": "700",
+        "count": 2,
+        "headings": 2,
+        "text": 0,
+        "buttons": 0
+      }
+    ],
+    "levels": {
+      "h1": {
+        "fontSize": 80,
+        "fontWeight": "700",
+        "count": 1,
+        "score": 140
+      },
+      "h2": {
+        "fontSize": 36,
+        "fontWeight": "600",
+        "count": 5,
+        "score": 120.75
+      },
+      "h3": {
+        "fontSize": 27,
+        "fontWeight": "600",
+        "count": 8,
+        "score": 114.55
+      }
+    },
+    "scaleAudit": {
+      "kind": "ad-hoc",
+      "sizes": [
+        80,
+        44,
+        36,
+        27,
+        19,
+        18,
+        16,
+        14,
+        11
+      ],
+      "note": "Ratios 80/44=1.82, 44/36=1.22, 36/27=1.33, 27/19=1.42 — no consistent ratio."
+    },
+    "files": [
+      {
+        "family": "Inter",
+        "host": "fonts.googleapis.com",
+        "licensing": "OFL (Google Fonts)"
+      }
+    ]
+  },
+  "spacing": {
+    "baseUnit": "8px",
+    "observed": [
+      "8px",
+      "16px",
+      "24px",
+      "32px",
+      "48px",
+      "80px"
+    ],
+    "basis": "button paddings (9.8/30.8, 18/28) + section rhythm read from screenshots; inferred"
+  },
+  "motifs": {
+    "borderRadius": {
+      "primary": "12px",
+      "pill": "100px",
+      "occurrences": [
+        {
+          "value": "100px",
+          "count": 47
+        },
+        {
+          "value": "12px",
+          "count": 29
+        },
+        {
+          "value": "50%",
+          "count": 24
+        },
+        {
+          "value": "999px",
+          "count": 3
+        },
+        {
+          "value": "2px",
+          "count": 2
+        },
+        {
+          "value": "4px",
+          "count": 1
+        }
+      ]
+    },
+    "shadows": [
+      {
+        "value": "rgba(28, 43, 53, 0.08) 0px 4px 20px 0px",
+        "count": 28
+      },
+      {
+        "value": "rgba(28, 43, 53, 0.06) 0px 1px 3px 0px",
+        "count": 24
+      },
+      {
+        "value": "rgba(28, 43, 53, 0.14) 0px 20px 60px 0px",
+        "count": 3
+      }
+    ],
+    "gradients": [
+      {
+        "value": "linear-gradient(90deg, rgb(181, 101, 29), rgb(212, 136, 58))",
+        "count": 6
+      }
+    ],
+    "patterns": [
+      "card",
+      "pill-button",
+      "chip-filter",
+      "hero-with-image",
+      "spec-table",
+      "quiz-options"
+    ]
+  },
+  "componentStyle": {
+    "buttonPrimary": {
+      "backgroundColor": "#B5651D",
+      "textColor": "#FFFFFF",
+      "radius": "100px",
+      "padding": "10px 31px",
+      "fontSize": "14px",
+      "fontWeight": 500,
+      "textTransform": "uppercase",
+      "letterSpacing": "1.4px"
+    },
+    "buttonGhost": {
+      "backgroundColor": "transparent",
+      "textColor": "#5C6B73",
+      "border": "1px solid #D4CFC5",
+      "radius": "100px",
+      "fontSize": "11px",
+      "textTransform": "uppercase"
+    },
+    "card": {
+      "backgroundColor": "#FFFFFF",
+      "radius": "12px",
+      "shadow": "0 1px 3px rgb(28 43 53 / 6%)"
+    }
+  },
+  "systemComponents": [
+    {
+      "kind": "header",
+      "occurrences": 3,
+      "headingSequence": [],
+      "ctaLabels": [
+        "Products",
+        "Stories",
+        "Experiences",
+        "About",
+        "White paper",
+        "Debug"
+      ]
+    },
+    {
+      "kind": "onboarding-coachmark",
+      "occurrences": 3,
+      "headingSequence": [
+        "Your personalized feed"
+      ],
+      "ctaLabels": [
+        "Dismiss",
+        "Next →",
+        "Got it ✓"
+      ]
+    },
+    {
+      "kind": "footer",
+      "occurrences": 3,
+      "headingSequence": [],
+      "ctaLabels": []
+    }
+  ],
+  "iconFont": null,
+  "voice": {
+    "heroHeadline": "Precision Brewing, Beautiful Design",
+    "heroSubcopy": "Arco crafts espresso machines and grinders for people who care about every detail — from bean to cup.",
+    "firstParagraph": "Arco crafts espresso machines and grinders for people who care about every detail — from bean to cup.",
+    "primaryCTALabel": "Explore Machines",
+    "ctaSamples": [
+      "Explore Machines",
+      "Find Your Brew Style",
+      "View Product",
+      "Add to cart"
+    ],
+    "navItems": [
+      "Products",
+      "Stories",
+      "Experiences",
+      "About"
+    ],
+    "heroImage": "https://main--arco--aem-growth-adoption.aem.page/media_1f7e12f4bd38e8ecf4fdc73dc84ebd9a5fd516521.jpg?width=2000&format=webply&optimize=medium",
+    "heroMedium": null
+  },
+  "voiceTable": {
+    "ctaFrequency": [
+      {
+        "label": "View Product",
+        "count": 8
+      },
+      {
+        "label": "Dismiss",
+        "count": 6
+      },
+      {
+        "label": "Products",
+        "count": 3
+      },
+      {
+        "label": "Stories",
+        "count": 3
+      },
+      {
+        "label": "Experiences",
+        "count": 3
+      },
+      {
+        "label": "About",
+        "count": 3
+      },
+      {
+        "label": "White paper",
+        "count": 3
+      },
+      {
+        "label": "Debug",
+        "count": 3
+      }
+    ],
+    "headingFrequency": [],
+    "toneMetrics": {
+      "headingsUppercasePercent": 0,
+      "distinctHeadings": 22,
+      "distinctCtaLabels": 44
+    },
+    "toneGuess": "confident, precise, warm-craft"
+  },
+  "crossPromo": {
+    "detected": false
+  },
+  "register": "brand"
+}

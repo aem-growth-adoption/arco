@@ -1,0 +1,185 @@
+{
+  "_provenance": {
+    "renderedBy": "playwright",
+    "fetchedAt": "2026-11-04T15:17:04.490Z",
+    "waitMode": "medium",
+    "waitMs": 2500,
+    "httpStatus": 200
+  },
+  "slug": "products-espresso-machines-primo",
+  "url": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines/primo",
+  "renderedBy": "playwright",
+  "fetchedAt": "2026-11-04T15:17:04.490Z",
+  "finalUrl": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines/primo",
+  "title": "Primo",
+  "description": null,
+  "og": {
+    "title": "Primo",
+    "description": null,
+    "image": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines/media_1abbfdb7ccdbc8a53e8e4bba6322c039404608c57.jpg?width=1200&format=pjpg&optimize=medium",
+    "type": null
+  },
+  "headings": [
+    {
+      "tag": "h1",
+      "text": "Primo"
+    },
+    {
+      "tag": "h1",
+      "text": "Primo"
+    },
+    {
+      "tag": "h3",
+      "text": "Specifications"
+    }
+  ],
+  "body": [
+    "$899",
+    "The Arco Primo is our signature entry into home espresso. A single-boiler machine with PID temperature control, a commercial-grade 58mm group head, and a 15-bar vibratory pump. Designed for those who want cafe-quality espresso without the complexity."
+  ],
+  "codeBlocks": [],
+  "ctas": [
+    {
+      "label": "Products",
+      "href": "/products/espresso-machines"
+    },
+    {
+      "label": "Stories",
+      "href": "/stories/"
+    },
+    {
+      "label": "Experiences",
+      "href": "/experiences/craft-at-home"
+    },
+    {
+      "label": "About",
+      "href": "/about"
+    },
+    {
+      "label": "White paper",
+      "href": null
+    },
+    {
+      "label": "Debug",
+      "href": null
+    },
+    {
+      "label": "Add to cart",
+      "href": null
+    },
+    {
+      "label": "Matte Black",
+      "href": null
+    },
+    {
+      "label": "Brushed Steel",
+      "href": null
+    },
+    {
+      "label": "Arctic White",
+      "href": null
+    },
+    {
+      "label": "Dismiss",
+      "href": null
+    },
+    {
+      "label": "Next →",
+      "href": null
+    },
+    {
+      "label": "Dismiss",
+      "href": null
+    },
+    {
+      "label": "Got it ✓",
+      "href": null
+    }
+  ],
+  "links": [
+    "https://main--arco--aem-growth-adoption.aem.page/",
+    "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines",
+    "https://main--arco--aem-growth-adoption.aem.page/products/grinders",
+    "https://main--arco--aem-growth-adoption.aem.page/products/accessories",
+    "https://main--arco--aem-growth-adoption.aem.page/stories/",
+    "https://main--arco--aem-growth-adoption.aem.page/stories/water-chemistry-and-espresso",
+    "https://main--arco--aem-growth-adoption.aem.page/stories/morning-routines-of-home-baristas",
+    "https://main--arco--aem-growth-adoption.aem.page/stories/flat-vs-conical-burrs",
+    "https://main--arco--aem-growth-adoption.aem.page/stories/from-bean-to-cup",
+    "https://main--arco--aem-growth-adoption.aem.page/stories/dialing-in-your-espresso",
+    "https://main--arco--aem-growth-adoption.aem.page/stories/the-science-of-milk-steaming",
+    "https://main--arco--aem-growth-adoption.aem.page/stories/cleaning-your-espresso-machine",
+    "https://main--arco--aem-growth-adoption.aem.page/stories/single-origin-vs-blends",
+    "https://main--arco--aem-growth-adoption.aem.page/stories/espresso-pressure-profiling",
+    "https://main--arco--aem-growth-adoption.aem.page/stories/travel-espresso-guide",
+    "https://main--arco--aem-growth-adoption.aem.page/experiences/craft-at-home",
+    "https://main--arco--aem-growth-adoption.aem.page/experiences/morning-minimalist",
+    "https://main--arco--aem-growth-adoption.aem.page/experiences/the-upgrade-path",
+    "https://main--arco--aem-growth-adoption.aem.page/experiences/espresso-anywhere",
+    "https://main--arco--aem-growth-adoption.aem.page/experiences/the-non-barista",
+    "https://main--arco--aem-growth-adoption.aem.page/about"
+  ],
+  "media": {
+    "imgs": [
+      {
+        "src": "https://main--arco--aem-growth-adoption.aem.page/icons/arco-logo.png",
+        "alt": "Arco",
+        "w": 1504,
+        "h": 704
+      },
+      {
+        "src": "https://main--arco--aem-growth-adoption.aem.page/products/espresso-machines/media_1abbfdb7ccdbc8a53e8e4bba6322c039404608c57.jpg?width=2000&format=webply&optimize=medium",
+        "alt": "Arco Primo Espresso Machine",
+        "w": 1408,
+        "h": 768
+      }
+    ],
+    "allImgCount": 2,
+    "cssBackgrounds": [],
+    "modals": [],
+    "videos": [],
+    "iframes": []
+  },
+  "customProps": {
+    "--background-color": "#F5F0E8",
+    "--light-color": "#FFF",
+    "--dark-color": "#5C6B73",
+    "--text-color": "#1C2B35",
+    "--link-color": "#B5651D",
+    "--link-hover-color": "#8E4E14",
+    "--border-color": "#D4CFC5",
+    "--muted-color": "#5C6B73",
+    "--accent-color": "#B5651D",
+    "--accent-secondary": "#D4883A",
+    "--body-font-family": "'Inter', sans-serif",
+    "--heading-font-family": "'Inter', sans-serif",
+    "--body-font-size-m": "18px",
+    "--body-font-size-s": "16px",
+    "--body-font-size-xs": "14px",
+    "--heading-font-size-xxl": "44px",
+    "--heading-font-size-xl": "36px",
+    "--heading-font-size-l": "27px",
+    "--heading-font-size-m": "22px",
+    "--heading-font-size-s": "19px",
+    "--heading-font-size-xs": "16px",
+    "--border-radius": "12px",
+    "--card-radius": "12px",
+    "--shadow-sm": "0 1px 3px rgb(28 43 53 / 6%)",
+    "--shadow-md": "0 4px 20px rgb(28 43 53 / 8%)",
+    "--shadow-lg": "0 12px 40px rgb(28 43 53 / 12%)",
+    "--shadow-xl": "0 20px 60px rgb(28 43 53 / 14%)",
+    "--transition": "0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+    "--nav-height": "80px"
+  },
+  "_signals": {
+    "filteredInterstitials": 0,
+    "distinctHeadings": 2,
+    "mainTextLen": 464,
+    "realImageCount": 2,
+    "trackingOnlyMedia": false,
+    "spaShellSuspect": false,
+    "screenshotMode": "fullPage"
+  },
+  "screenshot": "assets/screenshots/products-espresso-machines-primo.png",
+  "renderedHtml": "pages/products-espresso-machines-primo.html"
+}

@@ -1,0 +1,351 @@
+{
+  "_provenance": {
+    "writtenBy": "stardust:extract",
+    "writtenAt": "2026-11-04T15:27:20.297Z",
+    "stardustVersion": "0.36.0",
+    "synthesizedInputs": [],
+    "readArtifacts": [
+      "stardust/current/_brand-extraction.json",
+      "stardust/current/_computed-styles.json"
+    ]
+  },
+  "name": "Arco",
+  "description": "Arco crafts espresso machines and grinders for people who care about every detail — from bean to cup.",
+  "colors": {
+    "primary": "#B5651D",
+    "primary-hover": "#8E4E14",
+    "accent-secondary": "#D4883A",
+    "text": "#1C2B35",
+    "text-muted": "#5C6B73",
+    "background": "#F5F0E8",
+    "surface": "#FFFFFF",
+    "border": "#D4CFC5"
+  },
+  "typography": {
+    "heading": {
+      "family": "'Inter', sans-serif",
+      "weight": "600",
+      "style": "normal"
+    },
+    "body": {
+      "family": "'Inter', sans-serif",
+      "weight": "400",
+      "style": "normal"
+    },
+    "display": {
+      "fontFamily": "Inter, sans-serif",
+      "fontSize": "80px",
+      "fontWeight": 700,
+      "lineHeight": 1.05,
+      "letterSpacing": "-1.6px"
+    },
+    "h2": {
+      "fontFamily": "Inter, sans-serif",
+      "fontSize": "36px",
+      "fontWeight": 600,
+      "lineHeight": 1.15,
+      "letterSpacing": "-0.36px"
+    },
+    "h3": {
+      "fontFamily": "Inter, sans-serif",
+      "fontSize": "27px",
+      "fontWeight": 600,
+      "lineHeight": 1.15,
+      "letterSpacing": "-0.27px"
+    },
+    "body-m": {
+      "fontFamily": "Inter, sans-serif",
+      "fontSize": "18px",
+      "fontWeight": 400,
+      "lineHeight": 1.6
+    },
+    "body-s": {
+      "fontFamily": "Inter, sans-serif",
+      "fontSize": "16px",
+      "fontWeight": 400,
+      "lineHeight": 1.6
+    },
+    "label": {
+      "fontFamily": "Inter, sans-serif",
+      "fontSize": "14px",
+      "fontWeight": 500,
+      "letterSpacing": "1.4px",
+      "textTransform": "uppercase"
+    },
+    "fontSubstitutions": [],
+    "fontNotes": "Inter (Google Fonts, OFL) for headings and body; loaded via styles/fonts.css. No private fonts — no substitution."
+  },
+  "rounded": {
+    "sm": "4px",
+    "md": "12px",
+    "pill": "100px",
+    "circle": "50%"
+  },
+  "shapes": {
+    "card": {
+      "borderRadius": "12px"
+    },
+    "button": {
+      "borderRadius": "100px"
+    },
+    "chip": {
+      "borderRadius": "100px"
+    },
+    "avatar": {
+      "borderRadius": "50%"
+    },
+    "input": {
+      "borderRadius": "4px"
+    }
+  },
+  "spacing": {
+    "xs": "8px",
+    "sm": "16px",
+    "md": "24px",
+    "lg": "32px",
+    "xl": "48px",
+    "xxl": "80px"
+  },
+  "components": {
+    "button-primary": {
+      "backgroundColor": "{colors.primary}",
+      "textColor": "{colors.surface}",
+      "rounded": "{rounded.pill}",
+      "padding": "10px 31px",
+      "typography": "{typography.label}"
+    },
+    "button-primary-hover": {
+      "backgroundColor": "{colors.primary-hover}"
+    },
+    "button-secondary": {
+      "backgroundColor": "transparent",
+      "textColor": "{colors.text-muted}",
+      "rounded": "{rounded.pill}",
+      "padding": "6px 14px"
+    },
+    "card": {
+      "backgroundColor": "{colors.surface}",
+      "rounded": "{rounded.md}"
+    },
+    "chip": {
+      "backgroundColor": "{colors.surface}",
+      "textColor": "{colors.text}",
+      "rounded": "{rounded.pill}"
+    }
+  },
+  "extensions": {
+    "shadows": {
+      "sm": "0 1px 3px rgb(28 43 53 / 6%)",
+      "md": "0 4px 20px rgb(28 43 53 / 8%)",
+      "lg": "0 12px 40px rgb(28 43 53 / 12%)",
+      "xl": "0 20px 60px rgb(28 43 53 / 14%)"
+    },
+    "motion": {
+      "transition": "0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+    },
+    "gradients": [
+      {
+        "value": "linear-gradient(90deg, rgb(181, 101, 29), rgb(212, 136, 58))",
+        "count": 6
+      }
+    ],
+    "componentStyle": {
+      "buttonPrimary": {
+        "backgroundColor": "#B5651D",
+        "textColor": "#FFFFFF",
+        "radius": "100px",
+        "padding": "10px 31px",
+        "fontSize": "14px",
+        "fontWeight": 500,
+        "textTransform": "uppercase",
+        "letterSpacing": "1.4px"
+      },
+      "buttonGhost": {
+        "backgroundColor": "transparent",
+        "textColor": "#5C6B73",
+        "border": "1px solid #D4CFC5",
+        "radius": "100px",
+        "fontSize": "11px",
+        "textTransform": "uppercase"
+      },
+      "card": {
+        "backgroundColor": "#FFFFFF",
+        "radius": "12px",
+        "shadow": "0 1px 3px rgb(28 43 53 / 6%)"
+      }
+    },
+    "motifs": {
+      "borderRadius": {
+        "primary": "12px",
+        "pill": "100px",
+        "occurrences": [
+          {
+            "value": "100px",
+            "count": 47
+          },
+          {
+            "value": "12px",
+            "count": 29
+          },
+          {
+            "value": "50%",
+            "count": 24
+          },
+          {
+            "value": "999px",
+            "count": 3
+          },
+          {
+            "value": "2px",
+            "count": 2
+          },
+          {
+            "value": "4px",
+            "count": 1
+          }
+        ]
+      },
+      "shadows": [
+        {
+          "value": "rgba(28, 43, 53, 0.08) 0px 4px 20px 0px",
+          "count": 28
+        },
+        {
+          "value": "rgba(28, 43, 53, 0.06) 0px 1px 3px 0px",
+          "count": 24
+        },
+        {
+          "value": "rgba(28, 43, 53, 0.14) 0px 20px 60px 0px",
+          "count": 3
+        }
+      ],
+      "gradients": [
+        {
+          "value": "linear-gradient(90deg, rgb(181, 101, 29), rgb(212, 136, 58))",
+          "count": 6
+        }
+      ],
+      "patterns": [
+        "card",
+        "pill-button",
+        "chip-filter",
+        "hero-with-image",
+        "spec-table",
+        "quiz-options"
+      ]
+    },
+    "voice": {
+      "heroHeadline": "Precision Brewing, Beautiful Design",
+      "heroSubcopy": "Arco crafts espresso machines and grinders for people who care about every detail — from bean to cup.",
+      "firstParagraph": "Arco crafts espresso machines and grinders for people who care about every detail — from bean to cup.",
+      "primaryCTALabel": "Explore Machines",
+      "ctaSamples": [
+        "Explore Machines",
+        "Find Your Brew Style",
+        "View Product",
+        "Add to cart"
+      ],
+      "navItems": [
+        "Products",
+        "Stories",
+        "Experiences",
+        "About"
+      ],
+      "heroImage": "https://main--arco--aem-growth-adoption.aem.page/media_1f7e12f4bd38e8ecf4fdc73dc84ebd9a5fd516521.jpg?width=2000&format=webply&optimize=medium",
+      "heroMedium": null
+    },
+    "systemComponents": [
+      {
+        "kind": "header",
+        "occurrences": 3,
+        "headingSequence": [],
+        "ctaLabels": [
+          "Products",
+          "Stories",
+          "Experiences",
+          "About",
+          "White paper",
+          "Debug"
+        ]
+      },
+      {
+        "kind": "onboarding-coachmark",
+        "occurrences": 3,
+        "headingSequence": [
+          "Your personalized feed"
+        ],
+        "ctaLabels": [
+          "Dismiss",
+          "Next →",
+          "Got it ✓"
+        ]
+      },
+      {
+        "kind": "footer",
+        "occurrences": 3,
+        "headingSequence": [],
+        "ctaLabels": []
+      }
+    ],
+    "scaleAudit": {
+      "kind": "ad-hoc",
+      "sizes": [
+        80,
+        44,
+        36,
+        27,
+        19,
+        18,
+        16,
+        14,
+        11
+      ],
+      "note": "Ratios 80/44=1.82, 44/36=1.22, 36/27=1.33, 27/19=1.42 — no consistent ratio."
+    },
+    "logo": {
+      "svg": "stardust/current/assets/logo.svg",
+      "png": "stardust/current/assets/logo.png",
+      "note": "Raster PNG wrapped in SVG — the site publishes no vector logo."
+    },
+    "cssCustomProperties": {
+      "--background-color": "#F5F0E8",
+      "--light-color": "#FFF",
+      "--dark-color": "#5C6B73",
+      "--text-color": "#1C2B35",
+      "--link-color": "#B5651D",
+      "--link-hover-color": "#8E4E14",
+      "--border-color": "#D4CFC5",
+      "--muted-color": "#5C6B73",
+      "--accent-color": "#B5651D",
+      "--accent-secondary": "#D4883A",
+      "--body-font-family": "'Inter', sans-serif",
+      "--heading-font-family": "'Inter', sans-serif",
+      "--body-font-size-m": "18px",
+      "--body-font-size-s": "16px",
+      "--body-font-size-xs": "14px",
+      "--heading-font-size-xxl": "44px",
+      "--heading-font-size-xl": "36px",
+      "--heading-font-size-l": "27px",
+      "--heading-font-size-m": "22px",
+      "--heading-font-size-s": "19px",
+      "--heading-font-size-xs": "16px",
+      "--border-radius": "12px",
+      "--card-radius": "12px",
+      "--shadow-sm": "0 1px 3px rgb(28 43 53 / 6%)",
+      "--shadow-md": "0 4px 20px rgb(28 43 53 / 8%)",
+      "--shadow-lg": "0 12px 40px rgb(28 43 53 / 12%)",
+      "--shadow-xl": "0 20px 60px rgb(28 43 53 / 14%)",
+      "--transition": "0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+      "--nav-height": "80px"
+    },
+    "breakpoints": {
+      "layout": [
+        "600px",
+        "900px",
+        "1200px"
+      ],
+      "containerMaxWidth": null,
+      "note": "EDS boilerplate breakpoints; cap-probe not run"
+    }
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "discovery": {
+    "fetchTechnique": "headless",
+    "count": 3,
+    "concurrency": 4,
+    "source": "sitemap.xml",
+    "totalDiscovered": 368,
+    "userChoice": "--cap 3: home + category (/products/espresso-machines) + PDP (/products/espresso-machines/primo)"
+  },
+  "consent": {
+    "method": "auto"
+  },
+  "favicon": {
+    "url": "https://main--arco--aem-growth-adoption.aem.page/favicon.ico",
+    "file": "assets/favicon.ico"
+  },
+  "crawl": {
+    "failures": []
+  },
+  "captureGaps": {
+    "roots": [],
+    "detail": "uncaptured first-level targets: none (no locale root captured)"
+  },
+  "_provenance": {
+    "writtenBy": "stardust:extract",
+    "writtenAt": "2026-11-04T15:27:20.297Z"
+  },
+  "visionCheck": [
+    {
+      "slug": "index",
+      "verdict": "ok",
+      "notes": "Hero photo + headline match record; real product photography; personalised-feed coachmark overlay visible top-right."
+    },
+    {
+      "slug": "products-espresso-machines",
+      "verdict": "ok",
+      "notes": "8 product cards with real photos, filter chips; coachmark overlay visible."
+    },
+    {
+      "slug": "products-espresso-machines-primo",
+      "verdict": "ok",
+      "notes": "PDP image, price, add-to-cart, spec table; footer renders as empty dark band at capture time."
+    }
+  ],
+  "siblingCandidates": []
+}
